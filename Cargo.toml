@@ -1,0 +1,12 @@
+[package]
+name = "libtegra"
+version = "0.1.0"
+authors = [
+    "Valentin B. <valentin.be@protonmail.com>",
+    "Justus K. <justus.k@protonmail.com>",
+    "Thomas Guillemard <me@thog.eu>",
+]
+license = "MIT/Apache-2.0"
+edition = "2018"
+
+[dependencies]

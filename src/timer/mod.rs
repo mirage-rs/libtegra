@@ -12,12 +12,43 @@
 //! | TSC  | Reference for GT       | N/A               | Yes    | OSC      |
 //! | GT   | ARM CPU Generic Timers | PPIs*             | Yes    | TSC      |
 
+mod rtc;
 mod timerus;
+
+/// Reads the current time in seconds.
+#[inline]
+pub fn get_seconds() -> u32 {
+    unsafe { (*rtc::REGISTERS).APBDEV_RTC_SECONDS_0.get() }
+}
+
+/// Reads the current time in milliseconds.
+#[inline]
+pub fn get_milliseconds() -> u32 {
+    let rtc = unsafe { &*rtc::REGISTERS };
+
+    rtc.APBDEV_RTC_MILLI_SECONDS_0.get() + (rtc.APBDEV_RTC_SHADOW_SECONDS_0.get() * 1000)
+}
 
 /// Reads the current time in microseconds.
 #[inline]
 pub fn get_microseconds() -> u32 {
     unsafe { (*timerus::REGISTERS).TIMERUS_CNTR_1US_0.get() }
+}
+
+/// Sleeps for a given duration in seconds.
+#[inline]
+pub fn sleep(duration: u32) {
+    let start = get_seconds();
+
+    while (get_seconds() - start) <= duration {}
+}
+
+/// Sleeps for a given duration in milliseconds.
+#[inline]
+pub fn msleep(duration: u32) {
+    let start = get_milliseconds();
+
+    while (get_milliseconds() - start) <= duration {}
 }
 
 /// Sleeps for a given duration in microseconds.

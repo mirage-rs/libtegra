@@ -14,7 +14,7 @@ use register::{mmio::ReadWrite, register_bitfields, register_structs};
 /// Base address for Fixed Time Base registers.
 pub const TIMER_BASE: u32 = 0x6000_5000;
 
-/// A pointer to the register block that can be accessed by dereferencing it.
+/// A pointer to the Fixed Time Base register block that can be accessed by dereferencing it.
 pub const REGISTERS: *const Registers = (TIMER_BASE + 0x10) as *const Registers;
 
 register_bitfields! {

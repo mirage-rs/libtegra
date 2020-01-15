@@ -54,9 +54,13 @@ pub struct GpioBank {
     pub GPIO_MASKED_INT_CLEAR: [ReadWrite<u32>; GPIO_PORTS_COUNT],
 }
 
+assert_eq_size!(GpioBank, [u8; 0x100]);
+
 /// Representation of the GPIO controller.
 #[repr(C)]
 pub struct GpioController {
     /// The GPIO banks that are part of the controller
     pub banks: [GpioBank; GPIO_BANKS_COUNT],
 }
+
+assert_eq_size!(GpioController, [u8; 0x800]);

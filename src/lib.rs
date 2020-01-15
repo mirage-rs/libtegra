@@ -8,5 +8,5 @@ extern crate register;
 #[macro_use]
 extern crate static_assertions;
 
-mod gpio;
-mod timer;
+pub mod gpio;
+pub mod timer;

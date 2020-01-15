@@ -10,4 +10,5 @@ license = "MIT/Apache-2.0"
 edition = "2018"
 
 [dependencies]
+enum_primitive = { git = "https://github.com/mirage-rs/enum_primitive-rs.git" }
 register = { git = "https://github.com/mirage-rs/register-rs.git" }

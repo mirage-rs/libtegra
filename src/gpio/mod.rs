@@ -44,6 +44,7 @@
 pub use controller::CONTROLLER;
 
 use enum_primitive::FromPrimitive;
+use register::mmio::ReadWrite;
 
 mod controller;
 
@@ -127,5 +128,163 @@ enum_from_primitive! {
         Low = 0,
         /// High level.
         High,
+    }
+}
+
+/// Representation of a Tegra X1 GPIO.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Gpio {
+    /// The GPIO port.
+    pub port: Port,
+    /// The GPIO pin.
+    pub pin: Pin,
+}
+
+impl Gpio {
+    /// Calculates the numeric representation of the wrapped GPIO.
+    #[inline(always)]
+    fn get_gpio_value(&self) -> usize {
+        self.port as usize * 8 + self.pin as usize
+    }
+
+    /// Calculates the numeric representation of the wrapped GPIO port.
+    #[inline(always)]
+    fn get_port(&self) -> usize {
+        self.port as usize & 3
+    }
+
+    /// Calculates the bank where the GPIO is located.
+    #[inline(always)]
+    fn get_bank(&self) -> usize {
+        self.get_gpio_value() >> 5
+    }
+
+    /// Calculates the GPIO mask to be used for register writes.
+    #[inline(always)]
+    fn get_mask(&self) -> u32 {
+        1 << self.pin as u32
+    }
+
+    /// Reads the flag of a GPIO register.
+    #[inline]
+    fn read_flag(&self, register: &ReadWrite<u32>) -> u32 {
+        (register.get() >> self.pin as u32) & 1
+    }
+
+    /// Reads the GPIO mode the pin is currently set to.
+    pub fn get_mode(&self) -> Mode {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to read from.
+        let config_reg = &controller.banks[self.get_bank()].GPIO_CONFIG[self.get_port()];
+
+        // Read the flag and wrap it into the corresponding enum member.
+        Mode::from_u32(self.read_flag(config_reg)).unwrap()
+    }
+
+    /// Sets the pin to a given GPIO mode.
+    pub fn set_mode(&self, mode: Mode) {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to write to.
+        let config_reg = &controller.banks[self.get_bank()].GPIO_CONFIG[self.get_port()];
+
+        // Read the value to be modified and the mask to be used.
+        let mut value = config_reg.get();
+        let mask = self.get_mask();
+
+        // Set or clear the bit, as appropriate.
+        match mode {
+            Mode::Sfio => {
+                value &= !mask;
+            }
+            Mode::Gpio => {
+                value |= mask;
+            }
+        }
+
+        // Write the new value to the register.
+        config_reg.set(value);
+
+        // Dummy read.
+        config_reg.get();
+    }
+
+    /// Reads the GPIO direction the pin is currently set to.
+    pub fn get_direction(&self) -> Direction {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to read from.
+        let direction_reg = &controller.banks[self.get_bank()].GPIO_OUTPUT_ENABLE[self.get_port()];
+
+        // Read the flag and wrap it into the corresponding enum member.
+        Direction::from_u32(self.read_flag(direction_reg)).unwrap()
+    }
+
+    /// Sets the pin to a given GPIO direction.
+    pub fn set_direction(&self, direction: Direction) {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to write to.
+        let direction_reg = &controller.banks[self.get_bank()].GPIO_OUTPUT_ENABLE[self.get_port()];
+
+        // Read the value to be modified and the mask to be used.
+        let mut value = direction_reg.get();
+        let mask = self.get_mask();
+
+        // Set or clear the bit, as appropriate.
+        match direction {
+            Direction::Input => {
+                value &= !mask;
+            }
+            Direction::Output => {
+                value |= mask;
+            }
+        }
+
+        // Write the new value to the register.
+        direction_reg.set(value);
+
+        // Dummy read.
+        direction_reg.get();
+    }
+
+    /// Reads the GPIO level the pin is currently set to.
+    pub fn read(&self) -> Level {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to read from.
+        let in_reg = &controller.banks[self.get_bank()].GPIO_IN[self.get_port()];
+
+        // Read the flag and wrap it into the corresponding enum member.
+        Level::from_u32(self.read_flag(in_reg)).unwrap()
+    }
+
+    /// Writes the given GPIO level to the pin.
+    pub fn write(&self, level: Level) {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to write to.
+        let out_reg = &controller.banks[self.get_bank()].GPIO_OUT[self.get_port()];
+
+        // Read the value to be modified and the mask to be used.
+        let mut value = out_reg.get();
+        let mask = self.get_mask();
+
+        // Set or clear the bit, as appropriate.
+        match level {
+            Level::Low => {
+                value &= !mask;
+            }
+            Level::High => {
+                value |= mask;
+            }
+        }
+
+        // Write the new value to the register.
+        out_reg.set(value);
+
+        // Dummy read.
+        out_reg.get();
     }
 }

@@ -421,7 +421,7 @@ impl Gpio {
 
         // Configure the interrupt.
         value &= !(0x010101 << mask);
-        value |= ((interrupt as u32) << mask);
+        value |= (interrupt as u32) << mask;
 
         // Write the new value to the register.
         int_lvl_reg.set(value);

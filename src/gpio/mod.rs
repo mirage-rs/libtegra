@@ -1,4 +1,8 @@
+pub use controller::CONTROLLER;
+
 use enum_primitive::FromPrimitive;
+
+mod controller;
 
 /// The GPIO ports that are supported by the platform.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -41,6 +41,8 @@
 //! portions of software can modify the GPIO controller state without
 //! coordination.
 
+pub use paste::expr;
+
 pub use controller::CONTROLLER;
 
 use enum_primitive::FromPrimitive;
@@ -153,6 +155,30 @@ pub struct Gpio {
     pub port: Port,
     /// The GPIO pin.
     pub pin: Pin,
+}
+
+/// A macro to facilitate the creation of a GPIO given port and pin.
+///
+/// # Example
+///
+/// ```
+/// use libtegra::gpio::*;
+///
+/// let gpio = Gpio {
+///     port: Port::X,
+///     pin: Pin::P7,
+/// };
+///
+/// assert_eq!(gpio, gpio!(X, 7));
+/// ```
+#[macro_export]
+macro_rules! gpio {
+    ($port:ident, $pin:tt) => {
+        $crate::gpio::Gpio {
+            port: $crate::gpio::Port::$port,
+            pin: $crate::gpio::expr!($crate::gpio::Pin::[<P $pin>]),
+        }
+    }
 }
 
 impl Gpio {

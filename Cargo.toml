@@ -11,5 +11,6 @@ edition = "2018"
 
 [dependencies]
 enum_primitive = { git = "https://github.com/mirage-rs/enum_primitive-rs.git" }
+paste = "0.1.6"
 register = { git = "https://github.com/mirage-rs/register-rs.git" }
 static_assertions = "1.1.0"

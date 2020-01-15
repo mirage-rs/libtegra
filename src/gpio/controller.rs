@@ -1,3 +1,5 @@
+//! Abstractions over the registers of the Tegra X1 GPIO Controller.
+
 use register::mmio::ReadWrite;
 
 /// Base address for the GPIO controller registers.

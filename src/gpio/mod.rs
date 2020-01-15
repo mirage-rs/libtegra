@@ -287,4 +287,14 @@ impl Gpio {
         // Dummy read.
         out_reg.get();
     }
+
+    /// Whether the pin is currently set to high.
+    pub fn is_high(&self) -> bool {
+        self.read() == Level::High
+    }
+
+    /// Whether the pin is currently set to low.
+    pub fn is_low(&self) -> bool {
+        self.read() == Level::Low
+    }
 }

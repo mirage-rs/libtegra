@@ -131,6 +131,21 @@ enum_from_primitive! {
     }
 }
 
+/// Supported interrupt types.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum InterruptType {
+    /// Rising edge interrupt.
+    RisingEdge = 0,
+    /// Falling edge interrupt.
+    FallingEdge,
+    /// Both edges interrupt.
+    BothEdge,
+    /// High level interrupt.
+    HighLevel,
+    /// Low level interrupt.
+    LowLevel,
+}
+
 /// Representation of a Tegra X1 GPIO.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Gpio {
@@ -296,5 +311,96 @@ impl Gpio {
     /// Whether the pin is currently set to low.
     pub fn is_low(&self) -> bool {
         self.read() == Level::Low
+    }
+
+    /// Whether interrupts are enabled for the GPIO.
+    pub fn interrupts_enabled(&self) -> bool {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to read from.
+        let int_enb_reg = &controller.banks[self.get_bank()].GPIO_INT_ENABLE[self.get_port()];
+
+        // Read the flag and check whether interrupts are enabled.
+        self.read_flag(int_enb_reg) == 1
+    }
+
+    /// Enables or disables interrupts.
+    fn set_enable_interrupts(&self, enable: bool) {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to write to.
+        let int_enb_reg = &controller.banks[self.get_bank()].GPIO_INT_ENABLE[self.get_port()];
+
+        // Read the value to be modified and the mask to be used.
+        let mut value = int_enb_reg.get();
+        let mask = self.get_mask();
+
+        // Set or clear the bit, as appropriate.
+        if enable {
+            value |= mask;
+        } else {
+            value &= !mask;
+        }
+
+        // Write the new value to the register.
+        int_enb_reg.set(value);
+
+        // Dummy read.
+        int_enb_reg.get();
+    }
+
+    /// Enables interrupts for the GPIO.
+    #[inline]
+    pub fn enable_interrupts(&self) {
+        self.set_enable_interrupts(true)
+    }
+
+    /// Disables interrupts for the GPIO.
+    #[inline]
+    pub fn disable_interrupts(&self) {
+        self.set_enable_interrupts(false)
+    }
+
+    /// Clears the interrupts that are set for the GPIO.
+    pub fn clear_interrupts(&self) {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to write to.
+        let int_clr_reg = &controller.banks[self.get_bank()].GPIO_INT_CLEAR[self.get_port()];
+
+        // Read the value to be modified and the mask to be used.
+        let mut value = int_clr_reg.get();
+        let mask = self.get_mask();
+
+        // Set the bit.
+        value |= mask;
+
+        // Write the new value to the register.
+        int_clr_reg.set(value);
+
+        // Dummy read.
+        int_clr_reg.get();
+    }
+
+    /// Raises a given interrupt on the GPIO.
+    pub fn set_interrupt(&self, interrupt: InterruptType) {
+        let controller = unsafe { &*CONTROLLER };
+
+        // Figure out the register to write to.
+        let int_lvl_reg = &controller.banks[self.get_bank()].GPIO_INT_LEVEL[self.get_port()];
+
+        // Read the value to be modified and the mask to be used.
+        let mut value = int_lvl_reg.get();
+        let mask = self.get_mask();
+
+        // Configure the interrupt.
+        value &= !(0x010101 << mask);
+        value |= ((interrupt as u32) << mask);
+
+        // Write the new value to the register.
+        int_lvl_reg.set(value);
+
+        // Dummy read.
+        int_lvl_reg.get();
     }
 }

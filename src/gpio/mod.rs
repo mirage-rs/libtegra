@@ -133,6 +133,17 @@ enum_from_primitive! {
     }
 }
 
+/// Supported GPIO configurations.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Config {
+    /// Configures a GPIO for input.
+    Input,
+    /// Configures a GPIO for output with the level set to low.
+    OutputLow,
+    /// Configures a GPIO for output with the level set to high.
+    OutputHigh,
+}
+
 /// Supported interrupt types.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InterruptType {
@@ -210,6 +221,25 @@ impl Gpio {
     #[inline]
     fn read_flag(&self, register: &ReadWrite<u32>) -> u32 {
         (register.get() >> self.pin as u32) & 1
+    }
+
+    /// Configures a GPIO with a given configuration.
+    pub fn config(&self, config: Config) {
+        self.set_mode(Mode::Gpio);
+
+        match config {
+            Config::Input => {
+                self.set_direction(Direction::Input);
+            }
+            Config::OutputLow => {
+                self.set_direction(Direction::Output);
+                self.write(Level::Low);
+            }
+            Config::OutputHigh => {
+                self.set_direction(Direction::Output);
+                self.write(Level::High);
+            }
+        }
     }
 
     /// Reads the GPIO mode the pin is currently set to.

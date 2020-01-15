@@ -162,11 +162,11 @@ pub struct Gpio {
 /// # Example
 ///
 /// ```
-/// use libtegra::gpio::*;
+/// use libtegra::*;
 ///
-/// let gpio = Gpio {
-///     port: Port::X,
-///     pin: Pin::P7,
+/// let gpio = gpio::Gpio {
+///     port: gpio::Port::X,
+///     pin: gpio::Pin::P7,
 /// };
 ///
 /// assert_eq!(gpio, gpio!(X, 7));

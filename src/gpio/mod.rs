@@ -445,13 +445,12 @@ impl Gpio {
         // Figure out the register to write to.
         let int_lvl_reg = &controller.banks[self.get_bank()].GPIO_INT_LEVEL[self.get_port()];
 
-        // Read the value to be modified and the mask to be used.
+        // Read the value to be modified.
         let mut value = int_lvl_reg.get();
-        let mask = self.get_mask();
 
         // Configure the interrupt.
-        value &= !(0x010101 << mask);
-        value |= (interrupt as u32) << mask;
+        value &= !(0x010101 << self.pin as u32);
+        value |= (interrupt as u32) << self.pin as u32;
 
         // Write the new value to the register.
         int_lvl_reg.set(value);

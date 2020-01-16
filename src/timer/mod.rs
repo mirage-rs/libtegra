@@ -12,8 +12,8 @@
 //! | TSC  | Reference for GT       | N/A               | Yes    | OSC      |
 //! | GT   | ARM CPU Generic Timers | PPIs*             | Yes    | TSC      |
 
-mod rtc;
-mod timerus;
+pub mod rtc;
+pub mod timerus;
 
 /// Reads the current time in seconds.
 #[inline]

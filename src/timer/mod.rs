@@ -1,6 +1,6 @@
 //! Abstractions of the timer interfaces provided by the Tegra X1.
 //!
-//! See `CHAPTER 8: TIMERS` in the Tegra X1 Technical Reference Manual for details.
+//! See Chapter 8 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Overview
 //!
@@ -11,6 +11,28 @@
 //! | WDT  | Per CPU/COP            | WDT_<>            | Cfg    | 1Mhz     |
 //! | TSC  | Reference for GT       | N/A               | Yes    | OSC      |
 //! | GT   | ARM CPU Generic Timers | PPIs*             | Yes    | TSC      |
+//!
+//! # Usage
+//!
+//! ## RTC
+//!
+//! The Real-Time Clock can be used for time, alarms, countdowns, etc.
+//!
+//! ```no_run
+//! use libtegra::timer::sleep;
+//!
+//! sleep(5); // Delays execution for five seconds.
+//! ```
+//!
+//! ## TMR
+//!
+//! These timers can also be used for reading time, but more accurately.
+//!
+//! ```no_run
+//! use libtegra::timer::usleep;
+//!
+//! usleep(5_000_000); // Delays execution for five seconds.
+//! ```
 
 pub mod rtc;
 pub mod timerus;

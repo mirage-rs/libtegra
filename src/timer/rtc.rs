@@ -1,7 +1,6 @@
 //! Interface to the Tegra X1 Real-Time Clock.
 //!
-//! See `CHAPTER 12: REAL-TIME CLOCK` in the Tegra X1 Technical
-//! Reference Manual for details.
+//! See Chapter 12 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!
@@ -11,33 +10,6 @@
 //! when the system is in low-power state. If configured, interrupts
 //! triggered by the RTC can cause the system to wake up from a low-power
 //! state.
-//!
-//! # Operating Principle
-//!
-//! The RTC operates in two clock domains: the APB clock domain and the
-//! 32 kHz clock domain. The RTC continues updating the millisecond and
-//! second counters and continues triggering interrupts even when the
-//! MAIN partition is powered down. Since the APB clock is disabled when
-//! MAIN is down, registers are implemented in the 32 kHz clock domain.
-//!
-//! All the registers except the BUSY register are implemented in the
-//! 32 kHz clock domain. Writes are transferred to the 32 kHz clock
-//! domain with `BUSY.STATUS` being set to `BUSY` until the transfer is
-//! completed. Reads are shadowed in the APB clock domain and return
-//! immediately.
-//!
-//! The RTC implements a Seconds Counter register, a Milliseconds Counter
-//! register, three Alarm registers, two countdown alarms, and various
-//! interrupt-related registers.
-//!
-//! Writes to the Seconds Counter can be disabled by writing to the
-//! `CONTROL.DIS_WR_SEC_CNT` bit. Alarm registers and countdown alarm
-//! registers set interrupt bits when corresponding events occur.
-//! Interrupt status, mask, set and source registers reflect the status
-//! and also allow setting and clearing of various bits.
-//!
-//! The RTC retrieves an asynchronous reset which is synchronized to the
-//! APB clock and RTC clock domains.
 
 use register::{mmio::*, register_bitfields, register_structs};
 

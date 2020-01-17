@@ -1,3 +1,5 @@
+//! Device clock abstractions.
+
 use register::mmio::ReadWrite;
 
 use crate::timer::usleep;

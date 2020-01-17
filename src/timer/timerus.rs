@@ -1,7 +1,6 @@
 //! Abstractions over the Fixed Time Base Registers.
 //!
-//! See `8.8 Fixed Time Base Registers` in the Tegra X1 Technical
-//! Reference Manual for details.
+//! See Chapter 8.8 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!

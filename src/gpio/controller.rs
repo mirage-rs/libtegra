@@ -1,4 +1,7 @@
 //! Abstractions over the registers of the Tegra X1 GPIO Controller.
+//!
+//! See Chapter 9.13 in the Tegra X1 Technical Reference Manual for
+//! details.
 
 use register::mmio::ReadWrite;
 

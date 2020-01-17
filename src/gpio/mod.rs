@@ -1,46 +1,48 @@
 //! Driver for the Tegra X1 General-Purpose Input/Output controller.
 //!
-//! See `9.10 GPIO Controller` in the Tegra X1 Technical
-//! Reference Manual for details.
+//! See Chapter 9.10 in the Tegra X1 Technical Reference Manual for
+//! details.
 //!
 //! # Description
 //!
 //! The GPIO controller for Tegra X1 devices provides the tools for
 //! configuring each MPIO for use as a software-controlled GPIO.
 //!
-//! The GPIO controller is divided into 8 banks. Each bank handles
-//! the GPIO functionality for up to 32 MPIOs. Within a bank, the
-//! GPIOs are arranged as four ports of 8 bits each. The ports are
-//! labeled consecutively from A through Z and then AA through FF.
-//! In total, there are approximately 170 GPIOs, (however, approximately
-//! 170 physical GPIOs are available in the chip) and the banking
-//! and numbering conventions will have some break in between but
-//! will maintain backwards compatibility in register configurations
-//! for the GPIOs as that of previous generation chips.
+//! ## Controller Structure
 //!
-//! Each GPIO port has 8 available pins, numbered from 0 through 7.
+//! <img src="https://user-images.githubusercontent.com/38182450/72645430-f2750900-3973-11ea-96f2-dfe0bf9c2b4d.png" height="500px" alt="GPIO Controller">
 //!
-//! Each GPIO can be individually configured as Output/Input/Interrupt
+//! The controller is divided into 8 banks. Each bank contains 4 GPIO
+//! ports, which in turn provide 8 available pins, numbered from 0
+//! through 7. GPIO ports a labeled consecutively from A through Z
+//! and then AA through FF. Ports A through E are in bank 0, E through
+//! H in bank 1, and so on.
+//!
+//! In conclusion, approximately 170 GPIOs in total are therefore available.
+//! Each of them can be identified uniquely through a port and a pin.
+//!
+//! ## Configuration
+//!
+//! Each GPIO can be configured individually as Input/Output/Interrupt
 //! sources with level/edge controls.
 //!
-//! GPIO configuration has a lock bit controlling every bit separately.
-//! When the `LOCK` bit is set, the associated control aspects of the bits
-//! (for example, whether it is an Output/Input or used as GPIO or SFIO
-//! or values driven) cannot be modified (locked). The `LOCK` bit gets
-//! cleared only by system reset; it is sticky. This bit can be used for
-//! security-related functionality where an authorized entity owning the
-//! GPIO can set the configuration and lock it. The lock bit also covers
-//! the GPIO output value, so this may not be varied dynamically once
-//! `LOCK` is enabled.
+//! ```no_run
+//! use libtegra::{make_gpio, gpio};
 //!
-//! The GPIO controller also has masked-write registers.
-//! Values written to these registers specify both a mask of bits to be
-//! updated in the underlying state (the mask bits are not sticky) as well
-//! as new values for that state. Individual bits of the state can be
-//! updated without the need for a read-modify-write sequence. Thus different
-//! portions of software can modify the GPIO controller state without
-//! coordination.
+//! // The following line...
+//! make_gpio!(D, 4).config(gpio::Config::OutputHigh);
+//!
+//! // ...is equivalent to:
+//! let pin = gpio::Gpio {
+//!     port: gpio::Port::D,
+//!     pin: gpio::Pin::P4,
+//! };
+//! pin.set_mode(gpio::Mode::Gpio);
+//! pin.set_direction(gpio::Direction::Output);
+//! pin.write(gpio::Level::High);
+//! ```
 
+#[doc(hidden)]
 pub use paste::expr;
 
 pub use controller::CONTROLLER;
@@ -53,50 +55,90 @@ mod controller;
 /// The GPIO ports that are supported by the platform.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Port {
+    /// Port A.
     A = 0,
+    /// Port B.
     B,
+    /// Port C.
     C,
+    /// Port D.
     D,
+    /// Port E.
     E,
+    /// Port F.
     F,
+    /// Port G.
     G,
+    /// Port H.
     H,
+    /// Port I.
     I,
+    /// Port J.
     J,
+    /// Port K.
     K,
+    /// Port L.
     L,
+    /// Port M.
     M,
+    /// Port N.
     N,
+    /// Port O.
     O,
+    /// Port P.
     P,
+    /// Port Q.
     Q,
+    /// Port R.
     R,
+    /// Port S.
     S,
+    /// Port T.
     T,
+    /// Port U.
     U,
+    /// Port V.
     V,
+    /// Port W.
     W,
+    /// Port X.
     X,
+    /// Port Y.
     Y,
+    /// Port Z.
     Z,
+    /// Port AA.
     AA,
+    /// Port BB.
     BB,
+    /// Port CC.
     CC,
+    /// Port DD.
     DD,
+    /// Port EE.
     EE,
+    /// Port FF.
     FF,
 }
 
 /// The GPIO pins that are provided for each port.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pin {
+    /// Pin 0.
     P0 = 0,
+    /// Pin 1.
     P1,
+    /// Pin 2.
     P2,
+    /// Pin 3.
     P3,
+    /// Pin 4.
     P4,
+    /// Pin 5.
     P5,
+    /// Pin 6.
     P6,
+    /// Pin 7.
     P7,
 }
 
@@ -173,17 +215,17 @@ pub struct Gpio {
 /// # Example
 ///
 /// ```
-/// use libtegra::*;
+/// use libtegra::{make_gpio, gpio};
 ///
-/// let gpio = gpio::Gpio {
+/// let some_gpio = gpio::Gpio {
 ///     port: gpio::Port::X,
 ///     pin: gpio::Pin::P7,
 /// };
 ///
-/// assert_eq!(gpio, gpio!(X, 7));
+/// assert_eq!(some_gpio, make_gpio!(X, 7));
 /// ```
 #[macro_export]
-macro_rules! gpio {
+macro_rules! make_gpio {
     ($port:ident, $pin:tt) => {
         $crate::gpio::Gpio {
             port: $crate::gpio::Port::$port,

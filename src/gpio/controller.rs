@@ -23,37 +23,21 @@ const GPIO_BANKS_COUNT: usize = 8;
 #[allow(non_snake_case)]
 #[repr(C)]
 pub struct GpioBank {
-    /// The `GPIO_CNF_*` register.
     pub GPIO_CONFIG: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_OE_*` register.
     pub GPIO_OUTPUT_ENABLE: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_OUT_*` register.
     pub GPIO_OUT: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_IN_*` register.
     pub GPIO_IN: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_INT_STA_*` register.
     pub GPIO_INT_STATUS: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_INT_ENB_*` register.
     pub GPIO_INT_ENABLE: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_INT_LVL_*` register.
     pub GPIO_INT_LEVEL: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_INT_CLR_*` register.
     pub GPIO_INT_CLEAR: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_CNF` register.
     pub GPIO_MASKED_CONFIG: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_OE_*` register.
     pub GPIO_MASKED_OUTPUT_ENABLE: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_OUT_*` register.
     pub GPIO_MASKED_OUT: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_IN_*` register.
     pub GPIO_MASKED_IN: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_INT_STA_*` register.
     pub GPIO_MASKED_INT_STATUS: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_INT_ENB_*` register.
     pub GPIO_MASKED_INT_ENABLE: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_INT_LVL_*` register.
     pub GPIO_MASKED_INT_LEVEL: [ReadWrite<u32>; GPIO_PORTS_COUNT],
-    /// The `GPIO_MSK_INT_CLR_*` register.
     pub GPIO_MASKED_INT_CLEAR: [ReadWrite<u32>; GPIO_PORTS_COUNT],
 }
 

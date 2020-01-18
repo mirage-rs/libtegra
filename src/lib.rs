@@ -13,3 +13,4 @@ extern crate static_assertions;
 pub mod car;
 pub mod gpio;
 pub mod timer;
+pub mod uart;

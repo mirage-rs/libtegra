@@ -61,7 +61,8 @@ pub struct Clock {
     clock_divider: u32,
 }
 
-// Definitions for known device clocks.
+// Definitions of known device clocks.
+
 impl Clock {
     /// Representation of the UART A clock.
     pub const UART_A: Self = Clock {

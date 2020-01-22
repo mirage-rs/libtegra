@@ -47,6 +47,7 @@ register_bitfields! {
         ]
     ],
 
+    /// Bitfields of the `TIMERUS_CNTR_FREEZE_0` register.
     TIMERUS_CNTR_FREEZE_0 [
         /// Whether timers should be freezed when COP is in debug state.
         DBG_FREEZE_COP OFFSET(4) NUMBITS(1) [

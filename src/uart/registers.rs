@@ -62,7 +62,7 @@ register_bitfields! {
         IE_THR OFFSET(1) NUMBITS(1) [],
 
         /// Interrupt Enable for Receive Data Interrupt.
-        IE_RHR OFFSET(0) NUMBITS(1) [],
+        IE_RHR OFFSET(0) NUMBITS(1) []
     ],
 
     /// Bitfields of the `UART_IIR_FCR_0` register.
@@ -286,7 +286,7 @@ register_bitfields! {
         DDSR OFFSET(1) NUMBITS(1) [],
 
         /// Change (Delta) in CTS detected.
-        DCTS OFFSET(0) NUMBITS(1) [],
+        DCTS OFFSET(0) NUMBITS(1) []
     ],
 
     /// Bitfields of the `UART_SPR_0` register.

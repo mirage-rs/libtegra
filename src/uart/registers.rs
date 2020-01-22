@@ -18,7 +18,7 @@ register_bitfields! {
     u32,
 
     /// Bitfields of the `UART_THR_DLAB_0_0` register.
-    UART_THR_DLAB_0_0 [
+    pub UART_THR_DLAB_0_0 [
         /// The Transmit Holding Register.
         ///
         /// It holds the characters to be transmitted by the UART.
@@ -45,7 +45,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_IER_DLAB_0_0` register.
-    UART_IER_DLAB_0_0 [
+    pub UART_IER_DLAB_0_0 [
         /// Interrupt Enable for End of Received Data.
         IE_EORD OFFSET(5) NUMBITS(1) [],
 
@@ -66,7 +66,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_IIR_FCR_0` register.
-    UART_IIR_FCR_0 [
+    pub UART_IIR_FCR_0 [
         /// FIFO Mode Status.
         EN_FIFO OFFSET(6) NUMBITS(2) [
             /// 16450 Mode.
@@ -143,7 +143,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_LCR_0` register.
-    UART_LCR_0 [
+    pub UART_LCR_0 [
         /// Whether the Divisor Latch Access Bit should be enabled.
         ///
         /// NOTE: Set this bit to allow programming of the DLH and DLM Divisors.
@@ -184,7 +184,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_MCR_0` register.
-    UART_MCR_0 [
+    pub UART_MCR_0 [
         /// Whether the old SIR decode path should be used instead of the new one.
         OLD_SIR_DECODE OFFSET(10) NUMBITS(1) [],
 
@@ -226,7 +226,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_LSR_0` register.
-    UART_LSR_0 [
+    pub UART_LSR_0 [
         /// Whether the RX FIFO is empty.
         RX_FIFO_EMPTY OFFSET(9) NUMBITS(1) [],
 
@@ -263,7 +263,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_MSR_0` register.
-    UART_MSR_0 [
+    pub UART_MSR_0 [
         /// State of Carrier detect pin.
         CD OFFSET(7) NUMBITS(1) [],
 
@@ -290,13 +290,13 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_SPR_0` register.
-    UART_SPR_0 [
+    pub UART_SPR_0 [
         /// Scratchpad register (not used internally).
         SPR_A OFFSET(0) NUMBITS(8) []
     ],
 
     /// Bitfields of the `UART_IRDA_CSR_0` register.
-    UART_IRDA_CSR_0 [
+    pub UART_IRDA_CSR_0 [
         /// Whether SIR coder should be enabled.
         SIR_A OFFSET(7) NUMBITS(1) [],
 
@@ -322,7 +322,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_RX_FIFO_CFG_0` register.
-    UART_RX_FIFO_CFG_0 [
+    pub UART_RX_FIFO_CFG_0 [
         /// Enables the use of `RX_FIFO_TRIG` count, if set to 1.
         ///
         /// This obsoletes `RX_TRIG` when enabled.
@@ -335,7 +335,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_MIE_0` register.
-    UART_MIE_0 [
+    pub UART_MIE_0 [
         /// Interrupt Enable for Change (Delta) in CD state detected.
         DCD_INT_EN OFFSET(3) NUMBITS(1) [],
 
@@ -350,7 +350,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_VENDOR_STATUS_0_0` register.
-    UART_VENDOR_STATUS_0_0 [
+    pub UART_VENDOR_STATUS_0_0 [
         /// The entry in this field reflects the number of current entries in the TX FIFO.
         TX_FIFO_COUNTER OFFSET(24) NUMBITS(6) [],
 
@@ -383,7 +383,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `UART_ASR_0` register.
-    UART_ASR_0 [
+    pub UART_ASR_0 [
         /// This bit is set when the controller finishes counting the clocks between two
         /// successive clock edges after there is a write to ASR with don't care data.
         VALID OFFSET(31) NUMBITS(1) [],

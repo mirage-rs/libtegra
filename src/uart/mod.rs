@@ -1,4 +1,4 @@
-use crate::car::Clock;
+use crate::{car::Clock, timer::usleep};
 
 use registers::*;
 

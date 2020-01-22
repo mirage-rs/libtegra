@@ -20,7 +20,7 @@ register_bitfields! {
     u32,
 
     /// Bitfields of the `TIMERUS_USEC_CFG_0` register.
-    TIMERUS_CNTR_1US_0 [
+    pub TIMERUS_CNTR_1US_0 [
         /// Elapsed time in microseconds.
         HIGH_VALUE OFFSET(16) NUMBITS(16) [],
 
@@ -29,7 +29,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `TIMERUS_USEC_CFG_0` register.
-    TIMERUS_USEC_CFG_0 [
+    pub TIMERUS_USEC_CFG_0 [
         /// Microsecond dividend. (n+1)
         USEC_DIVIDEND OFFSET(8) NUMBITS(8) [
             /// 12 MHz clk_m frequency - 0x00 / 0x0B.
@@ -48,7 +48,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `TIMERUS_CNTR_FREEZE_0` register.
-    TIMERUS_CNTR_FREEZE_0 [
+    pub TIMERUS_CNTR_FREEZE_0 [
         /// Whether timers should be freezed when COP is in debug state.
         DBG_FREEZE_COP OFFSET(4) NUMBITS(1) [
             /// No freeze.

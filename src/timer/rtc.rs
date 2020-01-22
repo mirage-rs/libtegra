@@ -23,7 +23,7 @@ register_bitfields! {
     u32,
 
     /// Bitfields of the `APBDEV_RTC_CONTROL_0` register.
-    APBDEV_RTC_CONTROL_0 [
+    pub APBDEV_RTC_CONTROL_0 [
         /// When set, writes to the SECONDS counter are disabled.
         /// Can only be cleared by resetting the RTC module.
         WR_SEC_CNT OFFSET(0) NUMBITS(1) [
@@ -35,7 +35,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_BUSY_0` register.
-    APBDEV_RTC_BUSY_0 [
+    pub APBDEV_RTC_BUSY_0 [
         /// This bit is set when a write is initiated on the APB side.
         ///
         /// It is cleared once the write completes in RTC 32 kHz clock domain,
@@ -52,44 +52,44 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_SECONDS_0` register.
-    APBDEV_RTC_SECONDS_0 [
+    pub APBDEV_RTC_SECONDS_0 [
         /// The seconds counter which is incremented every 1000 milliseconds.
         SECONDS OFFSET(0) NUMBITS(32) []
     ],
 
     /// Bitfields of the `APBDEV_RTC_SHADOW_SECONDS_0` register.
-    APBDEV_RTC_SHADOW_SECONDS_0 [
+    pub APBDEV_RTC_SHADOW_SECONDS_0 [
         /// A snapshot of the SECONDS counter is taken,
         /// whenever there is a read to MILLI_SECONDS register.
         SHADOW_SECONDS OFFSET(0) NUMBITS(32) []
     ],
 
     /// Bitfields of the `APBDEV_RTC_MILLI_SECONDS_0` register.
-    APBDEV_RTC_MILLI_SECONDS_0 [
+    pub APBDEV_RTC_MILLI_SECONDS_0 [
         /// Milliseconds counter which is incremented using the Bresenham algorithm.
         MILLI_SECONDS OFFSET(0) NUMBITS(10) []
     ],
 
     /// Bitfields of the `APBDEV_RTC_SECONDS_ALARM0_0` register.
-    APBDEV_RTC_SECONDS_ALARM0_0 [
+    pub APBDEV_RTC_SECONDS_ALARM0_0 [
         /// Match value to trigger the alarm.
         SECS_MATCH_VALUE OFFSET(0) NUMBITS(32) []
     ],
 
     /// Bitfields of the `APBDEV_RTC_SECONDS_ALARM1_0` register.
-    APBDEV_RTC_SECONDS_ALARM1_0 [
+    pub APBDEV_RTC_SECONDS_ALARM1_0 [
         /// Match value to trigger the alarm.
         SECS_MATCH_VALUE OFFSET(0) NUMBITS(32) []
     ],
 
     /// Bitfields of the `APBDEV_RTC_MILLI_SECONDS_ALARM_0` register.
-    APBDEV_RTC_MILLI_SECONDS_ALARM_0 [
+    pub APBDEV_RTC_MILLI_SECONDS_ALARM_0 [
         /// Milliseconds match value.
         MSEC_MATCH_VALUE OFFSET(0) NUMBITS(10) []
     ],
 
     /// Bitfields of the `APBDEV_RTC_SECONDS_COUNTDOWN_ALARM_0` register.
-    APBDEV_RTC_SECONDS_COUNTDOWN_ALARM_0 [
+    pub APBDEV_RTC_SECONDS_COUNTDOWN_ALARM_0 [
         /// Enable bit for the countdown operation.
         ///
         /// If repeat is not set, this bit is cleared once the internal
@@ -114,7 +114,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_MILLI_SECONDS_COUNTDOWN_ALARM_0` register.
-    APBDEV_RTC_MILLI_SECONDS_COUNTDOWN_ALARM_0 [
+    pub APBDEV_RTC_MILLI_SECONDS_COUNTDOWN_ALARM_0 [
         /// Enable bit for the countdown operation.
         ///
         /// If repeat is not set, this bit is cleared once the internal
@@ -139,7 +139,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_INTR_MASK_0` register.
-    APBDEV_RTC_INTR_MASK_0 [
+    pub APBDEV_RTC_INTR_MASK_0 [
         MSEC_CDN_ALARM OFFSET(4) NUMBITS(1) [],
 
         SEC_CDN_ALARM OFFSET(3) NUMBITS(1) [],
@@ -152,7 +152,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_INTR_STATUS_0` register.
-    APBDEV_RTC_INTR_STATUS_0 [
+    pub APBDEV_RTC_INTR_STATUS_0 [
         MSEC_CDN_ALARM OFFSET(4) NUMBITS(1) [],
 
         SEC_CDN_ALARM OFFSET(3) NUMBITS(1) [],
@@ -165,7 +165,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_INTR_SOURCE_0` register.
-    APBDEV_RTC_INTR_SOURCE_0 [
+    pub APBDEV_RTC_INTR_SOURCE_0 [
         MSEC_CDN_ALARM OFFSET(4) NUMBITS(1) [],
 
         SEC_CDN_ALARM OFFSET(3) NUMBITS(1) [],
@@ -178,7 +178,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_INTR_SET_0` register.
-    APBDEV_RTC_INTR_SET_0 [
+    pub APBDEV_RTC_INTR_SET_0 [
         MSEC_CDN_ALARM OFFSET(4) NUMBITS(1) [],
 
         SEC_CDN_ALARM OFFSET(3) NUMBITS(1) [],
@@ -191,7 +191,7 @@ register_bitfields! {
     ],
 
     /// Bitfields of the `APBDEV_RTC_CORRECTION_FACTOR_0` register.
-    APBDEV_RTC_CORRECTION_FACTOR_0 [
+    pub APBDEV_RTC_CORRECTION_FACTOR_0 [
         /// Decrement must be used when the 32 kHz clock is above its nominal frequency.
         DIRECTION OFFSET(9) NUMBITS(1) [
             Decrement = 0,

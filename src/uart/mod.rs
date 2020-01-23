@@ -11,7 +11,7 @@ pub use registers::*;
 mod registers;
 
 /// Representation of a UART.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Uart {
     /// The baud rate this [`Uart`] is configured with.
     ///

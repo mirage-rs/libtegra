@@ -1,3 +1,86 @@
+//! Driver for the Tegra X1 Universal Asynchronous Receiver/Transmitter Controller.
+//!
+//! See chapter 36 in the Tegra X1 Technical Reference Manual for details.
+//!
+//! # Description
+//!
+//! There are five UARTs available in total. The UARTs A through D, which are
+//! identical, are built into Tegra X1 devices and the fifth UART is located
+//! in the Audio Processing Engine.
+//!
+//! These UARTs support both, 16450 and 16550 compatible modes, however they are
+//! always being initialized in 16550 mode. Using them in 16450 mode requires a
+//! custom implementation.
+//!
+//! UARTs internally use a TX FIFO, which acts as a buffer for data to send, and
+//! an RX FIFO, which acts as a buffer for received data, to read from. Hence,
+//! UARTs provide a stream of serial data to communicate with other devices.
+//!
+//! ## Initialization
+//!
+//! [`Uart`]s need to be initialized with a given baud rate before they can be used.
+//! The maximum supported rate is 12.5.
+//!
+//! ```no_run
+//! use libtegra::uart::Uart;
+//!
+//! Uart::A.init(115_200);
+//! ```
+//!
+//! ## Communication
+//!
+//! After a [`Uart`] was initialized, there are many possibilities how
+//! data can be sent:
+//!
+//! ```no_run
+//! use core::fmt::Write;
+//!
+//! use libtegra::uart::Uart;
+//!
+//! let mut uart = Uart::A; // Less typing...
+//!
+//! // You can write a slice of bytes...
+//! uart.write(b"48656c6c6f2c20776f726c6421");
+//! // ...just as well as a single byte...
+//! uart.write_byte(b'0');
+//!
+//! // ...or even strings with the `Write` trait.
+//! writeln!(&mut uart, "Hello, world!").ok();
+//!
+//! let name = "John";
+//! writeln!(&mut uart, "Hello, {}!", name).ok();
+//! ```
+//!
+//! Reading data is also supported:
+//!
+//! ```no_run
+//! use libtegra::uart::Uart;
+//!
+//! let mut uart = Uart::A; // Less typing...
+//!
+//! // Read a single byte.
+//! let byte = uart.read_byte();
+//!
+//! // Read 10 bytes into a buffer and print the data.
+//! let mut buffer = [0; 10];
+//! uart.read(&mut buffer);
+//!
+//! println!("UART A: {}", String::from_utf8_lossy(&buffer));
+//! ```
+//!
+//! ## Flushing
+//!
+//! In some cases, you may want to flush the underlying FIFOs:
+//!
+//! ```no_run
+//! use libtegra::uart::Uart;
+//!
+//! // Clears the data from both, TX FIFO and RX FIFO.
+//! Uart::A.flush();
+//! ```
+//!
+//! [`Uart`]: struct.Uart.html
+
 use core::{
     cell::Cell,
     fmt::{Write, Error},
@@ -11,19 +94,19 @@ pub use registers::*;
 mod registers;
 
 /// Representation of a UART.
+///
+/// NOTE: Instances of this struct should never be created manually.
+/// Refer to the public constants the struct holds, which represent
+/// the UARTs A through E.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Uart {
     /// The baud rate this [`Uart`] is configured with.
-    ///
-    /// Use [`Uart::get_baud_rate`] to obtain the "real" rate
-    /// the Uart is configured with.
     ///
     /// NOTE: This value will be overridden by [`Uart::init`],
     /// so it is safe to initialize instances of this struct
     /// with a dummy value, such as `Cell::new(0)`.
     ///
     /// [`Uart`]: struct.Uart.html
-    /// [`Uart::get_baud_rate`]: struct.Uart.html#method.get_baud_rate
     /// [`Uart::init`]: struct.Uart.html#method.init
     baud: Cell<u32>,
     /// A reference to the device clock that corresponds to the UART.
@@ -74,24 +157,31 @@ impl Uart {
 }
 
 impl Uart {
+    /// Waits for a given amount of baud cycles.
     #[inline(always)]
     fn wait_cycles(&self, amount: u32) {
         let baud_rate = self.baud.get();
         usleep((amount * 1_000_000 + 16 * baud_rate - 1) / (16 * baud_rate));
     }
 
+    /// Waits for a given amount of baud cycles.
     #[inline(always)]
     fn wait_symbols(&self, amount: u32) {
         let baud_rate = self.baud.get();
         usleep((amount * 1_000_000 + baud_rate - 1) / baud_rate);
     }
 
-    pub fn get_baud_rate(&self) -> u32 {
+    /// Computes the baud value that should be written to the MMIOs.
+    fn get_baud_rate(&self) -> u32 {
         let baud_rate = self.baud.get();
 
         (8 * baud_rate + 408_000_000) / (16 * baud_rate)
     }
 
+    /// Initializes the Uart with a given baud rate.
+    ///
+    /// This method needs to be called once before a
+    /// Uart can actually send and receive data.
     pub fn init(&self, baud_rate: u32) {
         let controller = unsafe { &*self.registers };
 
@@ -140,6 +230,9 @@ impl Uart {
         self.flush();
     }
 
+    /// Reads a byte over UART and returns it.
+    ///
+    /// This method blocks until data is available to read.
     pub fn read_byte(&self) -> u8 {
         let controller = unsafe { &*self.registers };
 
@@ -151,6 +244,9 @@ impl Uart {
         controller.UART_THR_DLAB_0_0.get() as u8
     }
 
+    /// Fills a mutable slice of data with bytes read over UART.
+    ///
+    /// This method blocks until the buffer is filled.
     pub fn read(&self, data: &mut [u8]) {
         let controller = unsafe { &*self.registers };
 
@@ -164,6 +260,9 @@ impl Uart {
         }
     }
 
+    /// Writes a byte over UART.
+    ///
+    /// This method blocks until data can be transferred.
     pub fn write_byte(&self, byte: u8) {
         let controller = unsafe { &*self.registers };
 
@@ -175,6 +274,9 @@ impl Uart {
         controller.UART_THR_DLAB_0_0.set(byte as u32);
     }
 
+    /// Writes a slice of bytes over UART.
+    ///
+    /// This method blocks until everything was transferred.
     pub fn write(&self, data: &[u8]) {
         let controller = unsafe { &*self.registers };
 
@@ -188,6 +290,11 @@ impl Uart {
         }
     }
 
+    /// Flushes the underlying FIFOs of the Uart.
+    ///
+    /// This wipes out the data to read and the data that
+    /// should be written, so be careful when you use it.
+    /// In most cases, this method won't be needed.
     pub fn flush(&self) {
         let controller = unsafe { &*self.registers };
 

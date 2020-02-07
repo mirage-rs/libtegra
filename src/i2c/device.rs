@@ -1,3 +1,8 @@
+//! Implementation of Tegra X1 I²C master devices.
+//!
+//! See Chapter 35.7 in the Tegra X1 Technical Reference Manual
+//! for details.
+
 use core::{convert::TryInto, marker::Sync};
 
 use crate::{car::Clock, timer::usleep};

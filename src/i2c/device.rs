@@ -98,8 +98,22 @@ impl I2c {
         register_base.I2C_I2C_CMD_ADDR0_0.set((slave << 1) as u32);
 
         // Load in data to transmit.
-        let data = u32::from_le_bytes(packet.try_into().unwrap());
-        register_base.I2C_I2C_CMD_DATA1_0.set(data);
+        if packet.len() > 4 {
+            // Set the LS value.
+            let data1 = u32::from_le_bytes(packet[..4].try_into().unwrap());
+            register_base.I2C_I2C_CMD_DATA1_0.set(data1);
+
+            // Set the MS value.
+            let mut data2 = [0; 4];
+            data2[..packet.len() - 4].copy_from_slice(&packet[4..]);
+            register_base
+                .I2C_I2C_CMD_DATA2_0
+                .set(u32::from_le_bytes(data2.try_into().unwrap()));
+        } else {
+            // Only set the LS value.
+            let data = u32::from_le_bytes(packet.try_into().unwrap());
+            register_base.I2C_I2C_CMD_DATA1_0.set(data);
+        }
 
         // Set config with LENGTH = packet.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
         register_base

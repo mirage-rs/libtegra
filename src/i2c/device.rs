@@ -91,11 +91,18 @@ impl I2c {
     }
 
     /// Transmits a packet of data to a slave over I²C.
-    fn send_packet(&self, slave: u8, packet: &[u8]) -> Result<(), Error> {
+    ///
+    /// NOTE: This method is a low-level implementation
+    /// of the I2C transfer flow that doesn't validate the
+    /// data in `packet`. It is advised to do this in
+    /// methods that call to [`I2c::send_packet`].
+    ///
+    /// [`I2c::send_packet`]: struct.I2c.html#method.send_packet
+    fn send_packet(&self, slave: u32, packet: &[u8]) -> Result<(), Error> {
         let register_base = unsafe { &*self.registers };
 
         // Set device for 7-bit write mode.
-        register_base.I2C_I2C_CMD_ADDR0_0.set((slave << 1) as u32);
+        register_base.I2C_I2C_CMD_ADDR0_0.set(slave << 1);
 
         // Load in data to transmit.
         if packet.len() > 4 {
@@ -104,11 +111,8 @@ impl I2c {
             register_base.I2C_I2C_CMD_DATA1_0.set(data1);
 
             // Set the MS value.
-            let mut data2 = [0; 4];
-            data2[..packet.len() - 4].copy_from_slice(&packet[4..]);
-            register_base
-                .I2C_I2C_CMD_DATA2_0
-                .set(u32::from_le_bytes(data2.try_into().unwrap()));
+            let mut data2 = u32::from_le_bytes(packet[4..].try_into().unwrap());
+            register_base.I2C_I2C_CMD_DATA2_0.set(data2);
         } else {
             // Only set the LS value.
             let data = u32::from_le_bytes(packet.try_into().unwrap());
@@ -141,13 +145,18 @@ impl I2c {
     }
 
     /// Reads a packet of data from a slave over I²C into a buffer.
-    fn read_packet(&self, slave: u8, buffer: &mut [u8]) -> Result<(), Error> {
+    ///
+    /// NOTE: This method is a low-level implementation of the I2C
+    /// receive flow and doesn't check the boundaries of `buffer`.
+    /// It is advised to do this in methods that call to
+    /// [`I2c::read_packet`].
+    ///
+    /// [`I2c::read_packet`]: struct.I2c.html#method.read_packet
+    fn receive_packet(&self, slave: u32, buffer: &mut [u8]) -> Result<(), Error> {
         let register_base = unsafe { &*self.registers };
 
         // Set device for 7-bit read mode.
-        register_base
-            .I2C_I2C_CMD_ADDR0_0
-            .set(((slave << 1) | 1) as u32);
+        register_base.I2C_I2C_CMD_ADDR0_0.set((slave << 1) | 1);
 
         // Set config with LENGTH = buffer.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
         register_base
@@ -187,6 +196,56 @@ impl I2c {
         } else {
             Err(Error::IoError)
         }
+    }
+
+    /// Writes a buffer of data to a slave register over I²C.
+    pub fn write(&self, slave: u32, register: u8, data: &[u8]) -> Result<(), Error> {
+        // Boundary checks, since a buffer cannot exceed 8 bytes
+        // and one byte is always reserved for the register.
+        if data.len() < 4 {
+            let mut packet = [0; 4];
+        } else if data.len() < 8 {
+            let mut packet = [0; 8];
+        } else {
+            return Err(Error::MemoryError);
+        }
+
+        // Prepare the I²C packet.
+        packet[0] = register;
+        packet[1..=data.len()].copy_from_slice(data);
+
+        // Write the packet to the device.
+        self.send_packet(slave, &packet[..])
+    }
+
+    /// Reads the contents of a slave register over I²C.
+    pub fn read(&self, slave: u32, register: u8, buffer: &mut [u8]) -> Result<(), Error> {
+        // Limit output buffer size to 8 bytes, as one
+        // cannot read a higher number of bytes anyway.
+        if buffer.len() > 8 {
+            return Err(Error::MemoryError);
+        }
+
+        // Write single byte register ID to device.
+        self.send_packet(slave, &[register])?;
+
+        // Read data and copy them into the buffer.
+        self.receive_packet(slave, buffer)
+    }
+
+    /// Writes a single byte of data to a slave register over I²C.
+    #[inline(always)]
+    pub fn write_byte(&self, slave: u32, register: u8, byte: u8) -> Result<(), Error> {
+        self.write(slave, register, &byte.to_le_bytes())
+    }
+
+    /// Reads a single byte of data from a slave register over I²C.
+    #[inline(always)]
+    pub fn read_byte(&self, slave: u32, register: u8) -> Result<u8, Error> {
+        let mut buffer = [0; 1];
+        self.read(slave, register, &mut buffer)?;
+
+        Ok(u8::from_le_bytes(buffer.try_into().unwrap()))
     }
 }
 

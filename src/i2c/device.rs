@@ -195,6 +195,40 @@ impl I2c {
         }
     }
 
+    /// Initializes the I2C device.
+    ///
+    /// NOTE: This method must be called once before the I2C device is usable.
+    pub fn init(&self) {
+        let register_base = unsafe { &*self.registers };
+
+        // Enable the device clock.
+        self.clock.enable();
+
+        // Setup divisor and clear the bus.
+        register_base.I2C_I2C_CLK_DIVISOR_REGISTER_0.set(0x50001);
+        register_base.I2C_I2C_BUS_CLEAR_CONFIG_0.set(0x90003);
+
+        // Load hardware configuration.
+        self.load_config();
+
+        // Wait a while until BUS_CLEAR_DONE is set.
+        for _ in 0..10 {
+            usleep(20_000);
+
+            if (register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get() & 0x800) != 0 {
+                break;
+            }
+        }
+
+        // Dummy read.
+        register_base.I2C_I2C_BUS_CLEAR_STATUS_0.get();
+
+        // Read and set the Interrupt Status.
+        register_base
+            .I2C_INTERRUPT_STATUS_REGISTER_0
+            .set(register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get());
+    }
+
     /// Writes a buffer of data to a slave register over I²C.
     pub fn write(&self, slave: u32, register: u8, data: &[u8]) -> Result<(), Error> {
         // Boundary checks, since a buffer cannot exceed 8 bytes

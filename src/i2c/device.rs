@@ -96,6 +96,7 @@ impl I2c {
     /// of the I2C transfer flow that doesn't validate the
     /// data in `packet`. It is advised to do this in
     /// methods that call to [`I2c::send_packet`].
+    /// `packet` is supposed to be exactly 8 bytes in size.
     ///
     /// [`I2c::send_packet`]: struct.I2c.html#method.send_packet
     fn send_packet(&self, slave: u32, packet: &[u8]) -> Result<(), Error> {
@@ -105,18 +106,13 @@ impl I2c {
         register_base.I2C_I2C_CMD_ADDR0_0.set(slave << 1);
 
         // Load in data to transmit.
-        if packet.len() > 4 {
-            // Set the LS value.
-            let data1 = u32::from_le_bytes(packet[..4].try_into().unwrap());
-            register_base.I2C_I2C_CMD_DATA1_0.set(data1);
+        let (data1, data2) = packet.split_at(4);
+        let data1_value = u32::from_le_bytes(data1.try_into().unwrap());
+        let data2_value = u32::from_le_bytes(data2.try_into().unwrap());
 
-            // Set the MS value.
-            let mut data2 = u32::from_le_bytes(packet[4..].try_into().unwrap());
-            register_base.I2C_I2C_CMD_DATA2_0.set(data2);
-        } else {
-            // Only set the LS value.
-            let data = u32::from_le_bytes(packet.try_into().unwrap());
-            register_base.I2C_I2C_CMD_DATA1_0.set(data);
+        register_base.I2C_I2C_CMD_DATA1_0.set(data1_value); // Set the LS value.
+        if data2_value != 0 {
+            register_base.I2C_I2C_CMD_DATA2_0.set(data2_value); // Set the MS value.
         }
 
         // Set config with LENGTH = packet.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
@@ -150,6 +146,7 @@ impl I2c {
     /// receive flow and doesn't check the boundaries of `buffer`.
     /// It is advised to do this in methods that call to
     /// [`I2c::read_packet`].
+    /// `buffer` may not exceed a size of 8 bytes.
     ///
     /// [`I2c::read_packet`]: struct.I2c.html#method.read_packet
     fn receive_packet(&self, slave: u32, buffer: &mut [u8]) -> Result<(), Error> {
@@ -202,15 +199,12 @@ impl I2c {
     pub fn write(&self, slave: u32, register: u8, data: &[u8]) -> Result<(), Error> {
         // Boundary checks, since a buffer cannot exceed 8 bytes
         // and one byte is always reserved for the register.
-        if data.len() < 4 {
-            let mut packet = [0; 4];
-        } else if data.len() < 8 {
-            let mut packet = [0; 8];
-        } else {
+        if data.len() > 8 {
             return Err(Error::MemoryError);
         }
 
         // Prepare the I²C packet.
+        let mut packet = [0; 8];
         packet[0] = register;
         packet[1..=data.len()].copy_from_slice(data);
 

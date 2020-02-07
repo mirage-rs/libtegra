@@ -23,7 +23,7 @@
 //! routines.
 //!
 //! ```no_run
-//! use libtegra::car::Clock;
+//! use libtegra::{car::Clock, i2c::I2C_5_REGISTERS};
 //!
 //! // Certain logic, such as I2C, hangs the SoC if the respective
 //! // clock is down. That's why it needs to be enabled first.
@@ -32,6 +32,11 @@
 //! Clock::I2C_5.enable();
 //!
 //! // Some I2C logic here...
+//! let registers = unsafe { &*I2C_5_REGISTERS };
+//! // (If the device clock wasn't enabled, the following line would hang the SoC.)
+//! while (registers.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
+//!     // This bus is busy.
+//! }
 //!
 //! // We're done. Disable the controller.
 //! Clock::I2C_5.disable();

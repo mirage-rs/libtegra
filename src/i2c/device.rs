@@ -3,7 +3,7 @@
 //! See Chapter 35.7 in the Tegra X1 Technical Reference Manual
 //! for details.
 
-use core::{convert::TryInto, marker::Sync};
+use core::convert::TryInto;
 
 use crate::{car::Clock, timer::usleep};
 
@@ -181,8 +181,8 @@ impl I2c {
         if (register_base.I2C_I2C_STATUS_0.get() & 0xF) == 0 {
             // Read and copy back the result.
             let data1 = register_base.I2C_I2C_CMD_DATA1_0.get().to_le_bytes();
+            let data2 = register_base.I2C_I2C_CMD_DATA2_0.get().to_le_bytes();
             if buffer.len() > 4 {
-                let data2 = register_base.I2C_I2C_CMD_DATA2_0.get().to_le_bytes();
                 // Copy both, LS and MS values.
                 buffer[..4].copy_from_slice(&data1);
                 {
@@ -281,5 +281,3 @@ impl I2c {
         Ok(u8::from_le_bytes(buffer.try_into().unwrap()))
     }
 }
-
-unsafe impl Sync for I2c {}

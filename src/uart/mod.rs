@@ -1,6 +1,6 @@
 //! Driver for the Tegra X1 Universal Asynchronous Receiver/Transmitter Controller.
 //!
-//! See chapter 36 in the Tegra X1 Technical Reference Manual for details.
+//! See Chapter 36 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!

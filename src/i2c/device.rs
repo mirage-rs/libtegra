@@ -238,7 +238,7 @@ impl I2c {
     pub fn write(&self, slave: u32, register: u8, data: &[u8]) -> Result<(), Error> {
         // Boundary checks, since a buffer cannot exceed 8 bytes
         // and one byte is always reserved for the register.
-        if data.len() > 8 {
+        if data.len() > 7 {
             return Err(Error::MemoryError);
         }
 

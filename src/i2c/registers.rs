@@ -5,21 +5,20 @@
 
 use register::{mmio::*, register_bitfields, register_structs};
 
-/// Base address for I2C registers.
-const I2C_BASE: u32 = 0x7000_C000;
+use crate::memory_map::i2c::*;
 
 /// A pointer to the I2C 1 register block that can be accessed by dereferencing it.
-pub const I2C_1_REGISTERS: *const Registers = (I2C_BASE + 0x0000)  as *const Registers;
+pub const I2C_1_REGISTERS: *const Registers = I2C_1 as *const Registers;
 /// A pointer to the I2C 2 register block that can be accessed by dereferencing it.
-pub const I2C_2_REGISTERS: *const Registers = (I2C_BASE + 0x0400)  as *const Registers;
+pub const I2C_2_REGISTERS: *const Registers = I2C_2 as *const Registers;
 /// A pointer to the I2C 3 register block that can be accessed by dereferencing it.
-pub const I2C_3_REGISTERS: *const Registers = (I2C_BASE + 0x0500)  as *const Registers;
+pub const I2C_3_REGISTERS: *const Registers = I2C_3 as *const Registers;
 /// A pointer to the I2C 4 register block that can be accessed by dereferencing it.
-pub const I2C_4_REGISTERS: *const Registers = (I2C_BASE + 0x0700)  as *const Registers;
+pub const I2C_4_REGISTERS: *const Registers = I2C_4 as *const Registers;
 /// A pointer to the I2C 5 register block that can be accessed by dereferencing it.
-pub const I2C_5_REGISTERS: *const Registers = (I2C_BASE + 0x1000)  as *const Registers;
+pub const I2C_5_REGISTERS: *const Registers = I2C_5 as *const Registers;
 /// A pointer to the I2C 6 register block that can be accessed by dereferencing it.
-pub const I2C_6_REGISTERS: *const Registers = (I2C_BASE + 0x1100)  as *const Registers;
+pub const I2C_6_REGISTERS: *const Registers = I2C_6 as *const Registers;
 
 register_bitfields! {
     u32,

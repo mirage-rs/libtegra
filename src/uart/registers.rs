@@ -1,18 +1,17 @@
 use register::{mmio::*, register_bitfields, register_structs};
 
-/// Base address for UART registers.
-pub const UART_BASE: u32 = 0x7000_6000;
+use crate::memory_map::uart::*;
 
 /// A pointer to the UART A register block that can be accessed by dereferencing it.
-pub const UART_A_REGISTERS: *const Registers = (UART_BASE + 0x000) as *const Registers;
+pub const UART_A_REGISTERS: *const Registers = UART_A as *const Registers;
 /// A pointer to the UART B register block that can be accessed by dereferencing it.
-pub const UART_B_REGISTERS: *const Registers = (UART_BASE + 0x040) as *const Registers;
+pub const UART_B_REGISTERS: *const Registers = UART_B as *const Registers;
 /// A pointer to the UART C register block that can be accessed by dereferencing it.
-pub const UART_C_REGISTERS: *const Registers = (UART_BASE + 0x200) as *const Registers;
+pub const UART_C_REGISTERS: *const Registers = UART_C as *const Registers;
 /// A pointer to the UART D register block that can be accessed by dereferencing it.
-pub const UART_D_REGISTERS: *const Registers = (UART_BASE + 0x300) as *const Registers;
+pub const UART_D_REGISTERS: *const Registers = UART_D as *const Registers;
 /// A pointer to the UART (AP)E register block that can be accessed by dereferencing it.
-pub const UART_E_REGISTERS: *const Registers = (UART_BASE + 0x400) as *const Registers;
+pub const UART_E_REGISTERS: *const Registers = UART_E as *const Registers;
 
 register_bitfields! {
     u32,

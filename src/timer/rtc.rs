@@ -13,11 +13,10 @@
 
 use register::{mmio::*, register_bitfields, register_structs};
 
-/// Base address for RTC registers.
-pub const RTC_BASE: u32 = 0x7000_E000;
+use crate::memory_map::RTC;
 
 /// A pointer to the RTC register block that can be accessed by dereferencing it.
-pub const REGISTERS: *const Registers = RTC_BASE as *const Registers;
+pub const REGISTERS: *const Registers = RTC as *const Registers;
 
 register_bitfields! {
     u32,

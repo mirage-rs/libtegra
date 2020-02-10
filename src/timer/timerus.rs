@@ -10,11 +10,10 @@
 
 use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
-/// Base address for Fixed Time Base registers.
-pub const TIMER_BASE: u32 = 0x6000_5000;
+use crate::memory_map::TMR;
 
 /// A pointer to the Fixed Time Base register block that can be accessed by dereferencing it.
-pub const REGISTERS: *const Registers = (TIMER_BASE + 0x10) as *const Registers;
+pub const REGISTERS: *const Registers = (TMR + 0x10) as *const Registers;
 
 register_bitfields! {
     u32,

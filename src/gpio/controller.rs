@@ -5,11 +5,10 @@
 
 use register::mmio::ReadWrite;
 
-/// Base address for the GPIO controller registers.
-pub const GPIO_BASE: u32 = 0x6000_D000;
+use crate::memory_map::gpio::BASE;
 
 /// A pointer to the GPIO controller that can be accessed by dereferencing it.
-pub const CONTROLLER: *const GpioController = GPIO_BASE as *const GpioController;
+pub const CONTROLLER: *const GpioController = BASE as *const GpioController;
 
 /// The amount of GPIO ports per bank.
 const GPIO_PORTS_COUNT: usize = 4;

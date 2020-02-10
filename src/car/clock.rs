@@ -2,10 +2,7 @@
 
 use register::mmio::ReadWrite;
 
-use crate::timer::usleep;
-
-/// Base address for Clock and Reset Controller registers.
-pub const CLOCK_BASE: u32 = 0x6000_6000;
+use crate::{memory_map::CAR, timer::usleep};
 
 // Some constants for the driver.
 
@@ -303,7 +300,7 @@ impl Clock {
     /// * `false` - Takes a clock off the reset state.
     fn set_reset(&self, reset: bool) {
         // Figure out the register to write to.
-        let reset_reg = unsafe { &*((CLOCK_BASE + self.reset) as *const ReadWrite<u32>) };
+        let reset_reg = unsafe { &*((CAR + self.reset) as *const ReadWrite<u32>) };
 
         // Read the value to be modified and the mask to be used.
         let mut value = reset_reg.get();
@@ -331,7 +328,7 @@ impl Clock {
     /// * `false` - Disables the device.
     fn set_enable(&self, enable: bool) {
         // Figure out the register to write to.
-        let enable_reg = unsafe { &*((CLOCK_BASE + self.enable) as *const ReadWrite<u32>) };
+        let enable_reg = unsafe { &*((CAR + self.enable) as *const ReadWrite<u32>) };
 
         // Read the value to be modified and the mask to be used.
         let mut value = enable_reg.get();
@@ -356,7 +353,7 @@ impl Clock {
         // Configure the clock source, if needed.
         if self.source != 0 {
             unsafe {
-                (*((CLOCK_BASE + self.source) as *const ReadWrite<u32>))
+                (*((CAR + self.source) as *const ReadWrite<u32>))
                     .set((self.clock_source << 29) | self.clock_divider);
             }
         }
@@ -391,7 +388,7 @@ impl Clock {
     /// Indicates whether the device is enabled or not.
     pub fn is_enabled(&self) -> bool {
         // Figure out the register to read from.
-        let enable_reg = unsafe { &*((CLOCK_BASE + self.enable) as *const ReadWrite<u32>) };
+        let enable_reg = unsafe { &*((CAR + self.enable) as *const ReadWrite<u32>) };
 
         // Check if the mask bit is set.
         let mask = self.get_mask();

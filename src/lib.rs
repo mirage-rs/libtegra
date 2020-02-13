@@ -1,4 +1,5 @@
 #![no_std]
+#![recursion_limit = "256"]
 #![feature(optimize_attribute)]
 
 #[macro_use]
@@ -15,6 +16,7 @@ pub mod car;
 pub mod gpio;
 pub mod i2c;
 pub mod kfuse;
+pub mod pinmux;
 pub mod memory_map;
 pub mod timer;
 pub mod uart;

@@ -37,6 +37,7 @@ const CLK_RST_CONTROLLER_CLK_SOURCE_I2C_6: u32 = 0x65C;
 const CLK_RST_CONTROLLER_CLK_SOURCE_SE: u32 = 0x42C;
 const CLK_RST_CONTROLLER_CLK_SOURCE_HOST1X: u32 = 0x180;
 const CLK_RST_CONTROLLER_CLK_SOURCE_TSEC: u32 = 0x1F4;
+const CLK_RST_CONTROLLER_CLK_SOURCE_TSECB: u32 = 0x6D8;
 const CLK_RST_CONTROLLER_CLK_SOURCE_SOR1: u32 = 0x410;
 const CLK_RST_CONTROLLER_CLK_SOURCE_CSITE: u32 = 0x1D4;
 const CLK_RST_CONTROLLER_CLK_SOURCE_PWM: u32 = 0x11;
@@ -54,8 +55,8 @@ pub struct Clock {
     index: u8,
     /// The clock source value.
     clock_source: u32,
-    /// The clock divider value.
-    clock_divider: u32,
+    /// The clock divisor value.
+    clock_divisor: u32,
 }
 
 // Definitions of known device clocks.
@@ -68,7 +69,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_A,
         index: 0x6,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the UART B clock.
@@ -78,7 +79,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_B,
         index: 0x7,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the UART C clock.
@@ -88,7 +89,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_C,
         index: 0x17,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the UART D clock.
@@ -98,7 +99,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_D,
         index: 0x1,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the UART APE clock.
@@ -108,7 +109,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_APE,
         index: 0x14,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the I²C 1 clock.
@@ -118,7 +119,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_1,
         index: 0xC,
         clock_source: 0x6,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the I²C 2 clock.
@@ -128,7 +129,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_2,
         index: 0x16,
         clock_source: 0x6,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the I²C 3 clock.
@@ -138,7 +139,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_3,
         index: 0x3,
         clock_source: 0x6,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the I²C 4 clock.
@@ -148,7 +149,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_4,
         index: 0x7,
         clock_source: 0x6,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the I²C 5 clock.
@@ -158,7 +159,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_5,
         index: 0xF,
         clock_source: 0x6,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the I²C 6 clock.
@@ -168,7 +169,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_6,
         index: 0x6,
         clock_source: 0x6,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the Security Engine clock.
@@ -178,7 +179,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_SE,
         index: 0x1F,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the TZRAM clock.
@@ -188,7 +189,7 @@ impl Clock {
         source: CLK_NO_SOURCE,
         index: 0x1E,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the HOST1X clock.
@@ -198,7 +199,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_HOST1X,
         index: 0x1C,
         clock_source: 0x4,
-        clock_divider: 0x3,
+        clock_divisor: 0x3,
     };
 
     /// Representation of the TSEC clock.
@@ -208,7 +209,17 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_TSEC,
         index: 0x13,
         clock_source: 0,
-        clock_divider: 0x2,
+        clock_divisor: 0x2,
+    };
+
+    /// Representation of the TSECB clock.
+    pub const TSECB: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_Y,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_Y,
+        source: CLK_RST_CONTROLLER_CLK_SOURCE_TSECB,
+        index: 0xE,
+        clock_source: 0,
+        clock_divisor: 2,
     };
 
     /// Representation of the SOR_SAFE clock.
@@ -218,7 +229,7 @@ impl Clock {
         source: CLK_NO_SOURCE,
         index: 0x1E,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the SOR0 clock.
@@ -228,7 +239,7 @@ impl Clock {
         source: CLK_NO_SOURCE,
         index: 0x16,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the SOR1 clock.
@@ -238,7 +249,67 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_SOR1,
         index: 0x17,
         clock_source: 0,
-        clock_divider: 0x2,
+        clock_divisor: 0x2,
+    };
+
+    /// Representation of the DPAUX clock.
+    pub const DPAUX: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_X,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_X,
+        source: CLK_NO_SOURCE,
+        index: 0x15,
+        clock_source: 0,
+        clock_divisor: 0,
+    };
+
+    /// Representation of the DPAUX1 clock.
+    pub const DPAUX1: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_Y,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_Y,
+        source: CLK_NO_SOURCE,
+        index: 0xF,
+        clock_source: 0,
+        clock_divisor: 0,
+    };
+
+    /// Representation of the MIPI CAL clock.
+    pub const MIPI_CAL: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
+        source: CLK_NO_SOURCE,
+        index: 0x18,
+        clock_source: 0,
+        clock_divisor: 0,
+    };
+
+    /// Representation of the CSI clock.
+    pub const CSI: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
+        source: CLK_NO_SOURCE,
+        index: 0x14,
+        clock_source: 0,
+        clock_divisor: 0,
+    };
+
+    /// Representation of the DSI clock.
+    pub const DSI: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
+        source: CLK_NO_SOURCE,
+        index: 0x10,
+        clock_source: 0,
+        clock_divisor: 0,
+    };
+
+    /// Representation of the DSIB clock.
+    pub const DSIB: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_U,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_U,
+        source: CLK_NO_SOURCE,
+        index: 0x12,
+        clock_source: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the KFUSE clock.
@@ -248,7 +319,7 @@ impl Clock {
         source: CLK_NO_SOURCE,
         index: 0x8,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the CL-DVFS clock.
@@ -258,7 +329,7 @@ impl Clock {
         source: CLK_NO_SOURCE,
         index: 0x1B,
         clock_source: 0,
-        clock_divider: 0,
+        clock_divisor: 0,
     };
 
     /// Representation of the CSITE clock.
@@ -268,7 +339,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_CSITE,
         index: 0x9,
         clock_source: 0,
-        clock_divider: 0x4,
+        clock_divisor: 0x4,
     };
 
     /// Representation of the PWM clock.
@@ -278,7 +349,7 @@ impl Clock {
         source: CLK_RST_CONTROLLER_CLK_SOURCE_PWM,
         index: 0x11,
         clock_source: 0x6,
-        clock_divider: 0x4,
+        clock_divisor: 0x4,
     };
 }
 
@@ -351,10 +422,10 @@ impl Clock {
         self.disable();
 
         // Configure the clock source, if needed.
-        if self.source != 0 {
+        if self.source != CLK_NO_SOURCE {
             unsafe {
                 (*((CAR + self.source) as *const ReadWrite<u32>))
-                    .set((self.clock_source << 29) | self.clock_divider);
+                    .set((self.clock_source << 29) | self.clock_divisor);
             }
         }
 
@@ -375,6 +446,8 @@ impl Clock {
             // Take clock off reset.
             self.set_reset(false);
         }
+
+        assert!(self.is_enabled());
     }
 
     /// Disables the device.
@@ -383,6 +456,8 @@ impl Clock {
         self.set_reset(true);
         // Disable.
         self.set_enable(false);
+
+        assert!(!self.is_enabled());
     }
 
     /// Indicates whether the device is enabled or not.

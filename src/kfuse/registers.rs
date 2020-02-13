@@ -1,4 +1,4 @@
-//! Abstractions over the HDCP KFUSE Control register of the Tegra X1.
+//! Abstractions over the HDCP KFUSE Control registers of the Tegra X1.
 //!
 //! See Chapter 27.9 in the Tegra X1 Technical Reference Manual
 //! for details.

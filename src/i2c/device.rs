@@ -204,6 +204,10 @@ impl I2c {
     /// Initializes the I2C device.
     ///
     /// NOTE: This method must be called once before the I2C device is usable.
+    /// Further, it is required to do the respective [`pinmux`] configuration
+    /// before calling this method.
+    ///
+    /// [`pinmux`]: ../pinmux
     pub fn init(&self) {
         let register_base = unsafe { &*self.registers };
 

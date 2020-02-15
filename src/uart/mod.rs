@@ -83,7 +83,7 @@
 
 use core::{
     cell::Cell,
-    fmt::{Write, Error},
+    fmt::{Error, Write},
     marker::Sync,
 };
 
@@ -180,8 +180,13 @@ impl Uart {
 
     /// Initializes the Uart with a given baud rate.
     ///
-    /// This method needs to be called once before a
-    /// Uart can actually send and receive data.
+    /// NOTE: This method needs to be called once before a
+    /// [`Uart`] can actually send and receive data.
+    /// Further, it is required to do the respective [`pinmux`]
+    /// configuration before calling this method.
+    ///
+    /// [`Uart`]: struct.Uart.html
+    /// [`pinmux`]: ../pinmux
     pub fn init(&self, baud_rate: u32) {
         let controller = unsafe { &*self.registers };
 

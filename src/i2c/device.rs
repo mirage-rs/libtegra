@@ -28,6 +28,7 @@ pub enum Error {
 /// NOTE: Instances of this struct should never be created manually.
 /// Refer to the public constants this struct holds, which represent
 /// the controllers 1 through 6.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct I2c {
     /// A reference of the device clock that corresponds to the I2C controller.
     clock: &'static Clock,

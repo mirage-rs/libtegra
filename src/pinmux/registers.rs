@@ -7,8 +7,11 @@ use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
 use crate::memory_map::MISC;
 
+/// Base address for Pinmux registers.
+pub const PINMUX_BASE: u32 = MISC + 0x3000;
+
 /// A pointer to the Pinmux register block that can be accessed by dereferencing it.
-pub const REGISTERS: *const Registers = (MISC + 0x3000) as *const Registers;
+pub const REGISTERS: *const Registers = PINMUX_BASE as *const Registers;
 
 register_bitfields! {
     u32,

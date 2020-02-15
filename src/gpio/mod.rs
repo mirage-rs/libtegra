@@ -10,15 +10,14 @@
 //!
 //! ## Controller Structure
 //!
-//! <img src="https://user-images.githubusercontent.com/38182450/72645430-f2750900-3973-11ea-96f2-dfe0bf9c2b4d.png" height="500px" alt="GPIO Controller">
-//!
 //! The controller is divided into 8 banks. Each bank contains 4 GPIO
 //! ports, which in turn provide 8 available pins, numbered from 0
 //! through 7. GPIO ports a labeled consecutively from A through Z
 //! and then AA through FF. Ports A through E are in bank 0, E through
 //! H in bank 1, and so on.
 //!
-//! In conclusion, approximately 170 GPIOs in total are therefore available.
+//! In conclusion, 256 GPIOs in total are therefore available,
+//! approximately 170 of them being physical pins.
 //! Each of them can be identified uniquely through a port and a pin.
 //!
 //! ## Configuration

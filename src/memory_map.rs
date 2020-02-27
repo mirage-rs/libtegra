@@ -8,11 +8,11 @@ pub mod pcie {
     pub const BASE: u32 = 0x0100_0000;
 
     /// Start address of the PCIe A1 register block.
-    pub const PCIE_A1: u32 = (BASE + 0x000000000);
+    pub const PCIE_A1: u32 = BASE + 0x000000000;
     /// Start address of the PCIe A2 register block.
-    pub const PCIE_A2: u32 = (BASE + 0x001000000);
+    pub const PCIE_A2: u32 = BASE + 0x001000000;
     /// Start address of the PCIe A3 register block.
-    pub const PCIE_A3: u32 = (BASE + 0x1F00_0000);
+    pub const PCIE_A3: u32 = BASE + 0x1F00_0000;
 }
 
 // TODO: IRAM
@@ -28,7 +28,7 @@ pub mod arm {
     /// Start address of the ARM PERIPHBASE register block.
     pub const PERIPHBASE: u32 = BASE;
     /// Start address of the ARM Interrupt Distributor register block.
-    pub const INTERRUPT_DISTRIBUTOR: u32 = (BASE + 0x1000);
+    pub const INTERRUPT_DISTRIBUTOR: u32 = BASE + 0x1000;
 }
 
 /// Start address of the BPMP-Lite CACHE register block.
@@ -82,7 +82,7 @@ pub const NVJPG: u32 = 0x5438_0000;
 pub const DSIB: u32 = 0x5440_0000;
 
 /// Start of the TSEC register block.
-pub const TSEC: u32 = 0x5440_0000;
+pub const TSEC: u32 = 0x5450_0000;
 
 /// Start of the TSEC2 register block.
 pub const TSEC2: u32 = 0x5410_0000;
@@ -129,21 +129,21 @@ pub mod gpio {
     pub const BASE: u32 = 0x6000_D000;
 
     /// Start address of the GPIO 1 register block.
-    pub const GPIO_1: u32 = (BASE + 0x000);
+    pub const GPIO_1: u32 = BASE + 0x000;
     /// Start address of the GPIO 2 register block.
-    pub const GPIO_2: u32 = (BASE + 0x100);
+    pub const GPIO_2: u32 = BASE + 0x100;
     /// Start address of the GPIO 3 register block.
-    pub const GPIO_3: u32 = (BASE + 0x200);
+    pub const GPIO_3: u32 = BASE + 0x200;
     /// Start address of the GPIO 4 register block.
-    pub const GPIO_4: u32 = (BASE + 0x300);
+    pub const GPIO_4: u32 = BASE + 0x300;
     /// Start address of the GPIO 5 register block.
-    pub const GPIO_5: u32 = (BASE + 0x400);
+    pub const GPIO_5: u32 = BASE + 0x400;
     /// Start address of the GPIO 6 register block.
-    pub const GPIO_6: u32 = (BASE + 0x500);
+    pub const GPIO_6: u32 = BASE + 0x500;
     /// Start address of the GPIO 7 register block.
-    pub const GPIO_7: u32 = (BASE + 0x600);
+    pub const GPIO_7: u32 = BASE + 0x600;
     /// Start address of the GPIO 8 register block.
-    pub const GPIO_8: u32 = (BASE + 0x700);
+    pub const GPIO_8: u32 = BASE + 0x700;
 }
 
 /// Start of the Exception Vectors register block.
@@ -161,15 +161,15 @@ pub mod uart {
     pub const BASE: u32 = 0x7000_6000;
 
     /// Start address of the UART A register block.
-    pub const UART_A: u32 = (BASE + 0x000);
+    pub const UART_A: u32 = BASE + 0x000;
     /// Start address of the UART B register block.
-    pub const UART_B: u32 = (BASE + 0x040);
+    pub const UART_B: u32 = BASE + 0x040;
     /// Start address of the UART C register block.
-    pub const UART_C: u32 = (BASE + 0x200);
+    pub const UART_C: u32 = BASE + 0x200;
     /// Start address of the UART D register block.
-    pub const UART_D: u32 = (BASE + 0x300);
+    pub const UART_D: u32 = BASE + 0x300;
     /// Start address of the UART E register block.
-    pub const UART_E: u32 = (BASE + 0x400);
+    pub const UART_E: u32 = BASE + 0x400;
 }
 
 /// Start of the PWM register block.
@@ -181,17 +181,17 @@ pub mod i2c {
     pub const BASE: u32 = 0x7000_C000;
 
     /// Start address of the I2C 1 register block.
-    pub const I2C_1: u32 = (BASE + 0x0000);
+    pub const I2C_1: u32 = BASE + 0x0000;
     /// Start address of the I2C 2 register block.
-    pub const I2C_2: u32 = (BASE + 0x0400);
+    pub const I2C_2: u32 = BASE + 0x0400;
     /// Start address of the I2C 3 register block.
-    pub const I2C_3: u32 = (BASE + 0x0500);
+    pub const I2C_3: u32 = BASE + 0x0500;
     /// Start address of the I2C 4 register block.
-    pub const I2C_4: u32 = (BASE + 0x0700);
+    pub const I2C_4: u32 = BASE + 0x0700;
     /// Start address of the I2C 5 register block.
-    pub const I2C_5: u32 = (BASE + 0x1000);
+    pub const I2C_5: u32 = BASE + 0x1000;
     /// Start address of the I2C 6 register block.
-    pub const I2C_6: u32 = (BASE + 0x1100);
+    pub const I2C_6: u32 = BASE + 0x1100;
 }
 
 /// Start of the RTC register block.

@@ -1,5 +1,6 @@
 #![no_std]
 #![recursion_limit = "256"]
+#![feature(const_fn)]
 #![feature(optimize_attribute)]
 
 #[macro_use]
@@ -19,4 +20,5 @@ pub mod kfuse;
 pub mod pinmux;
 pub mod memory_map;
 pub mod timer;
+pub mod tsec;
 pub mod uart;

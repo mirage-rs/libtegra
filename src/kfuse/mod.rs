@@ -44,6 +44,11 @@ mod registers;
 pub const MAX_WORD_LENGTH: usize = 144;
 
 /// Waits until KFUSE is ready to be used.
+///
+/// NOTE: This function expects the KFUSE [`Clock`] to be up
+/// before calling to it.
+///
+/// [`Clock`]: ../car/struct.Clock.html
 pub fn wait_until_ready() -> Result<(), ()> {
     let kfuse = unsafe { &*REGISTERS };
 
@@ -60,6 +65,11 @@ pub fn wait_until_ready() -> Result<(), ()> {
 }
 
 /// Reads the encrypted HDCP keys from the KFUSE into a buffer.
+///
+/// NOTE: This function expects the KFUSE [`Clock`] to be up
+/// before calling to it.
+///
+/// [`Clock`]: ../car/struct.Clock.html
 #[optimize(size)]
 pub fn read(buffer: &mut [u32]) -> Result<(), ()> {
     let kfuse = unsafe { &*REGISTERS };

@@ -309,9 +309,9 @@ impl Tsec {
         let mut res;
 
         // Configure Falcon and start the CPU.
-        register_base.FALCON_MAILBOX1.set(0);
+        register_base.FALCON_MAILBOX1.set(*arg1);
         register_base.FALCON_MAILBOX0.set(*arg0);
-        register_base.FALCON_MAILBOX0.set(*arg1);
+        //register_base.FALCON_MAILBOX0.set(*arg1);
         register_base.FALCON_BOOTVEC.set(boot_vector);
         register_base.FALCON_CPUCTL.set(2);
 

@@ -104,21 +104,13 @@
 //!     0xF8, 0x2,                      // exit;
 //! ]);
 //!
-//! // The arguments for the Mailbox configuration.
-//! let mut argument0 = 0;
-//! let mut argument1 = 0;
-//!
 //! // Load our Faucon firmware onto the TSEC.
 //! TSEC.load_firmware(&FAUCON.value).unwrap();
 //!
-//! // Boot it up...
+//! // Boot it up!
 //! unsafe {
-//!     TSEC.boot_firmware(0, &mut argument0, &mut argument1).unwrap();
+//!     TSEC.boot_firmware(0).unwrap();
 //! }
-//!
-//! // ...and finally check the Mailbox parameters!
-//! assert_eq!(argument0, 0x0);
-//! assert_eq!(argument1, 0xB0B0B0B0);
 //! ```
 //!
 //! [NVIDIA Falcon]: https://envytools.readthedocs.io/en/latest/hw/falcon/index.html
@@ -299,19 +291,13 @@ impl Tsec {
     /// TSEC can always fail, especially for malformed or misaligned blobs.
     ///
     /// [`Tsec::load_firmware`]: struct.Tsec.html#method.load_firmware
-    pub unsafe fn boot_firmware(
-        &self,
-        boot_vector: u32,
-        arg0: &mut u32,
-        arg1: &mut u32,
-    ) -> Result<(), FalconError> {
+    pub unsafe fn boot_firmware(&self, boot_vector: u32) -> Result<(), FalconError> {
         let register_base = &*REGISTERS;
         let mut res;
 
         // Configure Falcon and start the CPU.
-        register_base.FALCON_MAILBOX1.set(*arg1);
-        register_base.FALCON_MAILBOX0.set(*arg0);
-        //register_base.FALCON_MAILBOX0.set(*arg1);
+        register_base.FALCON_MAILBOX1.set(0);
+        register_base.FALCON_MAILBOX0.set(1);
         register_base.FALCON_BOOTVEC.set(boot_vector);
         register_base.FALCON_CPUCTL.set(2);
 

@@ -317,12 +317,13 @@ pub struct Registers {
     pub APBDEV_PMC_RAMDUMP_CTL_STATUS_0: ReadWrite<u32>,
     pub APBDEV_PMC_UTMIP_SLEEPWALK_P3_0: ReadWrite<u32>,
     pub APBDEV_PMC_DDR_CNTRL_0: ReadWrite<u32>,
+    _reserved7: [ReadWrite<u8>; 0xC8],
     pub APBDEV_PMC_SEC_DISABLE4_0: ReadWrite<u32>,
     pub APBDEV_PMC_SEC_DISABLE5_0: ReadWrite<u32>,
     pub APBDEV_PMC_SEC_DISABLE6_0: ReadWrite<u32>,
     pub APBDEV_PMC_SEC_DISABLE7_0: ReadWrite<u32>,
     pub APBDEV_PMC_SEC_DISABLE8_0: ReadWrite<u32>,
-    _reserved7: [ReadWrite<u8>; 0x3C],
+    _reserved8: [ReadWrite<u8>; 0x3C],
     pub APBDEV_PMC_SCRATCH56_0: ReadWrite<u32>,
     pub APBDEV_PMC_SCRATCH57_0: ReadWrite<u32>,
     pub APBDEV_PMC_SCRATCH58_0: ReadWrite<u32>,
@@ -567,7 +568,7 @@ pub struct Registers {
     pub APBDEV_PMC_SCRATCH297_0: ReadWrite<u32>,
     pub APBDEV_PMC_SCRATCH298_0: ReadWrite<u32>,
     pub APBDEV_PMC_SCRATCH299_0: ReadWrite<u32>,
-    _reserved8: [ReadWrite<u8>; 0xC8],
+    _reserved9: [ReadWrite<u8>; 0xC8],
     pub APBDEV_PMC_SECURE_SCRATCH80_0: ReadWrite<u32>,
     pub APBDEV_PMC_SECURE_SCRATCH81_0: ReadWrite<u32>,
     pub APBDEV_PMC_SECURE_SCRATCH82_0: ReadWrite<u32>,
@@ -610,4 +611,4 @@ pub struct Registers {
     pub APBDEV_PMC_SECURE_SCRATCH119_0: ReadWrite<u32>,
 }
 
-assert_eq_size!(Registers, [u8; 0xA70]);
+assert_eq_size!(Registers, [u8; 0xB38]);

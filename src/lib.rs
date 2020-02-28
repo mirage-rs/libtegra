@@ -3,6 +3,8 @@
 #![feature(const_fn)]
 #![feature(optimize_attribute)]
 
+pub extern crate cortex_a;
+
 #[macro_use]
 extern crate enum_primitive;
 

@@ -20,6 +20,7 @@ pub mod gpio;
 pub mod i2c;
 pub mod kfuse;
 pub mod pinmux;
+pub mod pmc;
 pub mod memory_map;
 pub mod timer;
 pub mod tsec;

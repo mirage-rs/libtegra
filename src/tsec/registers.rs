@@ -9,7 +9,9 @@ pub const REGISTERS: *const Registers = TSEC as *const Registers;
 
 // TODO: Bitfields.
 
-// TODO: Convert this to register_structs! format.
+// TODO: Convert this struct to register_structs! format.
+
+// FIXME: Are really all of them ReadWrite?
 
 /// Representation of the TSEC registers.
 #[allow(non_snake_case)]

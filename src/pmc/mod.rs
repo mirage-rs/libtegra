@@ -1,10 +1,64 @@
+//! Driver for the Tegra X1 Power Management Controller.
+//!
+//! See Chapter 12 in the Tegra X1 Technical Reference Manual
+//! for details.
+//!
+//! # Description
+//!
+//! The Power Management Controller (PMC) block interacts with
+//! an external Power Management Integrated Circuit (PMIC)
+//! through sideband signals. The PMC controls the entry and exit
+//! of the system from different sleep modes. It provides power-gating
+//! controllers for SoC and CPU power partitions, except for the
+//! Maxwell GPU power partition. The PMC also provides deep power down
+//! (DPD) mode control for pads, and scratch storage to save some of
+//! the context during sleep modes (when the CPU and/or SoC power rails
+//! are off).
+//!
+//! Sleep (LP1) and Deep Sleep (LP0) require specific logic to maintain
+//! some states and control the power domains, including signaling to
+//! the external PMIC to provide power to the main logic in Tegra X1
+//! devices. All this logic is centralized in the PMC block.
+//!
+//! ## Power Gating/Ungating
+//!
+//! This module exposes an implementation of the power-gating logic for
+//! certain [`Partition`]s through the [`powergate_partition`] function:
+//!
+//! ```no_run
+//! use libtegra::{car::Clock, pmc};
+//!
+//! /// Attempts to bring up all the Serial Output Resources.
+//! fn bring_up_sors() -> Result<(), ()> {
+//!     // Power-ungate SOR.
+//!     pmc::powergate_partition(pmc::Partition::SOR, false)?;
+//!
+//!     // Bring up clocks.
+//!     Clock::SOR_SAFE.enable();
+//!     Clock::SOR0.enable();
+//!     Clock::SOR1.enable();
+//!     Clock::DPAUX.enable();
+//!     Clock::DPAUX1.enable();
+//!     Clock::MIPI_CAL.enable();
+//!     Clock::CSI.enable();
+//!     Clock::DSI.enable();
+//!     Clock::DSIB.enable();
+//!
+//!     // Power-gate SOR.
+//!     pmc::powergate_partition(pmc::Partition::SOR, true)?;
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! [`Partition`]: enum.Partition.html
+//! [`powergate_partition`]: fn.powergate_partition.html
+
 use crate::timer::usleep;
 
 pub use registers::*;
 
 mod registers;
-
-// TODO: Docs
 
 enum_from_primitive! {
     /// Enumeration over power-gated PMC partitions.

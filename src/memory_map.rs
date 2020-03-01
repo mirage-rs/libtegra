@@ -197,6 +197,21 @@ pub mod i2c {
     pub const I2C_6: u32 = BASE + 0x1100;
 }
 
+/// Memory mappings of the SPI Controller.
+pub mod spi {
+    /// Base address of the SPI registers.
+    pub const BASE: u32 = 0x7000_D400;
+
+    /// Start address of the SPI 2B-1 register block.
+    pub const SPI_1: u32 = BASE + 0x000;
+    /// Start address of the SPI 2B-2 register block.
+    pub const SPI_2: u32 = BASE + 0x200;
+    /// Start address of the SPI 2B-3 register block.
+    pub const SPI_3: u32 = BASE + 0x400;
+    /// Start address of the SPI 2B-4 register block.
+    pub const SPI_4: u32 = BASE + 0x600;
+}
+
 /// Start of the RTC register block.
 pub const RTC: u32 = 0x7000_E000;
 

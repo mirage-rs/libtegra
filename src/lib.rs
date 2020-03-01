@@ -15,6 +15,7 @@ extern crate register;
 #[macro_use]
 extern crate static_assertions;
 
+pub mod apb;
 pub mod car;
 pub mod gpio;
 pub mod i2c;

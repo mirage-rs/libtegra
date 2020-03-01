@@ -152,6 +152,9 @@ pub const EXCEPTION_VECTORS: u32 = 0x6000_F000;
 /// Start of the IPATCH register block.
 pub const IPATCH: u32 = 0x6001_DC00;
 
+/// Start of the APB register block.
+pub const APB: u32 = 0x7000_0000;
+
 /// Start of the MISC register block.
 pub const MISC: u32 = 0x7000_0000;
 

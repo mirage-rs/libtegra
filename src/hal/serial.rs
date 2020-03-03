@@ -1,22 +1,15 @@
-use embedded_hal::serial;
+use embedded_hal::blocking::serial::Write;
 use crate::uart::Uart;
 
-impl serial::Read<u8> for Uart {
-    type Error = ();
-    fn read(&mut self) -> Result<u8, nb::Error<Self::Error>> {
-        Ok(self.read_byte())
-    }
-}
-
-impl serial::Write<u8> for Uart {
+impl Write<u8> for Uart {
     type Error = ();
 
-    fn write(&mut self, byte: u8) -> Result<(), nb::Error<Self::Error>> {
-        self.write_byte(byte);
+    fn bwrite_all(&mut self, bytes: &[u8]) -> Result<(), Self::Error> {
+        self.write(bytes);
         Ok(())
     }
 
-    fn flush(&mut self) -> Result<(), nb::Error<Self::Error>> {
+    fn bflush(&mut self) -> Result<(), Self::Error> {
         Uart::flush(self);
         Ok(())
     }

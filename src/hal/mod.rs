@@ -1,4 +1,5 @@
 pub mod delay;
-pub mod serial;
+pub mod gpio;
 pub mod i2c;
+pub mod serial;
 pub mod spi;

@@ -24,3 +24,4 @@ default-features = false
 [features]
 default = ["hal"]
 hal = ["embedded-hal"]
+hal-unproven = ["embedded-hal", "embedded-hal/unproven"]

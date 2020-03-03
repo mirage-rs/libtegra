@@ -20,14 +20,16 @@ pub mod bpmp;
 pub mod car;
 pub mod flow;
 pub mod gpio;
+pub mod hal;
 pub mod i2c;
 pub mod kfuse;
 pub mod mc;
+pub mod memory_map;
 pub mod pinmux;
 pub mod pmc;
 pub mod pwm;
 pub mod spi;
-pub mod memory_map;
 pub mod timer;
 pub mod tsec;
 pub mod uart;
+

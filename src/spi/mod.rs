@@ -174,37 +174,24 @@ impl Spi {
     pub fn init(&self) {
         let controller = unsafe { &*self.registers };
 
-        // TODO: Use the register bitflags instead of toggling bits manually.
-
-        let mut command1 = controller.SPI_COMMAND_0.get();
-
-        // Software drives chip-select, set value to high.
-        command1 |= (1 << 21) | (1 << 20);
-
-        // Enable 8-bit transfers, unpacked mode and most significant bit first.
-        command1 &= !((31 << 0) | (1 << 5));
-        command1 |= 7 << 0;
-
-        // Initialize the controller.
-        controller.SPI_COMMAND_0.set(command1);
+        // Set chip-select value to high, 8-bit transfers,
+        // unpacked mode and most significant bit first.
+        controller.SPI_COMMAND_0.modify(
+            SPI_COMMAND_0::CS_SW_HW::SET
+            + SPI_COMMAND_0::CS_SW_VAL::SET
+            + SPI_COMMAND_0::PACKED::CLEAR
+            + SPI_COMMAND_0::BIT_LEN.val(7)
+        );
 
         // Flush the FIFOs.
         self.flush_fifos();
 
-        // Force chip select 0 for now.
+        // Enforce chip-select line 0 for now and drive chip-select low.
         let cs = 0;
-
-        command1 = controller.SPI_COMMAND_0.get();
-
-        // Select appropriate chip-select line.
-        command1 &= !(3 << 26);
-        command1 |= cs << 26;
-
-        // Drive chip-select low.
-        command1 &= !(1 << 20);
-
-        // Start the controller.
-        controller.SPI_COMMAND_0.set(command1);
+        controller.SPI_COMMAND_0.modify(
+            SPI_COMMAND_0::CS_SEL.val(cs)
+            + SPI_COMMAND_0::CS_SW_VAL::CLEAR
+        );
     }
 
     /// Flushes the underlying FIFOs of the UART.

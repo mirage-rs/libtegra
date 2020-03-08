@@ -155,6 +155,77 @@ pub const IPATCH: u32 = 0x6001_DC00;
 /// Start of the APB register block.
 pub const APB: u32 = 0x7000_0000;
 
+/// Memory mappings of the APB DMA Controller.
+pub mod apb_dma {
+    /// Base address of the APB DMA registers.
+    pub const BASE: u32 = 0x6002_0000;
+
+    /// Start address of the APB DMA CH0 register block.
+    pub const CH0: u32 = BASE + 0x1000;
+    /// Start address of the APB DMA CH1 register block.
+    pub const CH1: u32 = BASE + 0x1040;
+    /// Start address of the APB DMA CH2 register block.
+    pub const CH2: u32 = BASE + 0x1080;
+    /// Start address of the APB DMA CH3 register block.
+    pub const CH3: u32 = BASE + 0x10C0;
+    /// Start address of the APB DMA CH4 register block.
+    pub const CH4: u32 = BASE + 0x1100;
+    /// Start address of the APB DMA CH5 register block.
+    pub const CH5: u32 = BASE + 0x1140;
+    /// Start address of the APB DMA CH6 register block.
+    pub const CH6: u32 = BASE + 0x1180;
+    /// Start address of the APB DMA CH7 register block.
+    pub const CH7: u32 = BASE + 0x11C0;
+    /// Start address of the APB DMA CH8 register block.
+    pub const CH8: u32 = BASE + 0x1200;
+    /// Start address of the APB DMA CH9 register block.
+    pub const CH9: u32 = BASE + 0x1240;
+    /// Start address of the APB DMA CH10 register block.
+    pub const CH10: u32 = BASE + 0x1280;
+    /// Start address of the APB DMA CH11 register block.
+    pub const CH11: u32 = BASE + 0x12C0;
+    /// Start address of the APB DMA CH12 register block.
+    pub const CH12: u32 = BASE + 0x1300;
+    /// Start address of the APB DMA CH13 register block.
+    pub const CH13: u32 = BASE + 0x1340;
+    /// Start address of the APB DMA CH14 register block.
+    pub const CH14: u32 = BASE + 0x1380;
+    /// Start address of the APB DMA CH15 register block.
+    pub const CH15: u32 = BASE + 0x13C0;
+    /// Start address of the APB DMA CH16 register block.
+    pub const CH16: u32 = BASE + 0x1400;
+    /// Start address of the APB DMA CH17 register block.
+    pub const CH17: u32 = BASE + 0x1440;
+    /// Start address of the APB DMA CH18 register block.
+    pub const CH18: u32 = BASE + 0x1480;
+    /// Start address of the APB DMA CH19 register block.
+    pub const CH19: u32 = BASE + 0x14C0;
+    /// Start address of the APB DMA CH20 register block.
+    pub const CH20: u32 = BASE + 0x1500;
+    /// Start address of the APB DMA CH21 register block.
+    pub const CH21: u32 = BASE + 0x1540;
+    /// Start address of the APB DMA CH22 register block.
+    pub const CH22: u32 = BASE + 0x1580;
+    /// Start address of the APB DMA CH23 register block.
+    pub const CH23: u32 = BASE + 0x15C0;
+    /// Start address of the APB DMA CH24 register block.
+    pub const CH24: u32 = BASE + 0x1600;
+    /// Start address of the APB DMA CH25 register block.
+    pub const CH25: u32 = BASE + 0x1640;
+    /// Start address of the APB DMA CH26 register block.
+    pub const CH26: u32 = BASE + 0x1680;
+    /// Start address of the APB DMA CH27 register block.
+    pub const CH27: u32 = BASE + 0x16C0;
+    /// Start address of the APB DMA CH28 register block.
+    pub const CH28: u32 = BASE + 0x1700;
+    /// Start address of the APB DMA CH29 register block.
+    pub const CH29: u32 = BASE + 0x1740;
+    /// Start address of the APB DMA CH30 register block.
+    pub const CH30: u32 = BASE + 0x1780;
+    /// Start address of the APB DMA CH31 register block.
+    pub const CH31: u32 = BASE + 0x17C0;
+}
+
 /// Start of the MISC register block.
 pub const MISC: u32 = 0x7000_0000;
 

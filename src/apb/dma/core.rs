@@ -5,6 +5,11 @@
 
 use register::{mmio::*, register_bitfields, register_structs};
 
+use crate::memory_map::apb_dma;
+
+/// A pointer to the APB DMA register block that can be accessed by dereferencing it.
+pub const REGISTERS: *const Registers = apb_dma::BASE as *const Registers;
+
 register_bitfields! {
     u32,
 

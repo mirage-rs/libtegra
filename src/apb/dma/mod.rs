@@ -79,6 +79,12 @@ impl Channel {
     }
 
     /// Indicates whether the channel is currently busy doing transfers.
+    ///
+    /// NOTE: Channels need to be acquired before being able to transfer
+    /// data. If this function returns `true`, [`Channel::is_acquired`]
+    /// is guaranteed to return `true` as well.
+    ///
+    /// [`Channel::is_acquired`]: struct.Channel.html#method.is_acquired
     pub fn is_busy(&self) -> bool {
         let register_base = unsafe { &*self.registers };
 
@@ -92,11 +98,23 @@ impl Channel {
     }
 
     /// Indicates whether the channel is in idle state and ready for transfers.
+    ///
+    /// This is the counterpart to [`Channel::is_busy`].
+    ///
+    /// [`Channel::is_busy`]: struct.Channel.html#method.is_busy
     pub fn is_idle(&self) -> bool {
         !self.is_busy()
     }
 
     /// Indicates whether the channel is currently claimed.
+    ///
+    /// NOTE: Channels need to be acquired before being able to
+    /// transfer data. Even though this function returns `true`,
+    /// that doesn't necessarily mean that data is actually being
+    /// processed at the moment. See [`Channel::is_ready`] for
+    /// further details.
+    ///
+    /// [`Channel::is_ready`]: struct.Channel.html#method.is_ready
     pub fn is_acquired(&self) -> bool {
         self.claimed.get()
     }

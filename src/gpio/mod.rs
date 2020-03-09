@@ -264,6 +264,37 @@ impl Gpio {
         (register.get() >> self.pin as u32) & 1
     }
 
+    /// Reads a GPIO register and returns the enum representation of the result.
+    #[inline]
+    fn read_gpio<T>(&self, register: &ReadWrite<u32>) -> T
+    where
+        T: FromPrimitive,
+    {
+        // Read the flag and wrap it into the corresponding enum member.
+        T::from_u32(self.read_flag(register)).unwrap()
+    }
+
+    /// Writes to a GPIO register and respectively toggles or clears the bit.
+    #[inline]
+    fn write_gpio(&self, register: &ReadWrite<u32>, set_bit: bool) {
+        // Read the value to be modified and the mask to be used.
+        let mut value = register.get();
+        let mask = self.get_mask();
+
+        // Toggle the bit appropriately.
+        if set_bit {
+            value |= mask;
+        } else {
+            value &= !mask;
+        }
+
+        // Write the new value to the register.
+        register.set(value);
+
+        // Dummy read.
+        register.get();
+    }
+
     /// Configures a GPIO with a given configuration.
     pub fn config(&self, config: Config) {
         self.set_mode(Mode::Gpio);
@@ -290,8 +321,8 @@ impl Gpio {
         // Figure out the register to read from.
         let config_reg = &controller.banks[self.get_bank()].GPIO_CONFIG[self.get_port()];
 
-        // Read the flag and wrap it into the corresponding enum member.
-        Mode::from_u32(self.read_flag(config_reg)).unwrap()
+        // Read the register and return the result.
+        self.read_gpio::<Mode>(config_reg)
     }
 
     /// Sets the pin to a given GPIO mode.
@@ -301,25 +332,8 @@ impl Gpio {
         // Figure out the register to write to.
         let config_reg = &controller.banks[self.get_bank()].GPIO_CONFIG[self.get_port()];
 
-        // Read the value to be modified and the mask to be used.
-        let mut value = config_reg.get();
-        let mask = self.get_mask();
-
-        // Set or clear the bit, as appropriate.
-        match mode {
-            Mode::Sfio => {
-                value &= !mask;
-            }
-            Mode::Gpio => {
-                value |= mask;
-            }
-        }
-
-        // Write the new value to the register.
-        config_reg.set(value);
-
-        // Dummy read.
-        config_reg.get();
+        // Update the register.
+        self.write_gpio(config_reg, mode == Mode::Gpio);
     }
 
     /// Reads the GPIO direction the pin is currently set to.
@@ -329,8 +343,8 @@ impl Gpio {
         // Figure out the register to read from.
         let direction_reg = &controller.banks[self.get_bank()].GPIO_OUTPUT_ENABLE[self.get_port()];
 
-        // Read the flag and wrap it into the corresponding enum member.
-        Direction::from_u32(self.read_flag(direction_reg)).unwrap()
+        // Read the register and return the result.
+        self.read_gpio::<Direction>(direction_reg)
     }
 
     /// Sets the pin to a given GPIO direction.
@@ -340,25 +354,8 @@ impl Gpio {
         // Figure out the register to write to.
         let direction_reg = &controller.banks[self.get_bank()].GPIO_OUTPUT_ENABLE[self.get_port()];
 
-        // Read the value to be modified and the mask to be used.
-        let mut value = direction_reg.get();
-        let mask = self.get_mask();
-
-        // Set or clear the bit, as appropriate.
-        match direction {
-            Direction::Input => {
-                value &= !mask;
-            }
-            Direction::Output => {
-                value |= mask;
-            }
-        }
-
-        // Write the new value to the register.
-        direction_reg.set(value);
-
-        // Dummy read.
-        direction_reg.get();
+        // Update the register.
+        self.write_gpio(direction_reg, direction == Direction::Output);
     }
 
     /// Reads the GPIO level the pin is currently set to.
@@ -368,8 +365,8 @@ impl Gpio {
         // Figure out the register to read from.
         let in_reg = &controller.banks[self.get_bank()].GPIO_IN[self.get_port()];
 
-        // Read the flag and wrap it into the corresponding enum member.
-        Level::from_u32(self.read_flag(in_reg)).unwrap()
+        // Read the register and return the result.
+        self.read_gpio::<Level>(in_reg)
     }
 
     /// Writes the given GPIO level to the pin.
@@ -379,25 +376,8 @@ impl Gpio {
         // Figure out the register to write to.
         let out_reg = &controller.banks[self.get_bank()].GPIO_OUT[self.get_port()];
 
-        // Read the value to be modified and the mask to be used.
-        let mut value = out_reg.get();
-        let mask = self.get_mask();
-
-        // Set or clear the bit, as appropriate.
-        match level {
-            Level::Low => {
-                value &= !mask;
-            }
-            Level::High => {
-                value |= mask;
-            }
-        }
-
-        // Write the new value to the register.
-        out_reg.set(value);
-
-        // Dummy read.
-        out_reg.get();
+        // Update the register.
+        self.write_gpio(out_reg, level == Level::High);
     }
 
     /// Whether the pin is currently set to high.
@@ -428,22 +408,8 @@ impl Gpio {
         // Figure out the register to write to.
         let int_enb_reg = &controller.banks[self.get_bank()].GPIO_INT_ENABLE[self.get_port()];
 
-        // Read the value to be modified and the mask to be used.
-        let mut value = int_enb_reg.get();
-        let mask = self.get_mask();
-
-        // Set or clear the bit, as appropriate.
-        if enable {
-            value |= mask;
-        } else {
-            value &= !mask;
-        }
-
-        // Write the new value to the register.
-        int_enb_reg.set(value);
-
-        // Dummy read.
-        int_enb_reg.get();
+        // Update the register.
+        self.write_gpio(int_enb_reg, enable);
     }
 
     /// Enables interrupts for the GPIO.
@@ -465,18 +431,8 @@ impl Gpio {
         // Figure out the register to write to.
         let int_clr_reg = &controller.banks[self.get_bank()].GPIO_INT_CLEAR[self.get_port()];
 
-        // Read the value to be modified and the mask to be used.
-        let mut value = int_clr_reg.get();
-        let mask = self.get_mask();
-
-        // Set the bit.
-        value |= mask;
-
-        // Write the new value to the register.
-        int_clr_reg.set(value);
-
-        // Dummy read.
-        int_clr_reg.get();
+        // Update the register.
+        self.write_gpio(int_clr_reg, true);
     }
 
     /// Raises a given interrupt on the GPIO.

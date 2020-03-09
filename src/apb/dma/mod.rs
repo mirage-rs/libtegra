@@ -45,6 +45,10 @@ impl Channel {
     ///
     /// [`Controller`]:
     pub(super) fn acquire(&self) {
+        if self.claimed.get() {
+            panic!("Channel is already acquired!");
+        }
+
         self.claimed.set(true);
     }
 

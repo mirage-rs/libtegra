@@ -223,3 +223,5 @@ register_structs! {
         (0x3C => @END),
     }
 }
+
+assert_eq_size!(Registers, [u8; 0x3C]);

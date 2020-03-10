@@ -101,3 +101,5 @@ register_structs! {
         (0x40 => @END),
     }
 }
+
+assert_eq_size!(Registers, [u8; 0x40]);

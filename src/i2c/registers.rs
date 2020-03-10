@@ -935,3 +935,5 @@ register_structs! {
         (0xA4 => @END),
     }
 }
+
+assert_eq_size!(Registers, [u8; 0xA4]);

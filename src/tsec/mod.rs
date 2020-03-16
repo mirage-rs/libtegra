@@ -178,6 +178,7 @@ pub enum FalconError {
 }
 
 /// Representation of the Tegra Security Co-Processor.
+#[derive(Debug)]
 pub struct Tsec;
 
 impl Tsec {

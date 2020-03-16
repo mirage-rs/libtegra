@@ -11,6 +11,142 @@ pub use self::core::*;
 mod channel;
 mod core;
 
+/// Representation of the AMBA Peripheral Bus DMA Controller.
+///
+/// The controller manages 32 DMA [`Channel`]s, which are used
+/// to transfer data over DMA. Various bus protocols support a
+/// DMA mode for data transfers, which can be implemented by
+/// interfacing with this device.
+///
+/// [`Channel`]: struct.Channel.html
+#[derive(Debug)]
+pub struct Controller {
+    /// An array that tracks all 32 DMA [`Channel`]s the controller can access.
+    ///
+    /// [`Channel`]: struct.Channel.html
+    channels: [Channel; 32],
+}
+
+impl Controller {
+    /// Creates a new instance of the APB DMA Controller.
+    ///
+    /// NOTE: Please refrain from calling this method multiple times.
+    /// It is advised to create a single, global instance
+    /// of the [`Controller`] and stick to it.
+    ///
+    /// [`Controller`]: struct.Controller.html
+    pub const fn new() -> Self {
+        Controller {
+            channels: [
+                Channel::CH0,
+                Channel::CH1,
+                Channel::CH2,
+                Channel::CH3,
+                Channel::CH4,
+                Channel::CH5,
+                Channel::CH6,
+                Channel::CH7,
+                Channel::CH8,
+                Channel::CH9,
+                Channel::CH10,
+                Channel::CH11,
+                Channel::CH12,
+                Channel::CH13,
+                Channel::CH14,
+                Channel::CH15,
+                Channel::CH16,
+                Channel::CH17,
+                Channel::CH18,
+                Channel::CH19,
+                Channel::CH20,
+                Channel::CH21,
+                Channel::CH22,
+                Channel::CH23,
+                Channel::CH24,
+                Channel::CH25,
+                Channel::CH26,
+                Channel::CH27,
+                Channel::CH28,
+                Channel::CH29,
+                Channel::CH30,
+                Channel::CH31,
+            ],
+        }
+    }
+
+    /// Tries to find a free [`Channel`].
+    ///
+    /// This method iterates over all 32 DMA [`Channel`]s
+    /// and returns the first one that is not acquired.
+    ///
+    /// If no channels are free, this method returns `None`.
+    ///
+    /// [`Channel`]: struct.Channel.html
+    fn find_free_channel(&self) -> Option<&Channel> {
+        for channel in self.channels.iter() {
+            if !channel.is_acquired() {
+                return Some(channel);
+            }
+        }
+
+        None
+    }
+
+    /// Reserves a [`Channel`] for use and passes its reference through the supplied closure.
+    ///
+    /// This method gives users the possibility to correctly acquire and release
+    /// channels respectively, without having to worry about unwanted side effects,
+    /// such as race conditions. If a specific channel is desired, it can be passed
+    /// directly to this method, otherwise an unclaimed channel will be randomly
+    /// picked.
+    ///
+    /// The supplied closure takes the [`Channel`] as argument and is expected to
+    /// return a `Result`, which is forwarded to the direct return value of this
+    /// method.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use libtegra::apb;
+    ///
+    /// /// The global instance of the APB DMA Controller.
+    /// const APB_DMA_CONTROLLER: apb::dma::Controller = apb::dma::Controller::new();
+    ///
+    /// // Do something with DMA Channel 0...
+    ///
+    /// APB_DMA_CONTROLLER.with_channel(Some(apb::dma::Channel::CH0), |channel| {
+    ///     // Within this context, we exclusively own Channel 0, which can
+    ///     // be accessed through `channel` of type `&apb::dma::Channel`.
+    ///
+    ///     // Do something with channel...
+    ///
+    ///     Ok(())
+    /// })
+    /// .unwrap();
+    ///
+    /// // DMA Channel 0 was released, it can be re-used now.
+    /// ```
+    ///
+    /// [`Channel`]: struct.Channel.html
+    pub fn with_channel<C>(&self, channel: Option<Channel>, exec: C) -> Result<(), ()>
+    where
+        C: FnOnce(&Channel) -> Result<(), ()>,
+    {
+        let exec_channel = if let Some(ref ch) = channel {
+            ch
+        } else {
+            self.find_free_channel()
+                .expect("No free DMA Channel available!")
+        };
+
+        exec_channel.acquire();
+        exec(exec_channel)?;
+        exec_channel.release();
+
+        Ok(())
+    }
+}
+
 /// Representation of an APB DMA Channel.
 ///
 /// Channels are used for data transfers over DMA by the DMA
@@ -21,7 +157,8 @@ mod core;
 /// Refer to the public constants this struct holds, which represent
 /// the channels 0 through 31.
 ///
-/// [`Controller`]:
+/// [`Controller`]: struct.Controller.html
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Channel {
     /// A pointer to the [`Register`] base of this channel.
     ///
@@ -239,10 +376,10 @@ impl Channel {
     ///
     /// NOTE: To be used by the [`Controller`] only.
     ///
-    /// [`Controller`]:
+    /// [`Controller`]: struct.Controller.html
     pub(super) fn acquire(&self) {
-        if self.claimed.get() {
-            panic!("Channel is already acquired!");
+        while self.claimed.get() {
+            // Wait until the channel is free.
         }
 
         self.claimed.set(true);
@@ -252,7 +389,7 @@ impl Channel {
     ///
     /// NOTE: To be used by the [`Controller`] only.
     ///
-    /// [`Controller`]:
+    /// [`Controller`]: struct.Controller.html
     pub(super) fn release(&self) {
         self.claimed.set(false);
     }
@@ -313,5 +450,123 @@ impl Channel {
     /// [`Channel::is_ready`]: struct.Channel.html#method.is_ready
     pub fn is_acquired(&self) -> bool {
         self.claimed.get()
+    }
+
+    /// Prepares for data to be queried over the channel.
+    ///
+    /// This function doesn't actually trigger transfers, it only
+    /// prepares the data output buffer and configures the channel. The
+    /// actual transfer process can be initiated through
+    /// [`Channel::start`] and terminated through [`Channel::finish`].
+    /// For transfer status details, see [`Channel::is_busy`].
+    ///
+    /// NOTE: This method has a strong low-level approach and
+    /// shouldn't be called directly.
+    ///
+    /// [`Channel::start`]: struct.Channel.html#method.start
+    /// [`Channel::finish`]: struct.Channel.html#method.finish
+    /// [`Channel::is_busy`]: struct.Channel.html#method.is_busy
+    pub(super) fn query(
+        &self,
+        slave: u32,
+        ahb_address: u32,
+        apb_address: u32,
+        size: u32,
+    ) -> Result<(), ()> {
+        let register_base = unsafe { &*self.registers };
+
+        if size == 0 {
+            return Err(());
+        }
+
+        // Program AHB and APB Starting addresses.
+        register_base.APBDMACHAN_CHANNEL_AHB_PTR_0.set(ahb_address);
+        register_base.APBDMACHAN_CHANNEL_APB_PTR_0.set(apb_address);
+
+        // Set AHB 1 word burst, and no address wrapping.
+        register_base.APBDMACHAN_CHANNEL_AHB_SEQ_0.modify(
+            APBDMACHAN_CHANNEL_AHB_SEQ_0::AHB_BURST::DmaBurst1Words
+            + APBDMACHAN_CHANNEL_AHB_SEQ_0::AHB_ADDR_WRAP::NoWrap
+        );
+
+        // Set APB bus width, and address wrap for each word.
+        register_base.APBDMACHAN_CHANNEL_APB_SEQ_0.modify(
+            APBDMACHAN_CHANNEL_APB_SEQ_0::APB_BUS_WIDTH::BusWidth32
+            + APBDMACHAN_CHANNEL_APB_SEQ_0::APB_ADDR_WRAP::WrapOn1Words
+        );
+
+        // Set the amount of words to be transferred.
+        register_base.APBDMACHAN_CHANNEL_WCOUNT_0.set((size - 1) as u32);
+
+        // Set transfer mode to one block at a time (64kB),
+        // set DMA direction for AHB to read,
+        // and set up flow control.
+        register_base.APBDMACHAN_CHANNEL_CSR_0.modify(
+            APBDMACHAN_CHANNEL_CSR_0::ONCE::SingleBlock
+            + APBDMACHAN_CHANNEL_CSR_0::DIR::AhbRead
+            + APBDMACHAN_CHANNEL_CSR_0::REQ_SEL.val(slave)
+            + APBDMACHAN_CHANNEL_CSR_0::FLOW::SET
+        );
+
+        Ok(())
+    }
+
+    /// Prepares data to be written over the channel.
+    ///
+    /// This method doesn't actually trigger transfers, it only
+    /// loads in the data and configures the channel. The
+    /// actual transfer process can be initiated through
+    /// [`Channel::start`] and terminated through [`Channel::finish`].
+    /// For transfer status details, see [`Channel::is_busy`].
+    ///
+    /// NOTE: This method has a strong low-level approach and
+    /// shouldn't be called directly.
+    ///
+    /// [`Channel::start`]: struct.Channel.html#method.start
+    /// [`Channel::finish`]: struct.Channel.html#method.finish
+    /// [`Channel::is_busy`]: struct.Channel.html#method.is_busy
+    pub(super) fn write(
+        &self,
+        slave: u32,
+        ahb_address: u32,
+        apb_address: u32,
+        size: u32,
+    ) -> Result<(), ()> {
+        let register_base = unsafe { &*self.registers };
+
+        if size == 0 {
+            return Err(());
+        }
+
+        // Program AHB and APB Starting addresses.
+        register_base.APBDMACHAN_CHANNEL_AHB_PTR_0.set(ahb_address);
+        register_base.APBDMACHAN_CHANNEL_APB_PTR_0.set(apb_address);
+
+        // Set AHB 1 word burst, and no address wrapping.
+        register_base.APBDMACHAN_CHANNEL_AHB_SEQ_0.modify(
+            APBDMACHAN_CHANNEL_AHB_SEQ_0::AHB_BURST::DmaBurst1Words
+            + APBDMACHAN_CHANNEL_AHB_SEQ_0::AHB_ADDR_WRAP::NoWrap
+        );
+
+        // Set APB bus width, and address wrap for each word.
+        register_base.APBDMACHAN_CHANNEL_APB_SEQ_0.modify(
+            APBDMACHAN_CHANNEL_APB_SEQ_0::APB_BUS_WIDTH::BusWidth32
+            + APBDMACHAN_CHANNEL_APB_SEQ_0::APB_ADDR_WRAP::WrapOn1Words
+        );
+
+        // Set the amount of words to be transferred.
+        register_base.APBDMACHAN_CHANNEL_WCOUNT_0.set((size - 1) as u32);
+
+        // Set transfer mode to one block at a time (64kB),
+        // set DMA direction for AHB to read,
+        // and set up flow control.
+        register_base.APBDMACHAN_CHANNEL_CSR_0.modify(
+            APBDMACHAN_CHANNEL_CSR_0::ONCE::SingleBlock
+            + APBDMACHAN_CHANNEL_CSR_0::DIR::AhbWrite
+            + APBDMACHAN_CHANNEL_CSR_0::REQ_SEL.val(slave)
+            + APBDMACHAN_CHANNEL_CSR_0::FLOW::SET
+        );
+
+        Ok(())
     }
 }

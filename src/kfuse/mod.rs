@@ -66,9 +66,6 @@ pub fn wait_until_ready() -> Result<(), ()> {
 
 /// Reads the encrypted HDCP keys from the KFUSE into a buffer.
 ///
-/// NOTE: This function expects the KFUSE [`Clock`] to be up
-/// before calling to it.
-///
 /// [`Clock`]: ../car/struct.Clock.html
 #[optimize(size)]
 pub fn read(buffer: &mut [u32]) -> Result<(), ()> {

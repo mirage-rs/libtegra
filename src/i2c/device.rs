@@ -5,7 +5,7 @@
 
 use core::convert::TryInto;
 
-use crate::{car::Clock, timer::usleep};
+use crate::{car::Clock, timer};
 
 use super::registers::*;
 
@@ -21,6 +21,8 @@ pub enum Error {
     /// An I/O error that occurred during communication
     /// over I²C. Indicated through the MMIOs.
     IoError,
+    /// The I²C bus encountered a timeout during a data transfer.
+    Timeout,
 }
 
 /// Representation of an I2C device.
@@ -88,7 +90,7 @@ impl I2c {
 
         // Wait a bit for master configuration to be loaded.
         for _ in 0..20 {
-            usleep(1);
+            timer::usleep(1);
 
             if register_base.I2C_I2C_CONFIG_LOAD_0.get() & 1 == 0 {
                 break;
@@ -134,8 +136,12 @@ impl I2c {
             .I2C_I2C_CNFG_0
             .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
 
+        let timeout = timer::get_milliseconds() + 1500;
         while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
-            // Wait until not busy.
+            // Wait until not busy or facing a timeout.
+            if timer::get_milliseconds() > timeout {
+                return Err(Error::Timeout);
+            }
         }
 
         // Check whether the transaction was successful and determine the appropriate Result.
@@ -174,8 +180,12 @@ impl I2c {
             .I2C_I2C_CNFG_0
             .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
 
+        let timeout = timer::get_milliseconds() + 1500;
         while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
-            // Wait until not busy.
+            // Wait until not busy or facing a timeout.
+            if timer::get_milliseconds() > timeout {
+                return Err(Error::Timeout);
+            }
         }
 
         // Check whether the transaction was successful and determine the appropriate Result.
@@ -223,7 +233,7 @@ impl I2c {
 
         // Wait a while until BUS_CLEAR_DONE is set.
         for _ in 0..10 {
-            usleep(20_000);
+            timer::usleep(20_000);
 
             if (register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get() & 0x800) != 0 {
                 break;

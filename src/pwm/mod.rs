@@ -10,6 +10,6 @@
 //! a programmable frequency divider and a programmable pulse
 //! width generator.
 
-use registers::*;
+pub use registers::*;
 
 mod registers;

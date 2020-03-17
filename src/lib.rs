@@ -17,6 +17,7 @@ extern crate static_assertions;
 
 pub mod apb;
 pub mod car;
+pub mod flow;
 pub mod gpio;
 pub mod i2c;
 pub mod kfuse;

@@ -23,7 +23,8 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: doc
-          args: -Z unstable-options --enable-index-page
+        env:
+          RUSTDOCFLAGS: -Z unstable-options --enable-index-page
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@2.0.3

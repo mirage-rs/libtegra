@@ -23,6 +23,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: doc
+          args: -Z unstable-options --enable-index-page
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@2.0.3
@@ -30,5 +31,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BASE_BRANCH: master
           BRANCH: gh-pages
-          FOLDER: deploy/documentation
-          BUILD_SCRIPT: mkdir -p deploy/documentation && mv target/doc deploy/documentation/master
+          FOLDER: target/doc

@@ -1,0 +1,30 @@
+name: Rust
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+        name: Checkout
+        with:
+          submodules: recursive
+
+      - name: Generate documentation
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@2.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # FIXME: This is a bad practice and pretty dangerous, waiting for Github to fix pages deployment with GITHUB_TOKEN.
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BASE_BRANCH: master
+          BRANCH: gh-pages
+          FOLDER: deploy/documentation
+          BUILD_SCRIPT: mkdir -p deploy/documentation && mv target/doc deploy/documentation/master

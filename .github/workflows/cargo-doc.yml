@@ -1,4 +1,4 @@
-name: Rust
+name: Cargo Doc
 on:
   push:
     branches:
@@ -12,6 +12,12 @@ jobs:
         name: Checkout
         with:
           submodules: recursive
+
+      - name: Install latest nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
 
       - name: Generate documentation
         uses: actions-rs/cargo@v1

@@ -68,10 +68,10 @@
 //! }
 //! ```
 //!
-//! [Flow Controller]: ./flow
+//! [Flow Controller]: ../flow
 //! [`msleep`]: fn.msleep.html
 //! [`usleep`]: fn.usleep.html
-//! [RTC]: ./timer
+//! [RTC]: ../timer
 //! [`halt`]: fn.halt.html
 
 use core::cmp::min;

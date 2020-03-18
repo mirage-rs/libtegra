@@ -16,6 +16,7 @@ extern crate register;
 extern crate static_assertions;
 
 pub mod apb;
+pub mod bpmp;
 pub mod car;
 pub mod flow;
 pub mod gpio;

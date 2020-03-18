@@ -1,5 +1,5 @@
 #![no_std]
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 #![feature(const_fn)]
 #![feature(optimize_attribute)]
 

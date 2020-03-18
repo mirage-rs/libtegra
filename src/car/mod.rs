@@ -45,5 +45,7 @@
 //! [`Clock`]: struct.Clock.html
 
 pub use clock::Clock;
+pub use registers::*;
 
 mod clock;
+mod registers;

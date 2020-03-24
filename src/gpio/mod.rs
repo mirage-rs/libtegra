@@ -26,10 +26,10 @@
 //! sources with level/edge controls.
 //!
 //! ```no_run
-//! use libtegra::{make_gpio, gpio};
+//! use libtegra::{tegra_gpio, gpio};
 //!
 //! // The following line...
-//! make_gpio!(D, 4).config(gpio::Config::OutputHigh);
+//! tegra_gpio!(D, 4).config(gpio::Config::OutputHigh);
 //!
 //! // ...is equivalent to:
 //! let pin = gpio::Gpio {
@@ -214,17 +214,17 @@ pub struct Gpio {
 /// # Example
 ///
 /// ```
-/// use libtegra::{make_gpio, gpio};
+/// use libtegra::{tegra_gpio, gpio};
 ///
 /// let some_gpio = gpio::Gpio {
 ///     port: gpio::Port::X,
 ///     pin: gpio::Pin::P7,
 /// };
 ///
-/// assert_eq!(some_gpio, make_gpio!(X, 7));
+/// assert_eq!(some_gpio, tegra_gpio!(X, 7));
 /// ```
 #[macro_export]
-macro_rules! make_gpio {
+macro_rules! tegra_gpio {
     ($port:ident, $pin:tt) => {
         $crate::gpio::Gpio {
             port: $crate::gpio::Port::$port,

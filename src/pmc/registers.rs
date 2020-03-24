@@ -612,3 +612,87 @@ pub struct Registers {
 }
 
 assert_eq_size!(Registers, [u8; 0xB38]);
+
+pub mod counter0 {
+    use register::{mmio::*, register_bitfields, register_structs};
+
+    use crate::memory_map::SYSCTR0;
+
+    /// A pointer to the PMC SYSCTR0 register block that can be accessed by dereferencing it.
+    pub const REGISTERS: *const Registers = SYSCTR0 as *const Registers;
+
+    register_bitfields! {
+        u32,
+
+        /// Bitfields of the `SYSCTR0_CNTCR_0` register.
+        pub SYSCTR0_CNTCR_0 [
+            /// Requested frequency modes table entry.
+            FCREQ OFFSET(8) NUMBITS(1) [],
+
+            /// Whether a Halt-on-Debug signal should halt the counter.
+            HDBG OFFSET(1) NUMBITS(1) [],
+
+            /// Enables the counter.
+            EN OFFSET(0) NUMBITS(1) []
+        ],
+
+        /// Bitfields of the `SYSCTR0_CNTSR_0` register.
+        pub SYSCTR0_CNTSR_0 [
+            /// Frequency change acknowledge.
+            FCREQ OFFSET(8) NUMBITS(1) [],
+
+            /// Whether or not the counter is halted due to the Halt-on-Debug signal being asserted.
+            HDBG OFFSET(1) NUMBITS(1) [],
+
+            /// Reserved.
+            RESERVED OFFSET(0) NUMBITS(1) []
+        ],
+
+        /// Bitfields of the `SYSCTR0_CNTCV_<x>_0` registers.
+        pub SYSCTR0_CNTCV_0 [
+            /// Counter value.
+            CV OFFSET(0) NUMBITS(32) []
+        ],
+
+        /// Bitfields of the `SYSCTR0_CNTFID_<x>_0` registers.
+        pub SYSCTR0_CNTFID_0 [
+            /// Counter frequency value.
+            FV OFFSET(0) NUMBITS(32) []
+        ],
+
+        /// Bitfields of the `SYSCTR0_COUNTERID_<x>_0` registers.
+        pub SYSCTR0_COUNTERID_0 [
+            /// Component ID value.
+            VALUE OFFSET(0) NUMBITS(8) []
+        ]
+    }
+
+    register_structs! {
+        #[allow(non_snake_case)]
+        pub Registers {
+            (0x0000 => pub SYSCTR0_CNTCR_0: ReadWrite<u32, SYSCTR0_CNTCR_0::Register>),
+            (0x0004 => pub SYSCTR0_CNTSR_0: ReadOnly<u32, SYSCTR0_CNTSR_0::Register>),
+            (0x0008 => pub SYSCTR0_CNTCV0_0: ReadWrite<u32, SYSCTR0_CNTCV_0::Register>),
+            (0x000C => pub SYSCTR0_CNTCV1_0: ReadWrite<u32, SYSCTR0_CNTCV_0::Register>),
+            (0x0010 => _reserved0: [ReadWrite<u8>; 0x10]),
+            (0x0020 => pub SYSCTR0_CNTFID0_0: ReadWrite<u32, SYSCTR0_CNTFID_0::Register>),
+            (0x0024 => pub SYSCTR0_CNTFID1_0: ReadOnly<u32, SYSCTR0_CNTFID_0::Register>),
+            (0x0028 => _reserved1: [ReadWrite<u8>; 0xFA8]),
+            (0x0FD0 => pub SYSCTR0_COUNTERID4_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FD4 => pub SYSCTR0_COUNTERID5_0: ReadOnly<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FD8 => pub SYSCTR0_COUNTERID6_0: ReadOnly<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FDC => pub SYSCTR0_COUNTERID7_0: ReadOnly<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FE0 => pub SYSCTR0_COUNTERID0_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FE4 => pub SYSCTR0_COUNTERID1_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FE8 => pub SYSCTR0_COUNTERID2_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FEC => pub SYSCTR0_COUNTERID3_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FF0 => pub SYSCTR0_COUNTERID8_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FF4 => pub SYSCTR0_COUNTERID9_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FF8 => pub SYSCTR0_COUNTERID10_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x0FFC => pub SYSCTR0_COUNTERID11_0: ReadWrite<u32, SYSCTR0_COUNTERID_0::Register>),
+            (0x1000 => @END),
+        }
+    }
+
+    assert_eq_size!(Registers, [u8; 0x1000]);
+}

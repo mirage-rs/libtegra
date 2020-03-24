@@ -668,6 +668,7 @@ pub mod counter0 {
     }
 
     register_structs! {
+        /// Representation of the PMC SYSCTR0 registers.
         #[allow(non_snake_case)]
         pub Registers {
             (0x0000 => pub SYSCTR0_CNTCR_0: ReadWrite<u32, SYSCTR0_CNTCR_0::Register>),
@@ -695,4 +696,39 @@ pub mod counter0 {
     }
 
     assert_eq_size!(Registers, [u8; 0x1000]);
+}
+
+pub mod sb {
+    use register::{mmio::ReadWrite, register_structs};
+
+    use crate::memory_map::SB;
+
+    /// A pointer to the PMC Secure Boot register block that can be accessed by dereferencing it.
+    pub const REGISTERS: *const Registers = SB as *const Registers;
+
+    // TODO: Bitfields.
+
+    register_structs! {
+        /// Representation of the PMC Secure Boot registers.
+        #[allow(non_snake_case)]
+        pub Registers {
+            (0x00 => pub SB_CSR_0: ReadWrite<u32>),
+            (0x04 => pub SB_PIROM_START_0: ReadWrite<u32>),
+            (0x08 => pub SB_PFCFG_0: ReadWrite<u32>),
+            (0x0C => pub SB_SECURE_SPAREREG_0_0: ReadWrite<u32>),
+            (0x10 => pub SB_SECURE_SPAREREG_1_0: ReadWrite<u32>),
+            (0x14 => pub SB_SECURE_SPAREREG_2_0: ReadWrite<u32>),
+            (0x18 => pub SB_SECURE_SPAREREG_3_0: ReadWrite<u32>),
+            (0x1C => pub SB_SECURE_SPAREREG_4_0: ReadWrite<u32>),
+            (0x20 => pub SB_SECURE_SPAREREG_5_0: ReadWrite<u32>),
+            (0x24 => pub SB_SECURE_SPAREREG_6_0: ReadWrite<u32>),
+            (0x28 => pub SB_SECURE_SPAREREG_7_0: ReadWrite<u32>),
+            (0x2C => _reserved: [ReadWrite<u8>; 0x4]),
+            (0x30 => pub SB_AA64_RESET_LOW_0: ReadWrite<u32>),
+            (0x34 => pub SB_AA64_RESET_HIGH_0: ReadWrite<u32>),
+            (0x38 => @END),
+        }
+    }
+
+    assert_eq_size!(Registers, [u8; 0x38]);
 }

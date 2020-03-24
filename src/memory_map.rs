@@ -120,6 +120,9 @@ pub const FLOW: u32 = 0x6000_7000;
 /// Start of the System Registers block.
 pub const SYSREG: u32 = 0x6000_C000;
 
+/// Start of the Secure Boot registers.
+pub const SB: u32 = SYSREG + 0x200;
+
 /// Start of the Activity Monitor register block.
 pub const ACTMON: u32 = 0x6000_C800;
 

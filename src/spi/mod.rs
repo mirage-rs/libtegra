@@ -1,6 +1,6 @@
 //! Driver for the Tegra X1 Serial Peripheral Interface Controller.
 
-use core::convert::TryInto;
+use core::{convert::TryInto, marker::Sync};
 
 use crate::timer::usleep;
 
@@ -15,10 +15,51 @@ mod registers;
 /// the controllers 1 through 4.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Spi {
+    // TODO: SPI device clocks?
+
     /// A pointer to the [`Registers`] of the device.
     ///
     /// [`Registers`]: struct.Registers.html
     registers: *const Registers,
+}
+
+// Definitions of known SPIs.
+
+impl Spi {
+    /// Representation of the SPI 1 controller.
+    pub const SPI_1: Self = Spi {
+        registers: SPI_1_REGISTERS,
+    };
+
+    /// Representation of the SPI 2 controller.
+    pub const SPI_2: Self = Spi {
+        registers: SPI_2_REGISTERS,
+    };
+
+    /// Representation of the SPI 3 controller.
+    pub const SPI_3: Self = Spi {
+        registers: SPI_3_REGISTERS,
+    };
+
+    /// Representation of the SPI 4 controller.
+    pub const SPI_4: Self = Spi {
+        registers: SPI_4_REGISTERS,
+    };
+
+    /// Representation of the SPI 5 controller.
+    pub const SPI_5: Self = Spi {
+        registers: SPI_5_REGISTERS,
+    };
+
+    /// Representation of the SPI 6 controller.
+    pub const SPI_6: Self = Spi {
+        registers: SPI_6_REGISTERS,
+    };
+
+    /// Representation of the QSPI controller.
+    pub const QSPI: Self = Spi {
+        registers: QSPI_REGISTERS,
+    };
 }
 
 impl Spi {
@@ -53,7 +94,7 @@ impl Spi {
     /// of the SPI transmit flow and doesn't validate any
     /// buffer boundaries. This task is delegated to the
     /// caller.
-    fn pio_send_packet(&self, data: &[u8]) -> Result<(), ()> {
+    fn pio_send_packet(&self, data: &[u8; 4]) -> Result<(), ()> {
         let controller = unsafe { &*self.registers };
 
         // Flush the FIFOs.
@@ -66,7 +107,7 @@ impl Spi {
         );
 
         // Set the size of data blocks to be transferred.
-        controller.SPI_DMA_BLK_SIZE_0.set((data.len() - 1) as u32);
+        controller.SPI_DMA_BLK_SIZE_0.set(0);
 
         // Clear SPI_TRANSFER_STATUS RDY bit.
         controller.SPI_TRANSFER_STATUS_0.modify(SPI_TRANSFER_STATUS_0::RDY::CLEAR);
@@ -75,8 +116,7 @@ impl Spi {
         controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::TX_EN::SET);
 
         // Load in the data to write.
-        let packet = u32::from_le_bytes(data.try_into().unwrap());
-        controller.SPI_TX_FIFO_0.set(packet);
+        controller.SPI_TX_FIFO_0.set(u32::from_le_bytes(*data));
 
         // Make sure that the register is stabilized before setting the PIO bit.
         usleep(2);
@@ -111,7 +151,7 @@ impl Spi {
     /// of the SPI receive flow and doesn't validate any
     /// buffer boundaries. This task is delegated to the
     /// caller.
-    fn pio_receive_packet(&self, data: &mut [u8]) -> Result<(), ()> {
+    fn pio_receive_packet(&self, data: &mut [u8; 4]) -> Result<(), ()> {
         let controller = unsafe { &*self.registers };
 
         // Flush the FIFOs.
@@ -124,7 +164,7 @@ impl Spi {
         );
 
         // Set the size of data blocks to be transferred.
-        controller.SPI_DMA_BLK_SIZE_0.set((data.len() - 1) as u32);
+        controller.SPI_DMA_BLK_SIZE_0.set(0);
 
         // Clear SPI_TRANSFER_STATUS RDY bit.
         controller.SPI_TRANSFER_STATUS_0.modify(SPI_TRANSFER_STATUS_0::RDY::CLEAR);
@@ -157,9 +197,7 @@ impl Spi {
         }
 
         // Read the data bytes into the buffer.
-        for i in data.iter_mut() {
-            *i = controller.SPI_RX_FIFO_0.get() as u8;
-        }
+        *data = controller.SPI_RX_FIFO_0.get().to_le_bytes();
 
         Ok(())
     }
@@ -187,9 +225,8 @@ impl Spi {
         self.flush_fifos();
 
         // Enforce chip-select line 0 for now and drive chip-select low.
-        let cs = 0;
         controller.SPI_COMMAND_0.modify(
-            SPI_COMMAND_0::CS_SEL.val(cs)
+            SPI_COMMAND_0::CS_SEL.val(0)
             + SPI_COMMAND_0::CS_SW_VAL::CLEAR
         );
     }
@@ -205,9 +242,10 @@ impl Spi {
         self.wait_until_ready();
 
         // Issue flush requests for TX FIFO and RX FIFO.
-        controller
-            .SPI_FIFO_STATUS_0
-            .modify(SPI_FIFO_STATUS_0::RX_FIFO_FLUSH::SET + SPI_FIFO_STATUS_0::TX_FIFO_FLUSH::SET);
+        controller.SPI_FIFO_STATUS_0.modify(
+            SPI_FIFO_STATUS_0::RX_FIFO_FLUSH::SET
+            + SPI_FIFO_STATUS_0::TX_FIFO_FLUSH::SET
+        );
 
         while controller.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::RX_FIFO_FLUSH)
             && controller.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::TX_FIFO_FLUSH)
@@ -215,4 +253,40 @@ impl Spi {
             // Wait for the changes to take effect.
         }
     }
+
+    /// Reads a buffer of data from a slave over SPI.
+    ///
+    /// NOTE: Currently, only PIO mode transfers are supported.
+    pub fn read(&self, data: &mut [u8]) -> Result<(), ()> {
+        if data.len() % 4 != 0 {
+            return Err(());
+        }
+
+        // TODO: Add DMA support.
+
+        for chunk in data.chunks_mut(4) {
+            self.pio_receive_packet(chunk.try_into().unwrap())?;
+        }
+
+        Ok(())
+    }
+
+    /// Writes a buffer of data to a slave over SPI.
+    ///
+    /// NOTE: Currently, only PIO mode transfers are supported.
+    pub fn write(&self, data: &[u8]) -> Result<(), ()> {
+        if data.len() % 4 != 0 {
+            return Err(());
+        }
+
+        // TODO: Add DMA support.
+
+        for chunk in data.chunks(4) {
+            self.pio_send_packet(chunk.try_into().unwrap())?;
+        }
+
+        Ok(())
+    }
 }
+
+unsafe impl Sync for Spi {}

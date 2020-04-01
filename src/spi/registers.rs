@@ -5,7 +5,7 @@
 
 use register::{mmio::*, register_bitfields, register_structs};
 
-use crate::memory_map::spi::*;
+use crate::memory_map::{QSPI, spi::*};
 
 /// A pointer to the SPI 2B-1 register block that can be accessed by dereferencing it.
 pub const SPI_1_REGISTERS: *const Registers = SPI_1 as *const Registers;
@@ -15,6 +15,13 @@ pub const SPI_2_REGISTERS: *const Registers = SPI_2 as *const Registers;
 pub const SPI_3_REGISTERS: *const Registers = SPI_3 as *const Registers;
 /// A pointer to the SPI 2B-4 register block that can be accessed by dereferencing it.
 pub const SPI_4_REGISTERS: *const Registers = SPI_4 as *const Registers;
+/// A pointer to the SPI 2B-5 register block that can be accessed by dereferencing it.
+pub const SPI_5_REGISTERS: *const Registers = SPI_5 as *const Registers;
+/// A pointer to the SPI 2B-6 register block that can be accessed by dereferencing it.
+pub const SPI_6_REGISTERS: *const Registers = SPI_6 as *const Registers;
+
+/// A pointer to the QSPI register block that can be accessed by dereferencing it.
+pub const QSPI_REGISTERS: *const Registers = QSPI as *const Registers;
 
 register_bitfields! {
     u32,

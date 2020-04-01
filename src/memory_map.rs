@@ -284,7 +284,14 @@ pub mod spi {
     pub const SPI_3: u32 = BASE + 0x400;
     /// Start address of the SPI 2B-4 register block.
     pub const SPI_4: u32 = BASE + 0x600;
+    /// Start address of the SPI 2B-5 register block.
+    pub const SPI_5: u32 = BASE + 0x800;
+    /// Start address of the SPI 2B-6 register block.
+    pub const SPI_6: u32 = BASE + 0xA00;
 }
+
+/// Start of the QSPI register block.
+pub const QSPI: u32 = 0x7041_0000;
 
 /// Start of the RTC register block.
 pub const RTC: u32 = 0x7000_E000;

@@ -15,7 +15,13 @@ enum_primitive = { git = "https://github.com/mirage-rs/enum_primitive-rs.git" }
 paste = "0.1.7"
 register = "0.5.0"
 static_assertions = "1.1.0"
+embedded-hal = { version = "0.2.3", optional = true }
 
 [dependencies.num-traits]
 version = "0.2"
 default-features = false
+
+[features]
+default = ["hal"]
+hal = ["embedded-hal"]
+hal-unproven = ["embedded-hal", "embedded-hal/unproven"]

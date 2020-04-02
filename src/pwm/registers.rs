@@ -7,8 +7,14 @@ use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
 use crate::memory_map::PWM;
 
-/// A pointer to the PWM register block that can be accessed by dereferencing it.
-pub const REGISTERS: *const Registers = PWM as *const Registers;
+/// A pointer to the PWM_0 register block that can be accessed by dereferencing it.
+pub const PWM_0_REGISTERS: *const Registers = (PWM + 0x00) as *const Registers;
+/// A pointer to the PWM_1 register block that can be accessed by dereferencing it.
+pub const PWM_1_REGISTERS: *const Registers = (PWM + 0x10) as *const Registers;
+/// A pointer to the PWM_2 register block that can be accessed by dereferencing it.
+pub const PWM_2_REGISTERS: *const Registers = (PWM + 0x20) as *const Registers;
+/// A pointer to the PWM_3 register block that can be accessed by dereferencing it.
+pub const PWM_3_REGISTERS: *const Registers = (PWM + 0x30) as *const Registers;
 
 register_bitfields! {
     u32,
@@ -35,15 +41,9 @@ register_structs! {
     /// Representation of the PWM Controller registers.
     #[allow(non_snake_case)]
     pub Registers {
-        (0x00 => pub PWM_CONTROLLER_PWM_CSR_0_0: ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>),
-        (0x04 => _reserved0: [ReadWrite<u8>; 0xC]),
-        (0x10 => pub PWM_CONTROLLER_PWM_CSR_1_0: ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>),
-        (0x14 => _reserved1: [ReadWrite<u8>; 0xC]),
-        (0x20 => pub PWM_CONTROLLER_PWM_CSR_2_0: ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>),
-        (0x24 => _reserved2: [ReadWrite<u8>; 0xC]),
-        (0x30 => pub PWM_CONTROLLER_PWM_CSR_3_0: ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>),
-        (0x34 => @END),
+        (0x0 => pub PWM_CONTROLLER_PWM_CSR_0: ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>),
+        (0x4 => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0x34]);
+assert_eq_size!(Registers, [u8; 0x4]);

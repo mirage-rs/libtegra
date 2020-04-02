@@ -10,35 +10,58 @@
 //! a programmable frequency divider and a programmable pulse
 //! width generator.
 
+use crate::car::Clock;
+
 pub use registers::*;
-use register::mmio::ReadWrite;
 
 mod registers;
 
-type ChannelRegister = ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>;
-
+/// Representation of a Pulse Width Modulator channel.
+///
+/// NOTE: It is expected that the PWM [`Clock`] is up
+/// before using any of the functionality of any channel.
+///
+/// [`Clock`]: ../car/struct.Clock.html
+#[derive(Debug)]
 pub struct PwmChannel {
-    register: ChannelRegister,
+    /// A pointer to the PWM [`Registers`] block.
+    ///
+    /// [`Registers`]: struct.Registers.html
+    registers: *const Registers,
+}
+
+// Definitions of known PWM channels.
+
+impl PwmChannel {
+    pub const PWM_0: Self = PwmChannel {
+        registers: PWM_0_REGISTERS,
+    };
+
+    pub const PWM_1: Self = PwmChannel {
+        registers: PWM_0_REGISTERS,
+    };
+
+    pub const PWM_2: Self = PwmChannel {
+        registers: PWM_0_REGISTERS,
+    };
+
+    pub const PWM_3: Self = PwmChannel {
+        registers: PWM_0_REGISTERS,
+    };
 }
 
 impl PwmChannel {
-    pub fn new(register: ChannelRegister) -> Self {
-        Self { register }
+    /// Enables pulse generation through this channel.
+    pub fn enable(&self) {
+        let controller = unsafe { &*self.registers };
+
+        controller.PWM_CONTROLLER_PWM_CSR_0.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::SET);
     }
 
-    pub fn enable(&mut self) {
-        self.register.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::SET)
-    }
+    /// Disables pulse generation through this channel.
+    pub fn disable(&self) {
+        let controller = unsafe { &*self.registers };
 
-    pub fn disable(&mut self) {
-        self.register.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::CLEAR)
-    }
-
-    pub fn set_duty(&mut self, duty: f32) {
-        todo!();
-    }
-
-    pub fn get_duty(&mut self) -> f32 {
-        todo!()
+        controller.PWM_CONTROLLER_PWM_CSR_0.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::CLEAR);
     }
 }

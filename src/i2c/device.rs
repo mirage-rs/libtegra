@@ -124,17 +124,15 @@ impl I2c {
         }
 
         // Set config with LENGTH = packet.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
-        register_base
-            .I2C_I2C_CNFG_0
-            .set((((packet.len() - 1) << 1) | 0x2800) as u32);
+        register_base.I2C_I2C_CNFG_0.set((((packet.len() - 1) << 1) | 0x2800) as u32);
 
         // Kick off the transaction.
         self.load_config();
 
         // Set CONFIG |= SEND.
-        register_base
-            .I2C_I2C_CNFG_0
-            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
+        register_base.I2C_I2C_CNFG_0.set(
+            (register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200
+        );
 
         let timeout = timer::get_milliseconds() + 1500;
         while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
@@ -168,17 +166,15 @@ impl I2c {
         register_base.I2C_I2C_CMD_ADDR0_0.set((slave << 1) | 1);
 
         // Set config with LENGTH = buffer.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
-        register_base
-            .I2C_I2C_CNFG_0
-            .set((((buffer.len() - 1) << 1) | 0x2840) as u32);
+        register_base.I2C_I2C_CNFG_0.set((((buffer.len() - 1) << 1) | 0x2840) as u32);
 
         // Kick off the transaction.
         self.load_config();
 
         // Set CONFIG |= SEND.
-        register_base
-            .I2C_I2C_CNFG_0
-            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
+        register_base.I2C_I2C_CNFG_0.set(
+            (register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200
+        );
 
         let timeout = timer::get_milliseconds() + 1500;
         while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
@@ -244,9 +240,9 @@ impl I2c {
         register_base.I2C_I2C_BUS_CLEAR_STATUS_0.get();
 
         // Read and set the Interrupt Status.
-        register_base
-            .I2C_INTERRUPT_STATUS_REGISTER_0
-            .set(register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get());
+        register_base.I2C_INTERRUPT_STATUS_REGISTER_0.set(
+            register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get()
+        );
     }
 
     /// Writes a buffer of data to a slave register over I²C.

@@ -424,8 +424,9 @@ impl Clock {
         // Configure the clock source, if needed.
         if self.source != CLK_NO_SOURCE {
             unsafe {
-                (*((CAR + self.source) as *const ReadWrite<u32>))
-                    .set((self.clock_source << 29) | self.clock_divisor);
+                (*((CAR + self.source) as *const ReadWrite<u32>)).set(
+                    (self.clock_source << 29) | self.clock_divisor
+                );
             }
         }
 

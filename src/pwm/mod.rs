@@ -10,8 +10,6 @@
 //! a programmable frequency divider and a programmable pulse
 //! width generator.
 
-use crate::car::Clock;
-
 pub use registers::*;
 
 mod registers;
@@ -63,5 +61,23 @@ impl PwmChannel {
         let controller = unsafe { &*self.registers };
 
         controller.PWM_CONTROLLER_PWM_CSR_0.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::CLEAR);
+    }
+
+    /// Configures the pulse width of the channel.
+    ///
+    /// The argument is the desired duty cycle as a float value,
+    /// representing a percentage ranging from 0.0 (0%) to 1.0 (100%).
+    pub fn set_pulse_width(&self, duty: f32) -> Result<(), ()> {
+        let controller = unsafe { &*self.registers };
+
+        if duty < 0.0 || duty > 1.0 {
+            return Err(());
+        }
+
+        controller.PWM_CONTROLLER_PWM_CSR_0.modify(
+            PWM_CONTROLLER_PWM_CSR_0::PWM_0.val((duty * 256.0) as u32)
+        );
+
+        Ok(())
     }
 }

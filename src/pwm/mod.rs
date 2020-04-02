@@ -4,8 +4,7 @@
 //! for details.
 //!
 //! # Description
-//!
-//! The Pulse Width Modulator (PWM) Controller is a four-channel
+//! //! The Pulse Width Modulator (PWM) Controller is a four-channel
 //! frequency divider whose pulse width varies. Each channel has
 //! a programmable frequency divider and a programmable pulse
 //! width generator.
@@ -79,5 +78,20 @@ impl PwmChannel {
         );
 
         Ok(())
+    }
+
+    /// Returns the current duty cycle.
+    ///
+    /// The returned duty cycle is a float value from 0.0 (0%) to 1.0 (100%).
+    pub fn get_duty(&self) -> f32 {
+        let controller = unsafe { &*self.registers };
+
+        let pulse_width = controller.PWM_CONTROLLER_PWM_CSR_0.read(PWM_CONTROLLER_PWM_CSR_0::PWM_0) as f32;
+        pulse_width / 256.0
+    }
+
+    /// Returns the max duty cycle that is possible to set.
+    pub fn get_max_duty(&self) -> f32 {
+        1.0
     }
 }

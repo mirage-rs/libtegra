@@ -11,5 +11,34 @@
 //! width generator.
 
 pub use registers::*;
+use register::mmio::ReadWrite;
 
 mod registers;
+
+type ChannelRegister = ReadWrite<u32, PWM_CONTROLLER_PWM_CSR_0::Register>;
+
+pub struct PwmChannel {
+    register: ChannelRegister,
+}
+
+impl PwmChannel {
+    pub fn new(register: ChannelRegister) -> Self {
+        Self { register }
+    }
+
+    pub fn enable(&mut self) {
+        self.register.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::SET)
+    }
+
+    pub fn disable(&mut self) {
+        self.register.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::CLEAR)
+    }
+
+    pub fn set_duty(&mut self, duty: f32) {
+        todo!();
+    }
+
+    pub fn get_duty(&mut self) -> f32 {
+        todo!()
+    }
+}

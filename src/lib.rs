@@ -28,8 +28,8 @@ pub mod memory_map;
 pub mod pinmux;
 pub mod pmc;
 pub mod pwm;
+pub mod se;
 pub mod spi;
 pub mod timer;
 pub mod tsec;
 pub mod uart;
-

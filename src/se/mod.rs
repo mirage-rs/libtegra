@@ -50,7 +50,7 @@ impl LinkedList {
         }
 
         self.entries += 1;
-        self.address_info[self.entries as usize + 1] = AddressInfo::from(entry);
+        self.address_info[self.entries as usize] = AddressInfo::from(entry);
 
         Ok(())
     }

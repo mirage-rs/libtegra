@@ -127,7 +127,7 @@ fn prepare_operation() -> Result<(), OperationError> {
 /// the AHB transfer has terminated and that the Security Engine has entered idle state.
 fn complete_operation() -> Result<(), OperationError> {
     let engine = unsafe { &*REGISTERS };
-    let ahb = unsafe { &*ahb::REGISTERS };
+    let ahb = unsafe { &*mem::REGISTERS };
     let mut timeout;
 
     // Poll the interrupt register to ensure the operation has completed.
@@ -230,5 +230,5 @@ fn start_context_save_operation(
     destination: &LinkedList,
     nbytes: u32
 ) -> Result<(), OperationError> {
-    trigger_operation(opcode::CTX_SAVE, source, destination, nbytes)
+    trigger_operation(opcodes::CTX_SAVE, source, destination, nbytes)
 }

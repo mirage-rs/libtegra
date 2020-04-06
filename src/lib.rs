@@ -15,6 +15,7 @@ extern crate register;
 #[macro_use]
 extern crate static_assertions;
 
+pub mod ahb;
 pub mod apb;
 pub mod bpmp;
 pub mod car;

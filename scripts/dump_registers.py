@@ -47,12 +47,12 @@ register_structs! {{
 # First match group: The chapter.
 # Second match group: Register name.
 # Third match group: Register short description (if present, otherwise garbage or nothing).
-REGISTER_PATTERN = re.compile(r'(\d[\d\.]+\d)\s+(\w+)(?:\n(.+))?\n', re.MULTILINE)
+REGISTER_PATTERN = re.compile(r'((?:\d+\.)+\d+)\s+(\w+)(?:\n(.+))?\n', re.MULTILINE)
 
 # A Regular Expression for extracting metadata corresponding to a register.
 # First match: The register offset.
 # Second match: The permissions of the memory segment.
-REGISTER_META_PATTERN = re.compile(r'Offset:\s+([0-9a-fA-Fx]+)\s+[\|I]\s+Read\/Write:\s([\w\/]+)')
+REGISTER_META_PATTERN = re.compile(r'Offset:\s+([0-9a-fA-Fx]+)\s+[\|I│].+Read\/Write:\s([\w\/]+)')
 
 
 class MemoryPermissions(Enum):

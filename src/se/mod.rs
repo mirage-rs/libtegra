@@ -2,20 +2,13 @@ use core::convert::TryFrom;
 
 use crate::{ahb::mem, timer};
 
+use constants::*;
+
 pub use registers::*;
 
+#[allow(dead_code)]
+mod constants;
 mod registers;
-
-const AES_BLOCK_SIZE: u32 = 16;
-
-/// Security Engine operation control opcodes.
-pub mod opcodes {
-    pub const ABORT: u32 = 0;
-    pub const START: u32 = 1;
-    pub const RESTART: u32 = 2;
-    pub const CTX_SAVE: u32 = 3;
-    pub const RESTART_IN: u32 = 4;
-}
 
 /// Address information of a DMA buffer, representing a node of the Security Engine Linked List.
 #[derive(Debug, Default)]
@@ -184,7 +177,7 @@ fn trigger_operation(
         .expect("Address does not fit an u32!");
 
     // Calculate the amount of blocks to be processed.
-    let nblocks = nbytes / AES_BLOCK_SIZE;
+    let nblocks = nbytes / aes::BLOCK_SIZE;
 
     // Load in the linked lists for input and output.
     engine.SE_IN_LL_ADDR_0.set(source_address);

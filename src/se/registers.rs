@@ -2,10 +2,16 @@
 
 use register::mmio::ReadWrite;
 
-use crate::memory_map::SE;
+use crate::memory_map::SE1;
+#[cfg(feature = "mariko")]
+use crate::memory_map::SE2;
 
-/// A pointer to the SE register block that can be accessed by dereferencing it.
-pub const REGISTERS: *const Registers = SE as *const Registers;
+/// A pointer to the SE1 register block that can be accessed by dereferencing it.
+pub const SE1_REGISTERS: *const Registers = SE1 as *const Registers;
+
+#[cfg(feature = "mariko")]
+/// A pointer to the SE2 register block that can be accessed by dereferencing it.
+pub const SE2_REGISTERS: *const Registers = SE2 as *const Registers;
 
 // TODO: Bitfields.
 

@@ -22,3 +22,4 @@ static_assertions = "1.1.0"
 default = ["hal"]
 hal = ["embedded-hal"]
 hal-unproven = ["embedded-hal", "embedded-hal/unproven"]
+mariko = []

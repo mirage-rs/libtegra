@@ -4,7 +4,7 @@ use core::convert::TryFrom;
 
 use crate::{ahb::mem, timer};
 
-use super::{constants::*, REGISTERS};
+use super::{constants::*, Registers};
 
 /// Address information of a DMA buffer.
 ///
@@ -99,9 +99,7 @@ pub enum OperationError {
 /// Waits for the Security Engine to enter idle state before starting the next operation.
 ///
 /// This function also clears pending interrupts from previous operations.
-fn prepare_operation() -> Result<(), OperationError> {
-    let engine = unsafe { &*REGISTERS };
-
+fn prepare_operation(engine: &Registers) -> Result<(), OperationError> {
     // Disable interrupts to be issued by a Security Engine operation.
     engine.SE_INT_ENABLE_0.set(0);
 
@@ -124,8 +122,7 @@ fn prepare_operation() -> Result<(), OperationError> {
 /// This function ensures that no interrupts are pending, no exceptions
 /// have occurred internally, the AHB transfer has terminated and that
 /// the Security Engine has entered idle state.
-fn complete_operation() -> Result<(), OperationError> {
-    let engine = unsafe { &*REGISTERS };
+fn complete_operation(engine: &Registers) -> Result<(), OperationError> {
     let ahb = unsafe { &*mem::REGISTERS };
 
     let mut timeout;
@@ -166,13 +163,12 @@ fn complete_operation() -> Result<(), OperationError> {
 ///
 /// [`LinkedList`]: struct.LinkedList.html
 pub fn trigger_operation(
+    engine: &Registers,
     opcode: u32,
     source: &LinkedList,
     destination: &mut LinkedList,
     nbytes: u32,
 ) -> Result<(), OperationError> {
-    let engine = unsafe { &*REGISTERS };
-
     // Compute memory addresses of the LLs.
     let source_address = u32::try_from(source as *const _ as usize)
         .expect("Address does not fit an u32!");
@@ -184,7 +180,7 @@ pub fn trigger_operation(
     engine.SE_OUT_LL_ADDR_0.set(destination_address);
 
     // Ensure that the previous operation has fully completed.
-    prepare_operation()?;
+    prepare_operation(engine)?;
 
     // Program the operation size in blocks.
     let nblocks = nbytes / aes::BLOCK_SIZE;
@@ -196,7 +192,7 @@ pub fn trigger_operation(
     engine.SE_OPERATION_0.set(opcode);
 
     // Wait for the operation to complete.
-    complete_operation()?;
+    complete_operation(engine)?;
 
     Ok(())
 }
@@ -208,11 +204,12 @@ pub fn trigger_operation(
 /// [`trigger_operation`]: fn.trigger_operation.html
 #[inline(always)]
 pub fn start_normal_operation(
+    engine: &Registers,
     source: &LinkedList,
     destination: &mut LinkedList,
     nbytes: u32,
 ) -> Result<(), OperationError> {
-    trigger_operation(opcodes::START, source, destination, nbytes)
+    trigger_operation(engine, opcodes::START, source, destination, nbytes)
 }
 
 /// Triggers a Security Engine operation that saves the crypto context afterwards.
@@ -222,9 +219,10 @@ pub fn start_normal_operation(
 /// [`trigger_operation`]: fn.trigger_operation.html
 #[inline(always)]
 pub fn start_context_save_operation(
+    engine: &Registers,
     source: &LinkedList,
     destination: &mut LinkedList,
     nbytes: u32,
 ) -> Result<(), OperationError> {
-    trigger_operation(opcodes::CTX_SAVE, source, destination, nbytes)
+    trigger_operation(engine, opcodes::CTX_SAVE, source, destination, nbytes)
 }

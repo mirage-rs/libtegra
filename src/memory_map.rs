@@ -305,8 +305,12 @@ pub const FUSE: u32 = 0x7000_F800;
 /// Start of the KFUSE register block.
 pub const KFUSE: u32 = 0x7000_FC00;
 
-/// Start of the SE register block.
-pub const SE: u32 = 0x7001_2000;
+/// Start of the SE1 register block.
+pub const SE1: u32 = 0x7001_2000;
+
+#[cfg(feature = "mariko")]
+/// Start of the SE2 register block.
+pub const SE2: u32 = 0x7041_2000;
 
 /// Start of the MC register block.
 pub const MC: u32 = 0x7001_9000;

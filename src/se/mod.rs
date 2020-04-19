@@ -50,7 +50,13 @@ pub struct SecurityEngine {
 impl SecurityEngine {
     /// A pointer to the first Security Engine instance.
     pub const SE1: Self = SecurityEngine {
-        registers: REGISTERS,
+        registers: SE1_REGISTERS,
+    };
+
+    #[cfg(feature = "mariko")]
+    /// A pointer to the second Security Engine instance.
+    pub const SE2: Self = SecurityEngine {
+        registers: SE2_REGISTERS,
     };
 }
 
@@ -76,7 +82,7 @@ impl SecurityEngine {
         let mut destination_ll = LinkedList::default();
 
         // Kick off the hardware operation.
-        start_normal_operation(&source_ll, &mut destination_ll, 0)?;
+        start_normal_operation(engine, &source_ll, &mut destination_ll, 0)?;
 
         // Read and copy back the resulting hash.
         for i in 0..8 {

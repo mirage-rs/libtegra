@@ -38,3 +38,4 @@ pub mod spi;
 pub mod timer;
 pub mod tsec;
 pub mod uart;
+pub mod utils;

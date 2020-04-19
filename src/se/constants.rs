@@ -4,6 +4,45 @@
 pub const CTX_BUFFER_SIZE: usize = 1072;
 pub const CTX_DRBG_BUFFER_SIZE: u32 = 2112;
 
+/// Configuration flags for different crypto algorithms.
+pub mod alg {
+    pub const NOP: u32 = 0 << 12;
+    pub const AES_ENC: u32 = 1 << 12;
+    pub const AES_DEC: u32 = (1 << 8) | NOP;
+    pub const RNG: u32 = 2 << 12;
+    pub const SHA: u32 = 3 << 12;
+    pub const RSA: u32 = 4 << 12;
+}
+
+/// Configuration flags for the destination of the crypto output.
+pub mod destination {
+    pub const MEMORY: u32 = 0 << 2;
+    pub const HASHREG: u32 = 1 << 2;
+    pub const KEYTAB: u32 = 2 << 2;
+    pub const SRK: u32 = 3 << 2;
+    pub const RSAREG: u32 = 4 << 2;
+}
+
+/// Configuration flags for the encryption mode to be used.
+pub mod enc_mode {
+    pub const KEY128_ENC: u32 = 0 << 24;
+    pub const KEY128_DEC: u32 = 0 << 16;
+    pub const KEY192_ENC: u32 = 1 << 24;
+    pub const KEY192_DEC: u32 = 1 << 16;
+    pub const KEY256_ENC: u32 = 2 << 24;
+    pub const KEY256_DEC: u32 = 2 << 16;
+    pub const SHA1_ENC: u32 = 0 << 24;
+    pub const SHA1_DEC: u32 = 0 << 16;
+    pub const SHA224_ENC: u32 = 4 << 24;
+    pub const SHA224_DEC: u32 = 4 << 16;
+    pub const SHA256_ENC: u32 = 5 << 24;
+    pub const SHA256_DEC: u32 = 5 << 16;
+    pub const SHA384_ENC: u32 = 6 << 24;
+    pub const SHA384_DEC: u32 = 6 << 16;
+    pub const SHA512_ENC: u32 = 7 << 24;
+    pub const SHA512_DEC: u32 = 7 << 16;
+}
+
 /// Control opcodes for Security Engine operations.
 pub mod opcodes {
     pub const ABORT: u32 = 0;

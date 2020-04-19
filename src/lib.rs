@@ -5,6 +5,10 @@
 
 pub extern crate cortex_a;
 
+extern crate byteorder;
+
+extern crate embedded_hal;
+
 #[macro_use]
 extern crate enum_primitive;
 

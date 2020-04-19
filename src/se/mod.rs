@@ -23,10 +23,68 @@
 //! [`LinkedList`]: struct.LinkedList.html
 //! [`trigger_operation`]: fn.trigger_operation.html
 
+use ::core::marker::Sync;
+
+use byteorder::{BE, ByteOrder};
+
 pub use self::core::*;
 pub use registers::*;
+
+use constants::*;
 
 #[allow(dead_code)]
 mod constants;
 mod core;
 mod registers;
+
+/// Representation of the Security Engine used for cryptographic operations.
+pub struct SecurityEngine {
+    /// A pointer to the Security Engine [`Registers`].
+    ///
+    /// [`Registers`]: struct.Registers.html
+    registers: *const Registers,
+}
+
+// Definitions of known SE instances.
+
+impl SecurityEngine {
+    /// A pointer to the first Security Engine instance.
+    pub const SE1: Self = SecurityEngine {
+        registers: REGISTERS,
+    };
+}
+
+impl SecurityEngine {
+    pub fn sha256(&self, source: &[u8]) -> Result<[u8; 32], OperationError> {
+        let engine = unsafe { &*self.registers };
+        let mut output = [0; 32];
+
+        // Prepare a SHA256 hardware operation.
+        engine.SE_CONFIG_0.set(enc_mode::SHA256_ENC | alg::SHA | destination::HASHREG);
+        engine.SE_SHA_CONFIG_0.set(1);
+        engine.SE_SHA_MSG_LENGTH_0[0].set((source.len() << 3) as u32);
+        engine.SE_SHA_MSG_LENGTH_0[1].set(0);
+        engine.SE_SHA_MSG_LENGTH_0[2].set(0);
+        engine.SE_SHA_MSG_LENGTH_0[3].set(0);
+        engine.SE_SHA_MSG_LEFT_0[0].set((source.len() << 3) as u32);
+        engine.SE_SHA_MSG_LEFT_0[1].set(0);
+        engine.SE_SHA_MSG_LEFT_0[2].set(0);
+        engine.SE_SHA_MSG_LEFT_0[3].set(0);
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the hardware operation.
+        start_normal_operation(&source_ll, &mut destination_ll, 0)?;
+
+        // Read and copy back the resulting hash.
+        for i in 0..8 {
+            BE::write_u32(&mut output[i << 2..], engine.SE_HASH_RESULT_0[i].get());
+        }
+
+        Ok(output)
+    }
+}
+
+unsafe impl Sync for SecurityEngine {}

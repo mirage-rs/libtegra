@@ -63,6 +63,29 @@ impl SecurityEngine {
 }
 
 impl SecurityEngine {
+    /// Peforms a hardware operation to generate the Storage Root Key (SRK).
+    ///
+    /// NOTE: Different entropy sources will lead to different results.
+    pub fn srk(&self) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Prepare an SRK operation.
+        engine.SE_CONFIG_0.set(alg::ENC_RNG | alg::DEC_NOP | destination::SRK);
+
+        // Configure the RNG.
+        engine.SE_RNG_CONFIG_0.set(drbg_mode::FORCE_RESEED | drbg_src::LFSR);
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::default();
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the hardware operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll, 0)?;
+
+        Ok(())
+    }
+
+    /// Performs a hashing operation on a given buffer of data using the SHA256 algorithm.
     pub fn sha256(&self, source: &[u8]) -> Result<[u8; 32], OperationError> {
         let engine = unsafe { &*self.registers };
         let mut output = [0; 32];

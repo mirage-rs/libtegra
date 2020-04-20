@@ -6,12 +6,13 @@ pub const CTX_DRBG_BUFFER_SIZE: u32 = 2112;
 
 /// Configuration flags for different crypto algorithms.
 pub mod alg {
-    pub const NOP: u32 = 0 << 12;
-    pub const AES_ENC: u32 = 1 << 12;
-    pub const AES_DEC: u32 = (1 << 8) | NOP;
-    pub const RNG: u32 = 2 << 12;
-    pub const SHA: u32 = 3 << 12;
-    pub const RSA: u32 = 4 << 12;
+    pub const ENC_NOP: u32 = 0 << 12;
+    pub const DEC_NOP: u32 = 0 << 8;
+    pub const ENC_AES: u32 = 1 << 12;
+    pub const DEC_AES: u32 = 1 << 8;
+    pub const ENC_RNG: u32 = 2 << 12;
+    pub const ENC_SHA: u32 = 3 << 12;
+    pub const ENC_RSA: u32 = 4 << 12;
 }
 
 /// Configuration flags for the destination of the crypto output.
@@ -41,6 +42,20 @@ pub mod enc_mode {
     pub const SHA384_DEC: u32 = 6 << 16;
     pub const SHA512_ENC: u32 = 7 << 24;
     pub const SHA512_DEC: u32 = 7 << 16;
+}
+
+/// DRBG mode configuration flags for RNG.
+pub mod drbg_mode {
+    pub const NORMAL: u32 = 0 << 0;
+    pub const FORCE_INSTANTION: u32 = 1 << 0;
+    pub const FORCE_RESEED: u32 = 2 << 0;
+}
+
+/// DRBG source configuration flags for RNG.
+pub mod drbg_src {
+    pub const NONE: u32 = 0 << 2;
+    pub const ENTROPY: u32 = 1 << 2;
+    pub const LFSR: u32 = 2 << 2;
 }
 
 /// Control opcodes for Security Engine operations.

@@ -55,6 +55,8 @@ impl SecurityEngine {
 
     #[cfg(feature = "mariko")]
     /// A pointer to the second Security Engine instance.
+    ///
+    /// NOTE: Only available with the `mariko` feature enabled.
     pub const SE2: Self = SecurityEngine {
         registers: SE2_REGISTERS,
     };

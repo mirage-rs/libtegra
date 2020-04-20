@@ -310,6 +310,8 @@ pub const SE1: u32 = 0x7001_2000;
 
 #[cfg(feature = "mariko")]
 /// Start of the SE2 register block.
+///
+/// NOTE: Only available with the `mariko` feature enabled.
 pub const SE2: u32 = 0x7041_2000;
 
 /// Start of the MC register block.

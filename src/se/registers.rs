@@ -11,6 +11,8 @@ pub const SE1_REGISTERS: *const Registers = SE1 as *const Registers;
 
 #[cfg(feature = "mariko")]
 /// A pointer to the SE2 register block that can be accessed by dereferencing it.
+///
+/// NOTE: Only available with the `mariko` feature enabled.
 pub const SE2_REGISTERS: *const Registers = SE2 as *const Registers;
 
 // TODO: Bitfields.

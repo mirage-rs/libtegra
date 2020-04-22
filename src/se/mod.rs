@@ -91,7 +91,7 @@ impl SecurityEngine {
         let mut output = [0; 32];
 
         // Prepare a SHA256 hardware operation.
-        engine.SE_CONFIG_0.set(enc_mode::SHA256_ENC | alg::SHA | destination::HASHREG);
+        engine.SE_CONFIG_0.set(enc_mode::SHA256_ENC | alg::ENC_SHA | destination::HASHREG);
         engine.SE_SHA_CONFIG_0.set(1);
         engine.SE_SHA_MSG_LENGTH_0[0].set((source.len() << 3) as u32);
         engine.SE_SHA_MSG_LENGTH_0[1].set(0);

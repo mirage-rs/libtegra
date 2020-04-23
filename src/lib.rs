@@ -24,6 +24,7 @@ pub mod apb;
 pub mod bpmp;
 pub mod car;
 pub mod flow;
+pub mod fuse;
 pub mod gpio;
 pub mod hal;
 pub mod i2c;

@@ -47,5 +47,6 @@
 pub use clock::Clock;
 pub use registers::*;
 
+#[allow(unused)]
 mod clock;
 mod registers;

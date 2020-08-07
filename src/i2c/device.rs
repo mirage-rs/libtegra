@@ -81,7 +81,6 @@ impl I2c {
 }
 
 impl I2c {
-    /// Loads the hardware configuration of the device.
     fn load_config(&self) {
         let register_base = unsafe { &*self.registers };
 
@@ -98,15 +97,6 @@ impl I2c {
         }
     }
 
-    /// Transmits a packet of data to a slave over I²C.
-    ///
-    /// NOTE: This method is a low-level implementation
-    /// of the I2C transfer flow that doesn't validate the
-    /// data in `packet`. It is advised to do this in
-    /// methods that call to [`I2c::send_packet`].
-    /// `packet` is supposed to be exactly 8 bytes in size.
-    ///
-    /// [`I2c::send_packet`]: struct.I2c.html#method.send_packet
     fn send_packet(&self, slave: u32, packet: &[u8]) -> Result<(), Error> {
         let register_base = unsafe { &*self.registers };
 
@@ -124,15 +114,17 @@ impl I2c {
         }
 
         // Set config with LENGTH = packet.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
-        register_base.I2C_I2C_CNFG_0.set((((packet.len() - 1) << 1) | 0x2800) as u32);
+        register_base
+            .I2C_I2C_CNFG_0
+            .set((((packet.len() - 1) << 1) | 0x2800) as u32);
 
         // Kick off the transaction.
         self.load_config();
 
         // Set CONFIG |= SEND.
-        register_base.I2C_I2C_CNFG_0.set(
-            (register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200
-        );
+        register_base
+            .I2C_I2C_CNFG_0
+            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
 
         let timeout = timer::get_milliseconds() + 1500;
         while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
@@ -150,15 +142,6 @@ impl I2c {
         }
     }
 
-    /// Reads a packet of data from a slave over I²C into a buffer.
-    ///
-    /// NOTE: This method is a low-level implementation of the I2C
-    /// receive flow and doesn't check the boundaries of `buffer`.
-    /// It is advised to do this in methods that call to
-    /// [`I2c::read_packet`].
-    /// `buffer` may not exceed a size of 8 bytes.
-    ///
-    /// [`I2c::read_packet`]: struct.I2c.html#method.read_packet
     fn receive_packet(&self, slave: u32, buffer: &mut [u8]) -> Result<(), Error> {
         let register_base = unsafe { &*self.registers };
 
@@ -166,15 +149,17 @@ impl I2c {
         register_base.I2C_I2C_CMD_ADDR0_0.set((slave << 1) | 1);
 
         // Set config with LENGTH = buffer.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
-        register_base.I2C_I2C_CNFG_0.set((((buffer.len() - 1) << 1) | 0x2840) as u32);
+        register_base
+            .I2C_I2C_CNFG_0
+            .set((((buffer.len() - 1) << 1) | 0x2840) as u32);
 
         // Kick off the transaction.
         self.load_config();
 
         // Set CONFIG |= SEND.
-        register_base.I2C_I2C_CNFG_0.set(
-            (register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200
-        );
+        register_base
+            .I2C_I2C_CNFG_0
+            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
 
         let timeout = timer::get_milliseconds() + 1500;
         while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
@@ -240,9 +225,9 @@ impl I2c {
         register_base.I2C_I2C_BUS_CLEAR_STATUS_0.get();
 
         // Read and set the Interrupt Status.
-        register_base.I2C_INTERRUPT_STATUS_REGISTER_0.set(
-            register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get()
-        );
+        register_base
+            .I2C_INTERRUPT_STATUS_REGISTER_0
+            .set(register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get());
     }
 
     /// Writes a buffer of data to a slave register over I²C.

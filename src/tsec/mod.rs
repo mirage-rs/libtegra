@@ -2,32 +2,36 @@
 //!
 //! # Description
 //!
-//! The TSEC is a dedicated unit powered by a NVIDIA Falcon
-//! microprocessor with crypto extensions.
+//! The TSEC is a dedicated unit powered by a NVIDIA Falcon microprocessor with
+//! crypto extensions. Its purpose is to leverage certain cryptographic tasks
+//! done by firmwares signed by NVIDIA into a secure space that cannot be taken
+//! over by the host system.
 //!
-//! ## Falcon Processor
+//! It has three operating modes:
 //!
-//! The [NVIDIA Falcon] microprocessor is an MCU with very limited code
-//! and data space, which is why many features in general are not
-//! available.
+//! - No Secure Mode (NS): Every piece of microcode that is not cryptographically
+//! signed by NVIDIA will be executed in this mode. It prevents you from accessing
+//! certain registers and may disable physical memory access from code.
 //!
-//! See [this article] for a more in-depth description of the Falcon
-//! LLVM backend and thus the Falcon environment along with its limitations
-//! and features.
+//! - Light Secure Mode (LS): In this mode, the Falcon has more privileges than in
+//! No Secure Mode, but fewer than in Heavy Secure Mode. This mode leaks some of
+//! the internal state to ease up debugging and can only be enabled from Heavy
+//! Secure Mode microcode.
 //!
-//! Within the TSEC, it has special crypto extensions, which makes it
-//! usable for execution of critical code within a secure environment.
+//! - Heavy Secure Mode (HS): This mode can be entered by uploading signed microcode
+//! and grants the full range of privileges to the microcode. This state essentially
+//! turns the Falcon into a black box that doesn't expose any of its inner workings
+//! to, for example, the host system.
 //!
 //! ## Firmware
 //!
-//! [envytools] have proven to be valuable tools when it comes to working
-//! with various ISAs used by NVIDIA, including the Falcon processor.
+//! [envytools] have proven to be valuable tools when it comes to working with
+//! various ISAs used by NVIDIA, including the Falcon processor.
 //!
 //! The following examples will use this reference firmware:
 //!
 //! ```asm
 //! mov $r15 0xB0B0B0B0;
-//! mov $r12 0x0;
 //! mov $r9 0x1100;
 //! iowr I[$r9] $r15;
 //! exit;
@@ -43,7 +47,9 @@
 //! ## Firmware Alignment
 //!
 //! Firmware blobs that should be booted on the [`Tsec`] are supposed to
-//! be aligned to the boundary denoted by [`FIRMWARE_ALIGNMENT`].
+//! be aligned to the boundary denoted by [`FIRMWARE_ALIGNMENT`]. This is
+//! implied by the Falcon code segment, which consists of 0x100 byte pages.
+//! An approach to getting this correct could be:
 //!
 //! ```
 //! use libtegra::tsec::FIRMWARE_ALIGNMENT;
@@ -61,12 +67,11 @@
 //! }
 //!
 //! /// The firmware blob.
-//! static FAUCON: Firmware<[u8; 15]> = Firmware::new([
+//! static FAUCON: Firmware<[u8; 13]> = Firmware::new([
 //!     0xDF, 0xB0, 0xB0, 0xB0, 0xB0,   // mov $r15 0xB0B0B0B0;
-//!     0xC, 0x0,                       // mov $r12 0x0;
-//!     0x49, 0x0, 0x11,                // mov $r9 0x1100;
-//!     0xF6, 0x9F, 0x0,                // iowr I[$r9] $r15;
-//!     0xF8, 0x2,                      // exit;
+//!     0x49, 0x00, 0x11,               // mov $r9 0x1100;
+//!     0xF6, 0x9F, 0x00,               // iowr I[$r9] $r15;
+//!     0xF8, 0x02,                     // exit;
 //! ]);
 //!
 //! assert_eq!(FAUCON.value.as_ptr() as usize % FIRMWARE_ALIGNMENT, 0);
@@ -79,9 +84,6 @@
 //!
 //! ```no_run
 //! use libtegra::tsec::Tsec;
-//!
-//! /// The global instance of the TSEC.
-//! const TSEC: Tsec = Tsec::new();
 //!
 //! /// A helper that wraps around a TSEC firmware blob to ensure correct alignment.
 //! #[repr(align(256))]
@@ -105,16 +107,15 @@
 //! ]);
 //!
 //! // Load our Faucon firmware onto the TSEC.
-//! TSEC.load_firmware(&FAUCON.value).unwrap();
+//! Tsec::A.load_firmware(&FAUCON.value).unwrap();
 //!
 //! // Boot it up!
 //! unsafe {
-//!     TSEC.boot_firmware(0).unwrap();
+//!     Tsec::A.boot_firmware(0).unwrap();
 //! }
 //! ```
 //!
 //! [NVIDIA Falcon]: https://envytools.readthedocs.io/en/latest/hw/falcon/index.html
-//! [this article]: https://0x04.net/~mwk/Falcon.html
 //! [envytools]: https://github.com/envytools/envytools
 //! [`Tsec`]: struct.Tsec.html
 //! [`FIRMWARE_ALIGNMENT`]: constant.FIRMWARE_ALIGNMENT.html
@@ -122,7 +123,6 @@
 use enum_primitive::FromPrimitive;
 
 use crate::{car::Clock, kfuse, timer::get_milliseconds};
-
 pub use registers::*;
 
 mod registers;
@@ -138,14 +138,28 @@ enum_from_primitive! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     #[repr(u8)]
     pub enum FalconExceptionClause {
+        /// The software trap 0 that may be triggered by the TRAP instruction.
         Trap0,
+        /// The software trap 1 that may be triggered by the TRAP instruction.
         Trap1,
+        /// The software trap 2 that may be triggered by the TRAP instruction.
         Trap2,
+        /// The software trap 3 that may be triggered by the TRAP instruction.
         Trap3,
+        /// A trap that is triggered when the Falcon encounters an opcode it
+        /// cannot decode.
         InvalidOpcode,
+        /// A so-called Secure Fault was indicated by jumping to a secure page,
+        /// but the MAC verification for that page failed, which halted the MCU.
         AuthenticationEntry,
+        /// A page fault occurred because the TLB failed to provide mappings for
+        /// a virtual address on lookup.
         PageMiss,
+        /// A page fault occurred because the TLB contained multiple mappings for
+        /// a single virtual address on lookup.
         PageMultipleMiss,
+        /// A breakpoint, which was set through the integrated hardware debugging
+        /// interface, was hit during code execution.
         BreakpointHit,
     }
 }
@@ -170,8 +184,8 @@ pub enum FalconError {
     /// The firmware blob is misaligned.
     FirmwareMisaligned,
     /// A Falcon exception that occurred during execution, consisting of the Program
-    /// Counter where execution has halted and a [`FalconExceptionClause`] which
-    /// provides additional details.
+    /// Counter where execution stopped and a [`FalconExceptionClause`] which
+    /// provides additional context.
     ///
     /// [`FalconExceptionClause`]: enum.FalconExceptionClause.html
     Exception(u32, FalconExceptionClause),
@@ -179,23 +193,26 @@ pub enum FalconError {
 
 /// Representation of the Tegra Security Co-Processor.
 #[derive(Debug)]
-pub struct Tsec;
+pub struct Tsec {
+    /// The internal TSEC MMIO register interface.
+    registers: *const Registers,
+}
 
 impl Tsec {
-    /// Creates a new instance of the TSEC.
-    ///
-    /// NOTE: Please refrain from calling this method multiple times.
-    /// It is advised to create a single, global instance
-    /// of the [`Tsec`] and stick to it.
-    ///
-    /// [`Tsec`]: struct.Tsec.html
-    pub const fn new() -> Self {
-        Tsec
-    }
+    /// Representation of the TSEC-A instance.
+    pub const A: Self = Tsec {
+        registers: TSEC_A_REGISTERS,
+    };
 
-    /// Waits for the DMA engine to enter idle state.
+    /// Representation of the TSEC-B instance.
+    pub const B: Self = Tsec {
+        registers: TSEC_B_REGISTERS,
+    };
+}
+
+impl Tsec {
     fn dma_wait_idle(&self) -> Result<(), FalconError> {
-        let register_base = unsafe { &*REGISTERS };
+        let register_base = unsafe { &*self.registers };
 
         let timeout = get_milliseconds() + 10_000;
 
@@ -208,9 +225,8 @@ impl Tsec {
         Ok(())
     }
 
-    /// Attempts to load a TSEC firmware blob onto the Falcon processor.
     fn try_load_firmware(&self, firmware: &[u8]) -> Result<(), FalconError> {
-        let register_base = unsafe { &*REGISTERS };
+        let register_base = unsafe { &*self.registers };
 
         // Check if the firmware is being aligned correctly.
         let firmware_address = firmware.as_ptr() as usize;
@@ -289,11 +305,11 @@ impl Tsec {
     /// in advance, otherwise this method will fail.
     ///
     /// UNSAFE: This method is considered unsafe because code execution on the
-    /// TSEC can always fail, especially for malformed or misaligned blobs.
+    /// TSEC can fail for malformed or misaligned blobs.
     ///
     /// [`Tsec::load_firmware`]: struct.Tsec.html#method.load_firmware
     pub unsafe fn boot_firmware(&self, boot_vector: u32) -> Result<(), FalconError> {
-        let register_base = &*REGISTERS;
+        let register_base = &*self.registers;
         let mut res;
 
         // Configure Falcon and start the CPU.

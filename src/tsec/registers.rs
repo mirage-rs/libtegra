@@ -2,10 +2,13 @@
 
 use register::mmio::ReadWrite;
 
-use crate::memory_map::TSEC;
+use crate::memory_map::{TSEC, TSEC2};
 
-/// A pointer to the TSEC register block that can be accessed by dereferencing it.
-pub const REGISTERS: *const Registers = TSEC as *const Registers;
+/// A pointer to the TSEC-A register block that can be accessed by dereferencing it.
+pub const TSEC_A_REGISTERS: *const Registers = TSEC as *const Registers;
+
+/// A pointer to the TSEC-B register block that can be accessed by dereferencing it.
+pub const TSEC_B_REGISTERS: *const Registers = TSEC2 as *const Registers;
 
 // TODO: Bitfields.
 

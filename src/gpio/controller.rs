@@ -10,10 +10,7 @@ use crate::memory_map::gpio::BASE;
 /// A pointer to the GPIO controller that can be accessed by dereferencing it.
 pub const CONTROLLER: *const GpioController = BASE as *const GpioController;
 
-/// The amount of GPIO ports per bank.
 const GPIO_PORTS_COUNT: usize = 4;
-
-/// The amount of available GPIO banks.
 const GPIO_BANKS_COUNT: usize = 8;
 
 // TODO: Bitfields for the registers?

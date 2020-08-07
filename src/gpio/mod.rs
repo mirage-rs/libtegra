@@ -54,90 +54,50 @@ mod controller;
 /// The GPIO ports that are supported by the platform.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Port {
-    /// Port A.
     A = 0,
-    /// Port B.
     B,
-    /// Port C.
     C,
-    /// Port D.
     D,
-    /// Port E.
     E,
-    /// Port F.
     F,
-    /// Port G.
     G,
-    /// Port H.
     H,
-    /// Port I.
     I,
-    /// Port J.
     J,
-    /// Port K.
     K,
-    /// Port L.
     L,
-    /// Port M.
     M,
-    /// Port N.
     N,
-    /// Port O.
     O,
-    /// Port P.
     P,
-    /// Port Q.
     Q,
-    /// Port R.
     R,
-    /// Port S.
     S,
-    /// Port T.
     T,
-    /// Port U.
     U,
-    /// Port V.
     V,
-    /// Port W.
     W,
-    /// Port X.
     X,
-    /// Port Y.
     Y,
-    /// Port Z.
     Z,
-    /// Port AA.
     AA,
-    /// Port BB.
     BB,
-    /// Port CC.
     CC,
-    /// Port DD.
     DD,
-    /// Port EE.
     EE,
-    /// Port FF.
     FF,
 }
 
 /// The GPIO pins that are provided for each port.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pin {
-    /// Pin 0.
     P0 = 0,
-    /// Pin 1.
     P1,
-    /// Pin 2.
     P2,
-    /// Pin 3.
     P3,
-    /// Pin 4.
     P4,
-    /// Pin 5.
     P5,
-    /// Pin 6.
     P6,
-    /// Pin 7.
     P7,
 }
 
@@ -234,31 +194,26 @@ macro_rules! tegra_gpio {
 }
 
 impl Gpio {
-    /// Calculates the numeric representation of the wrapped GPIO.
     #[inline(always)]
     fn get_gpio_value(&self) -> usize {
         self.port as usize * 8 + self.pin as usize
     }
 
-    /// Calculates the numeric representation of the wrapped GPIO port.
     #[inline(always)]
     fn get_port(&self) -> usize {
         self.port as usize & 3
     }
 
-    /// Calculates the bank where the GPIO is located.
     #[inline(always)]
     fn get_bank(&self) -> usize {
         self.get_gpio_value() >> 5
     }
 
-    /// Calculates the GPIO mask to be used for register writes.
     #[inline(always)]
     fn get_mask(&self) -> u32 {
         1 << self.pin as u32
     }
 
-    /// Reads the flag of a GPIO register.
     #[inline]
     fn read_flag(&self, register: &ReadWrite<u32>) -> u32 {
         (register.get() >> self.pin as u32) & 1
@@ -291,7 +246,7 @@ impl Gpio {
         // Write the new value to the register.
         register.set(value);
 
-        // Dummy read.
+        // Commit the write.
         register.get();
     }
 

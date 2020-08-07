@@ -25,7 +25,7 @@
 
 use ::core::marker::Sync;
 
-use byteorder::{BE, ByteOrder};
+use byteorder::{ByteOrder, BE};
 
 pub use self::core::*;
 pub use registers::*;
@@ -63,17 +63,49 @@ impl SecurityEngine {
 }
 
 impl SecurityEngine {
-    /// Peforms a hardware operation to generate the Storage Root Key (SRK).
+    /// Locks the SE down.
+    ///
+    /// Only TrustZone clients can access the SE anymore afterwards.
+    pub fn lock(&self) {
+        let engine = unsafe { &*self.registers };
+
+        let mut value = engine.SE_SE_SECURITY_0.get();
+        value |= 0 << 16; // Clear no-lockdown bit.
+        engine.SE_SE_SECURITY_0.set(value);
+
+        // Confirm the write.
+        engine.SE_SE_SECURITY_0.get();
+    }
+
+    /// Unlocks the SE.
+    ///
+    /// All clients can access the SE afterwards.
+    pub fn unlock(&self) {
+        let engine = unsafe { &*self.registers };
+
+        let mut value = engine.SE_SE_SECURITY_0.get();
+        value |= 1 << 16; // Set no-lockdown bit.
+        engine.SE_SE_SECURITY_0.set(value);
+
+        // Confirm the write.
+        engine.SE_SE_SECURITY_0.get();
+    }
+
+    /// Performs a hardware operation to generate the Storage Root Key (SRK).
     ///
     /// NOTE: Different entropy sources will lead to different results.
     pub fn srk(&self) -> Result<(), OperationError> {
         let engine = unsafe { &*self.registers };
 
         // Prepare an SRK operation.
-        engine.SE_CONFIG_0.set(alg::ENC_RNG | alg::DEC_NOP | destination::SRK);
+        engine
+            .SE_CONFIG_0
+            .set(alg::ENC_RNG | alg::DEC_NOP | destination::SRK);
 
         // Configure the RNG.
-        engine.SE_RNG_CONFIG_0.set(drbg_mode::FORCE_RESEED | drbg_src::LFSR);
+        engine
+            .SE_RNG_CONFIG_0
+            .set(drbg_mode::FORCE_RESEED | drbg_src::LFSR);
 
         // Construct the Security Engine Linked Lists.
         let source_ll = LinkedList::default();
@@ -91,7 +123,9 @@ impl SecurityEngine {
         let mut output = [0; 32];
 
         // Prepare a SHA256 hardware operation.
-        engine.SE_CONFIG_0.set(enc_mode::SHA256_ENC | alg::ENC_SHA | destination::HASHREG);
+        engine
+            .SE_CONFIG_0
+            .set(enc_mode::SHA256_ENC | alg::ENC_SHA | destination::HASHREG);
         engine.SE_SHA_CONFIG_0.set(1);
         engine.SE_SHA_MSG_LENGTH_0[0].set((source.len() << 3) as u32);
         engine.SE_SHA_MSG_LENGTH_0[1].set(0);

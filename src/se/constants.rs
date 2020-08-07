@@ -97,7 +97,7 @@ pub const CTX_KNOWN_PATTERN_SIZE_WORDS: u32 = CTX_KNOWN_PATTERN_SIZE / 4;
 
 /// Data sizes related to RSA.
 pub mod rsa {
-    pub const KEY_SLOT_COUNT: u32 = 2;
+    pub const KEY_SLOT_COUNT: usize = 2;
     pub const MAX_EXP_BIT_SIZE: u32 = 2048;
     pub const MAX_EXP_SIZE_32: u32 = MAX_EXP_BIT_SIZE >> 5;
     pub const MAX_MOD_BIT_SIZE: u32 = 2048;

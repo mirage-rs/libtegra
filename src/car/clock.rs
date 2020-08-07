@@ -4,8 +4,6 @@ use register::mmio::ReadWrite;
 
 use crate::{memory_map::CAR, timer::usleep};
 
-// Some constants for the driver.
-
 const CLK_RST_CONTROLLER_RST_DEVICES_L: u32 = 0x4;
 const CLK_RST_CONTROLLER_RST_DEVICES_H: u32 = 0x8;
 const CLK_RST_CONTROLLER_RST_DEVICES_U: u32 = 0xC;
@@ -42,6 +40,219 @@ const CLK_RST_CONTROLLER_CLK_SOURCE_SOR1: u32 = 0x410;
 const CLK_RST_CONTROLLER_CLK_SOURCE_CSITE: u32 = 0x1D4;
 const CLK_RST_CONTROLLER_CLK_SOURCE_PWM: u32 = 0x110;
 
+const CLK_L_CPU: u8 = 0;
+const CLK_L_BPMP: u8 = 1;
+const CLK_L_SYS: u8 = 2;
+const CLK_L_ISPB: u8 = 3;
+const CLK_L_RTC: u8 = 4;
+const CLK_L_TMR: u8 = 5;
+const CLK_L_UARTA: u8 = 6;
+const CLK_L_UARTB: u8 = 7;
+const CLK_L_GPIO: u8 = 8;
+const CLK_L_SDMMC2: u8 = 9;
+const CLK_L_SPDIF: u8 = 10;
+const CLK_L_I2S2: u8 = 11;
+const CLK_L_I2C1: u8 = 12;
+const CLK_L_NDFLASH: u8 = 13;
+const CLK_L_SDMMC1: u8 = 14;
+const CLK_L_SDMMC4: u8 = 15;
+const CLK_L_TWC: u8 = 16;
+const CLK_L_PWM: u8 = 17;
+const CLK_L_I2S3: u8 = 18;
+const CLK_L_EPP: u8 = 19;
+const CLK_L_VI: u8 = 20;
+const CLK_L_2D: u8 = 21;
+const CLK_L_USBD: u8 = 22;
+const CLK_L_ISP: u8 = 23;
+const CLK_L_3D: u8 = 24;
+const CLK_L_DISP2: u8 = 26;
+const CLK_L_DISP1: u8 = 27;
+const CLK_L_HOST1X: u8 = 28;
+const CLK_L_VCP: u8 = 29;
+const CLK_L_I2S1: u8 = 30;
+const CLK_L_BPMP_CACHE_CTRL: u8 = 31;
+
+const CLK_H_MEM: u8 = 0;
+const CLK_H_AHBDMA: u8 = 1;
+const CLK_H_APBDMA: u8 = 2;
+const CLK_H_KBC: u8 = 4;
+const CLK_H_STAT_MON: u8 = 5;
+const CLK_H_PMC: u8 = 6;
+const CLK_H_FUSE: u8 = 7;
+const CLK_H_KFUSE: u8 = 8;
+const CLK_H_SPI1: u8 = 9;
+const CLK_H_SNOR: u8 = 10;
+const CLK_H_JTAG2TBC: u8 = 11;
+const CLK_H_SPI2: u8 = 12;
+const CLK_H_XIO: u8 = 13;
+const CLK_H_SPI3: u8 = 14;
+const CLK_H_I2C5: u8 = 15;
+const CLK_H_DSI: u8 = 16;
+const CLK_H_HSI: u8 = 18;
+const CLK_H_HDMI: u8 = 19;
+const CLK_H_CSI: u8 = 20;
+const CLK_H_I2C2: u8 = 22;
+const CLK_H_UARTC: u8 = 23;
+const CLK_H_MIPI_CAL: u8 = 24;
+const CLK_H_EMC: u8 = 25;
+const CLK_H_USB2: u8 = 26;
+const CLK_H_USB3: u8 = 27;
+const CLK_H_MPE: u8 = 28;
+const CLK_H_VDE: u8 = 29;
+const CLK_H_BSEA: u8 = 30;
+const CLK_H_BSEV: u8 = 31;
+
+const CLK_U_UARTD: u8 = 1;
+const CLK_U_UARTE: u8 = 2;
+const CLK_U_I2C3: u8 = 3;
+const CLK_U_SPI4: u8 = 4;
+const CLK_U_SDMMC3: u8 = 5;
+const CLK_U_PCIE: u8 = 6;
+const CLK_U_UNUSED: u8 = 7;
+const CLK_U_AFI: u8 = 8;
+const CLK_U_CSITE: u8 = 9;
+const CLK_U_PCIEXCLK: u8 = 10;
+const CLK_U_BPMPUCQ: u8 = 11;
+const CLK_U_LA: u8 = 12;
+const CLK_U_TRACECLKIN: u8 = 13;
+const CLK_U_SOC_THERM: u8 = 14;
+const CLK_U_DTV: u8 = 15;
+const CLK_U_NAND_SPEED: u8 = 16;
+const CLK_U_I2C_SLOW: u8 = 17;
+const CLK_U_DSIB: u8 = 18;
+const CLK_U_TSEC: u8 = 19;
+const CLK_U_IRAMA: u8 = 20;
+const CLK_U_IRAMB: u8 = 21;
+const CLK_U_IRAMC: u8 = 22;
+const CLK_U_IRAMD: u8 = 23;
+const CLK_U_BPMP_CACHE_RAM: u8 = 24;
+const CLK_U_XUSB_HOST: u8 = 25;
+const CLK_U_CLK_M_DOUBLER: u8 = 26;
+const CLK_U_MSENC: u8 = 27;
+const CLK_U_SUS_OUT: u8 = 28;
+const CLK_U_DEV2_OUT: u8 = 29;
+const CLK_U_DEV1_OUT: u8 = 30;
+const CLK_U_XUSB_DEV: u8 = 31;
+
+const CLK_V_CPUG: u8 = 0;
+const CLK_V_CPULP: u8 = 1;
+const CLK_V_3D2: u8 = 2;
+const CLK_V_MSELECT: u8 = 3;
+const CLK_V_TSENSOR: u8 = 4;
+const CLK_V_I2S4: u8 = 5;
+const CLK_V_I2S5: u8 = 6;
+const CLK_V_I2C4: u8 = 7;
+const CLK_V_SPI5: u8 = 8;
+const CLK_V_SPI6: u8 = 9;
+const CLK_V_AHUB: u8 = 10;
+const CLK_V_APB2APE: u8 = 11;
+const CLK_V_DAM0: u8 = 12;
+const CLK_V_DAM1: u8 = 13;
+const CLK_V_DAM2: u8 = 14;
+const CLK_V_HDA2CODEC_2X: u8 = 15;
+const CLK_V_ATOMICS: u8 = 16;
+const CLK_V_SPDIF_DOUBLER: u8 = 22;
+const CLK_V_ACTMON: u8 = 23;
+const CLK_V_EXTPERIPH1: u8 = 24;
+const CLK_V_EXTPERIPH2: u8 = 25;
+const CLK_V_EXTPERIPH3: u8 = 26;
+const CLK_V_SATA_OOB: u8 = 27;
+const CLK_V_SATA: u8 = 28;
+const CLK_V_HDA: u8 = 29;
+const CLK_V_TZRAM: u8 = 30;
+const CLK_V_SE: u8 = 31;
+
+const CLK_W_HDA2HDMICODEC: u8 = 0;
+const CLK_W_RESERVED0: u8 = 1;
+const CLK_W_PCIERX0: u8 = 2;
+const CLK_W_PCIERX1: u8 = 3;
+const CLK_W_PCIERX2: u8 = 4;
+const CLK_W_PCIERX3: u8 = 5;
+const CLK_W_PCIERX4: u8 = 6;
+const CLK_W_PCIERX5: u8 = 7;
+const CLK_W_CEC: u8 = 8;
+const CLK_W_PCIE2_IOBIST: u8 = 9;
+const CLK_W_EMC_IOBIST: u8 = 10;
+const CLK_W_HDMI_IOBIST: u8 = 11;
+const CLK_W_SATA_IOBIST: u8 = 12;
+const CLK_W_MIPI_IOBIST: u8 = 13;
+const CLK_W_XUSB_PADCTL: u8 = 14;
+const CLK_W_XUSB: u8 = 15;
+const CLK_W_CILAB: u8 = 16;
+const CLK_W_CILCD: u8 = 17;
+const CLK_W_CILEF: u8 = 18;
+const CLK_W_DSIA_LP: u8 = 19;
+const CLK_W_DSIB_LP: u8 = 20;
+const CLK_W_ENTROPY: u8 = 21;
+const CLK_W_DDS: u8 = 22;
+const CLK_W_DP2: u8 = 24;
+const CLK_W_AMX0: u8 = 25;
+const CLK_W_ADX0: u8 = 26;
+const CLK_W_DVFS: u8 = 27;
+const CLK_W_XUSB_SS: u8 = 28;
+const CLK_W_EMC_LATENCY: u8 = 29;
+const CLK_W_MC1: u8 = 30;
+
+const CLK_X_SPARE: u8 = 0;
+const CLK_X_DMIC1: u8 = 1;
+const CLK_X_DMIC2: u8 = 2;
+const CLK_X_ETR: u8 = 3;
+const CLK_X_CAM_MCLK: u8 = 4;
+const CLK_X_CAM_MCLK2: u8 = 5;
+const CLK_X_I2C6: u8 = 6;
+const CLK_X_MC_CAPA: u8 = 7;
+const CLK_X_MC_CBPA: u8 = 8;
+const CLK_X_MC_CPU: u8 = 9;
+const CLK_X_MC_BBC: u8 = 10;
+const CLK_X_VIM2_CLK: u8 = 11;
+const CLK_X_MIPIBIF: u8 = 13;
+const CLK_X_EMC_DLL: u8 = 14;
+const CLK_X_HDMI_AUDIO: u8 = 16;
+const CLK_X_UART_FST_MIPI_CAL: u8 = 17;
+const CLK_X_VIC: u8 = 18;
+const CLK_X_ADX1: u8 = 20;
+const CLK_X_DPAUX: u8 = 21;
+const CLK_X_SOR0: u8 = 22;
+const CLK_X_SOR1: u8 = 23;
+const CLK_X_GPU: u8 = 24;
+const CLK_X_DBGAPB: u8 = 25;
+const CLK_X_HPLL_ADSP: u8 = 26;
+const CLK_X_PLLP_ADSP: u8 = 27;
+const CLK_X_PLLA_ADSP: u8 = 28;
+const CLK_X_PLLG_REF: u8 = 29;
+
+const CLK_Y_SPARE1: u8 = 0;
+const CLK_Y_SDMMC_LEGACY_TM: u8 = 1;
+const CLK_Y_NVDEC: u8 = 2;
+const CLK_Y_NVJPG: u8 = 3;
+const CLK_Y_AXIAP: u8 = 4;
+const CLK_Y_DMIC3: u8 = 5;
+const CLK_Y_APE: u8 = 6;
+const CLK_Y_ADSP: u8 = 7;
+const CLK_Y_MC_CDPA: u8 = 8;
+const CLK_Y_MC_CCPA: u8 = 9;
+const CLK_Y_MAUD: u8 = 10;
+const CLK_Y_SATA_USB_UPHY: u8 = 12;
+const CLK_Y_PEX_USB_UPHY: u8 = 13;
+const CLK_Y_TSECB: u8 = 14;
+const CLK_Y_DPAUX1: u8 = 15;
+const CLK_Y_VI_I2C: u8 = 16;
+const CLK_Y_HSIC_TRK: u8 = 17;
+const CLK_Y_USB2_TRK: u8 = 18;
+const CLK_Y_QSPI: u8 = 19;
+const CLK_Y_UARTAPE: u8 = 20;
+const CLK_Y_ADSPINTF: u8 = 21;
+const CLK_Y_ADSPPERIPH: u8 = 22;
+const CLK_Y_ADSPDBG: u8 = 23;
+const CLK_Y_ADSPWDT: u8 = 24;
+const CLK_Y_ADSPSCU: u8 = 25;
+const CLK_Y_ADSPNEON: u8 = 26;
+const CLK_Y_NVENC: u8 = 27;
+const CLK_Y_IQC2: u8 = 28;
+const CLK_Y_IQC1: u8 = 29;
+const CLK_Y_SOR_SAFE: u8 = 30;
+const CLK_Y_PLLP_OUT_CPU: u8 = 31;
+
 /// Representation of a device clock.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Clock {
@@ -59,15 +270,13 @@ pub struct Clock {
     clock_divisor: u32,
 }
 
-// Definitions of known device clocks.
-
 impl Clock {
     /// Representation of the UART A clock.
     pub const UART_A: Self = Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_L,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_L,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_A,
-        index: 0x6,
+        index: CLK_L_UARTA,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -77,7 +286,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_L,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_L,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_B,
-        index: 0x7,
+        index: CLK_L_UARTB,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -87,7 +296,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_C,
-        index: 0x17,
+        index: CLK_H_UARTC,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -97,7 +306,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_U,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_U,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_D,
-        index: 0x1,
+        index: CLK_U_UARTD,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -107,7 +316,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_Y,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_Y,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_UART_APE,
-        index: 0x14,
+        index: CLK_Y_UARTAPE,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -117,9 +326,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_L,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_L,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_1,
-        index: 0xC,
-        clock_source: 0x6,
-        clock_divisor: 0,
+        index: CLK_L_I2C1,
+        clock_source: 0,
+        clock_divisor: 19,
     };
 
     /// Representation of the I²C 2 clock.
@@ -127,9 +336,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_2,
-        index: 0x16,
-        clock_source: 0x6,
-        clock_divisor: 0,
+        index: CLK_H_I2C2,
+        clock_source: 0,
+        clock_divisor: 4,
     };
 
     /// Representation of the I²C 3 clock.
@@ -137,9 +346,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_U,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_U,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_3,
-        index: 0x3,
-        clock_source: 0x6,
-        clock_divisor: 0,
+        index: CLK_U_I2C3,
+        clock_source: 0,
+        clock_divisor: 4,
     };
 
     /// Representation of the I²C 4 clock.
@@ -147,9 +356,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_V,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_V,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_4,
-        index: 0x7,
-        clock_source: 0x6,
-        clock_divisor: 0,
+        index: CLK_V_I2C4,
+        clock_source: 0,
+        clock_divisor: 19,
     };
 
     /// Representation of the I²C 5 clock.
@@ -157,9 +366,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_5,
-        index: 0xF,
-        clock_source: 0x6,
-        clock_divisor: 0,
+        index: CLK_H_I2C5,
+        clock_source: 0,
+        clock_divisor: 4,
     };
 
     /// Representation of the I²C 6 clock.
@@ -167,9 +376,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_X,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_X,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_I2C_6,
-        index: 0x6,
-        clock_source: 0x6,
-        clock_divisor: 0,
+        index: CLK_X_I2C6,
+        clock_source: 0,
+        clock_divisor: 19,
     };
 
     /// Representation of the Security Engine clock.
@@ -177,7 +386,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_V,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_V,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_SE,
-        index: 0x1F,
+        index: CLK_V_SE,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -187,7 +396,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_V,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_V,
         source: CLK_NO_SOURCE,
-        index: 0x1E,
+        index: CLK_V_TZRAM,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -197,27 +406,27 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_L,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_L,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_HOST1X,
-        index: 0x1C,
-        clock_source: 0x4,
-        clock_divisor: 0x3,
+        index: CLK_L_HOST1X,
+        clock_source: 4,
+        clock_divisor: 3,
     };
 
-    /// Representation of the TSEC clock.
+    /// Representation of the TSEC-A clock.
     pub const TSEC: Self = Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_U,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_U,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_TSEC,
-        index: 0x13,
+        index: CLK_U_TSEC,
         clock_source: 0,
-        clock_divisor: 0x2,
+        clock_divisor: 2,
     };
 
-    /// Representation of the TSECB clock.
+    /// Representation of the TSEC-B clock.
     pub const TSECB: Self = Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_Y,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_Y,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_TSECB,
-        index: 0xE,
+        index: CLK_Y_TSECB,
         clock_source: 0,
         clock_divisor: 2,
     };
@@ -227,7 +436,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_Y,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_Y,
         source: CLK_NO_SOURCE,
-        index: 0x1E,
+        index: CLK_Y_SOR_SAFE,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -237,7 +446,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_X,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_X,
         source: CLK_NO_SOURCE,
-        index: 0x16,
+        index: CLK_X_SOR0,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -247,9 +456,9 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_X,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_X,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_SOR1,
-        index: 0x17,
+        index: CLK_X_SOR1,
         clock_source: 0,
-        clock_divisor: 0x2,
+        clock_divisor: 2,
     };
 
     /// Representation of the DPAUX clock.
@@ -257,7 +466,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_X,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_X,
         source: CLK_NO_SOURCE,
-        index: 0x15,
+        index: CLK_X_DPAUX,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -267,7 +476,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_Y,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_Y,
         source: CLK_NO_SOURCE,
-        index: 0xF,
+        index: CLK_Y_DPAUX1,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -277,7 +486,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_NO_SOURCE,
-        index: 0x18,
+        index: CLK_H_MIPI_CAL,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -287,7 +496,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_NO_SOURCE,
-        index: 0x14,
+        index: CLK_H_CSI,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -297,7 +506,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_NO_SOURCE,
-        index: 0x10,
+        index: CLK_H_DSI,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -307,7 +516,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_U,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_U,
         source: CLK_NO_SOURCE,
-        index: 0x12,
+        index: CLK_U_DSIB,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -317,7 +526,7 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_H,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_H,
         source: CLK_NO_SOURCE,
-        index: 0x8,
+        index: CLK_H_KFUSE,
         clock_source: 0,
         clock_divisor: 0,
     };
@@ -327,19 +536,19 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_W,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_W,
         source: CLK_NO_SOURCE,
-        index: 0x1B,
+        index: CLK_W_DVFS,
         clock_source: 0,
         clock_divisor: 0,
     };
 
     /// Representation of the CSITE clock.
-    pub const CORESIGHT: Self = Clock {
+    pub const CSITE: Self = Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_U,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_U,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_CSITE,
-        index: 0x9,
+        index: CLK_U_CSITE,
         clock_source: 0,
-        clock_divisor: 0x4,
+        clock_divisor: 4,
     };
 
     /// Representation of the PWM clock.
@@ -347,28 +556,18 @@ impl Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_L,
         enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_L,
         source: CLK_RST_CONTROLLER_CLK_SOURCE_PWM,
-        index: 0x11,
-        clock_source: 0x6,
-        clock_divisor: 0x4,
+        index: CLK_L_PWM,
+        clock_source: 6,
+        clock_divisor: 4,
     };
 }
 
 impl Clock {
-    /// Calculates the mask to be used for writes to the clock registers.
     #[inline(always)]
     fn get_mask(&self) -> u32 {
         (1 << (self.index & 0x1F)) as u32
     }
 
-    /// Changes the reset state of a clock.
-    ///
-    /// # Arguments
-    ///
-    /// Behavior of this method depends on the `reset` argument.
-    ///
-    /// * `true` - Puts a clock into a reset state.
-    ///
-    /// * `false` - Takes a clock off the reset state.
     fn set_reset(&self, reset: bool) {
         // Figure out the register to write to.
         let reset_reg = unsafe { &*((CAR + self.reset) as *const ReadWrite<u32>) };
@@ -388,15 +587,6 @@ impl Clock {
         reset_reg.set(value);
     }
 
-    /// Changes the enabling state of the clock.
-    ///
-    /// # Arguments
-    ///
-    /// Behavior of this method depends on the `enable` argument.
-    ///
-    /// * `true` - Enables the device.
-    ///
-    /// * `false` - Disables the device.
     fn set_enable(&self, enable: bool) {
         // Figure out the register to write to.
         let enable_reg = unsafe { &*((CAR + self.enable) as *const ReadWrite<u32>) };
@@ -424,9 +614,8 @@ impl Clock {
         // Configure the clock source, if needed.
         if self.source != CLK_NO_SOURCE {
             unsafe {
-                (*((CAR + self.source) as *const ReadWrite<u32>)).set(
-                    (self.clock_source << 29) | self.clock_divisor
-                );
+                (*((CAR + self.source) as *const ReadWrite<u32>))
+                    .set((self.clock_source << 29) | self.clock_divisor);
             }
         }
 

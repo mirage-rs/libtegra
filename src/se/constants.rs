@@ -69,6 +69,7 @@ pub mod opcodes {
 
 /// Data sizes related to AES.
 pub mod aes {
+    pub const KEY_SLOT_COUNT: usize = 16;
     pub const KEY_SIZE_256: u32 = 32;
     pub const KEY_SIZE_192: u32 = 24;
     pub const KEY_SIZE_128: u32 = 16;
@@ -96,7 +97,7 @@ pub const CTX_KNOWN_PATTERN_SIZE_WORDS: u32 = CTX_KNOWN_PATTERN_SIZE / 4;
 
 /// Data sizes related to RSA.
 pub mod rsa {
-    pub const KEYSLOT_COUNT: u32 = 2;
+    pub const KEY_SLOT_COUNT: u32 = 2;
     pub const MAX_EXP_BIT_SIZE: u32 = 2048;
     pub const MAX_EXP_SIZE_32: u32 = MAX_EXP_BIT_SIZE >> 5;
     pub const MAX_MOD_BIT_SIZE: u32 = 2048;

@@ -91,6 +91,41 @@ impl SecurityEngine {
         engine.SE_SE_SECURITY_0.get();
     }
 
+    /// Locks down the Security Engine per-key.
+    pub fn lock_per_key(&self) {
+        let engine = unsafe { &*self.registers };
+
+        engine.SE_CRYPTO_SECURITY_PERKEY_0.set(0);
+
+        let mut value = engine.SE_SE_SECURITY_0.get();
+        value |= 0 << 2; // Set per-key secure setting.
+        engine.SE_SE_SECURITY_0.set(value);
+
+        // Confirm the write.
+        engine.SE_SE_SECURITY_0.get();
+    }
+
+    /// Disables the Security Engine.
+    pub fn disable(&self) {
+        let engine = unsafe { &*self.registers };
+
+        // Lock access to the AES key slots.
+        for i in 0..aes::KEY_SLOT_COUNT {
+            engine.SE_CRYPTO_KEYTABLE_ACCESS_0[i].set(0);
+        }
+
+        // Lock access to the RSA key slots.
+        for i in 0..rsa::KEY_SLOT_COUNT {
+            engine.SE_RSA_KEYTABLE_ACCESS_0[i].set(0);
+        }
+
+        // Set Per Key lockdown.
+        self.lock_per_key();
+
+        // Adjust lockdown settings.
+        engine.SE_SE_SECURITY_0.set(2);
+    }
+
     /// Performs a hardware operation to generate the Storage Root Key (SRK).
     ///
     /// NOTE: Different entropy sources will lead to different results.

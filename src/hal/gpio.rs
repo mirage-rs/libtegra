@@ -1,16 +1,17 @@
-use crate::gpio::{Gpio, Level};
 use embedded_hal::digital::v2;
+
+use crate::gpio::{Gpio, Level};
 
 impl v2::OutputPin for Gpio {
     type Error = ();
 
-    fn set_high(&mut self) -> Result<(), Self::Error> {
-        self.write(Level::High);
+    fn set_low(&mut self) -> Result<(), Self::Error> {
+        self.write(Level::Low);
         Ok(())
     }
 
-    fn set_low(&mut self) -> Result<(), Self::Error> {
-        self.write(Level::Low);
+    fn set_high(&mut self) -> Result<(), Self::Error> {
+        self.write(Level::High);
         Ok(())
     }
 }

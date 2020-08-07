@@ -12,16 +12,16 @@ impl PwmPin for PwmChannel {
         PwmChannel::enable(self);
     }
 
-    #[allow(unused_must_use)]
-    fn set_duty(&mut self, duty: f32) {
-        PwmChannel::set_pulse_width(self, duty);
-    }
-
     fn get_duty(&self) -> f32 {
         PwmChannel::get_duty(self)
     }
 
     fn get_max_duty(&self) -> f32 {
         PwmChannel::get_max_duty(self)
+    }
+
+    #[allow(unused_must_use)]
+    fn set_duty(&mut self, duty: f32) {
+        PwmChannel::set_pulse_width(self, duty);
     }
 }

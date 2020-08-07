@@ -12,36 +12,6 @@
 //! as publicly exposed constants of the [`I2c`] structure, labeled from `C1`
 //! through `C6`.
 //!
-//! ## Initialization (Master)
-//!
-//! [`I2c`] devices have to pass an initialization routine before they can be used.
-//!
-//! ```no_run
-//! use libtegra::i2c::I2c;
-//!
-//! I2c::C1.init();
-//! ```
-//!
-//! ## Communication (Master)
-//!
-//! ```no_run
-//! use libtegra::i2c::I2c;
-//!
-//! const MAX77620_RTC_I2C_ADDR: u32 = 0x68;
-//!
-//! /// Reads the current time from the Real-Time Clock over I²C.
-//! fn get_time() -> (u8, u8, u8) {
-//!     let hour = I2c::C5.read_byte(MAX77620_RTC_I2C_ADDR, 0x9).unwrap();
-//!     let minute = I2c::C5.read_byte(MAX77620_RTC_I2C_ADDR, 0x8).unwrap() & 0x7F;
-//!     let second = I2c::C5.read_byte(MAX77620_RTC_I2C_ADDR, 0x7).unwrap() & 0x7F;
-//!
-//!     (hour, minute, second)
-//! }
-//!
-//! let time = get_time();
-//! println!("The current time is: {}:{}:{}", time.0, time.1, time.2);
-//! ```
-//!
 //! [`I2c`]: struct.I2c.html
 
 pub use device::*;

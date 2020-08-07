@@ -8,9 +8,8 @@
 //! identical, are built into Tegra X1 devices and the fifth UART is located
 //! in the Audio Processing Engine.
 //!
-//! These UARTs support both, 16450 and 16550 compatible modes, however they are
-//! always being initialized in 16550 mode. Using them in 16450 mode requires a
-//! custom implementation.
+//! These UARTs support both, 16450 and 16550 compatible modes, although this
+//! implementation specifically targets the 16550 mode.
 //!
 //! UARTs internally use a TX FIFO, which acts as a buffer for data to send, and
 //! an RX FIFO, which acts as a buffer for received data, to read from. Hence,
@@ -19,36 +18,23 @@
 //! ## Initialization
 //!
 //! [`Uart`]s need to be initialized with a given baud rate before they can be used.
-//! The maximum supported rate is 12.5.
 //!
 //! ```no_run
-//! use libtegra::uart::Uart;
+//! use libtegra::uart::{Uart, BAUD_115200};
 //!
-//! Uart::A.init(115_200);
+//! Uart::A.init(BAUD_115200);
 //! ```
 //!
 //! ## Communication
 //!
-//! After a [`Uart`] was initialized, there are many possibilities how
-//! data can be sent:
+//! After a [`Uart`] was initialized, it can be used like this:
 //!
 //! ```no_run
 //! use core::fmt::Write;
 //!
 //! use libtegra::uart::Uart;
 //!
-//! let mut uart = Uart::A; // Less typing...
-//!
-//! // You can write a slice of bytes...
-//! uart.write(b"48656c6c6f2c20776f726c6421");
-//! // ...just as well as a single byte...
-//! uart.write_byte(b'0');
-//!
-//! // ...or even strings with the `Write` trait.
-//! writeln!(&mut uart, "Hello, world!").ok();
-//!
-//! let name = "John";
-//! writeln!(&mut uart, "Hello, {}!", name).ok();
+//! writeln!(&mut Uart::A, "I got {} problems, but UART logging ain't one!", 99);
 //! ```
 //!
 //! Reading data is also supported:
@@ -61,11 +47,9 @@
 //! // Read a single byte.
 //! let byte = uart.read_byte();
 //!
-//! // Read 10 bytes into a buffer and print the data.
+//! // Read 10 bytes into a buffer.
 //! let mut buffer = [0; 10];
 //! uart.read(&mut buffer);
-//!
-//! println!("UART A: {}", String::from_utf8_lossy(&buffer));
 //! ```
 //!
 //! ## Flushing
@@ -82,23 +66,24 @@
 //! [`Uart`]: struct.Uart.html
 
 use core::{
-    cell::Cell,
     fmt::{Error, Write},
     marker::Sync,
 };
 
 use crate::{car::Clock, timer::usleep};
-
 pub use registers::*;
 
 mod registers;
+
+/// The default baud rate that can be used to intiialize UARTs.
+pub const BAUD_115200: u32 = 115_200;
 
 /// Representation of a UART.
 ///
 /// NOTE: Instances of this struct should never be created manually.
 /// Refer to the public constants the struct holds, which represent
 /// the UARTs A through E.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Uart {
     /// The baud rate this [`Uart`] is configured with.
     ///
@@ -108,7 +93,7 @@ pub struct Uart {
     ///
     /// [`Uart`]: struct.Uart.html
     /// [`Uart::init`]: struct.Uart.html#method.init
-    baud: Cell<u32>,
+    baud: u32,
     /// A reference to the device clock that corresponds to the UART.
     clock: &'static Clock,
     /// A pointer to the [`Registers`] of the UART.
@@ -122,86 +107,82 @@ pub struct Uart {
 impl Uart {
     /// Representation of UART A.
     pub const A: Self = Uart {
-        baud: Cell::new(0),
+        baud: 0,
         clock: &Clock::UART_A,
         registers: UART_A_REGISTERS,
     };
 
     /// Representation of UART B.
     pub const B: Self = Uart {
-        baud: Cell::new(0),
+        baud: 0,
         clock: &Clock::UART_B,
         registers: UART_B_REGISTERS,
     };
 
     /// Representation of UART C.
     pub const C: Self = Uart {
-        baud: Cell::new(0),
+        baud: 0,
         clock: &Clock::UART_C,
         registers: UART_C_REGISTERS,
     };
 
     /// Representation of UART D.
     pub const D: Self = Uart {
-        baud: Cell::new(0),
+        baud: 0,
         clock: &Clock::UART_D,
         registers: UART_D_REGISTERS,
     };
 
     /// Representation of UART E.
     pub const E: Self = Uart {
-        baud: Cell::new(0),
+        baud: 0,
         clock: &Clock::UART_APE,
         registers: UART_E_REGISTERS,
     };
 }
 
 impl Uart {
-    /// Waits for a given amount of baud cycles.
     #[inline(always)]
     fn wait_cycles(&self, amount: u32) {
-        let baud_rate = self.baud.get();
+        let baud_rate = self.baud;
         usleep((amount * 1_000_000 + 16 * baud_rate - 1) / (16 * baud_rate));
     }
 
-    /// Waits for a given amount of baud cycles.
     #[inline(always)]
     fn wait_symbols(&self, amount: u32) {
-        let baud_rate = self.baud.get();
+        let baud_rate = self.baud;
         usleep((amount * 1_000_000 + baud_rate - 1) / baud_rate);
     }
 
-    /// Computes the baud value that should be written to the MMIOs.
-    fn get_baud_rate(&self) -> u32 {
-        let baud_rate = self.baud.get();
+    fn round_baud_rate(&self) -> u32 {
+        let baud_rate = self.baud;
 
         (8 * baud_rate + 408_000_000) / (16 * baud_rate)
     }
 
     /// Initializes the Uart with a given baud rate.
     ///
-    /// NOTE: This method needs to be called once before a
-    /// [`Uart`] can actually send and receive data.
-    /// Further, it is required to do the respective [`pinmux`]
-    /// configuration before calling this method.
+    /// NOTE: This method needs to be called once before a [`Uart`] can actually
+    /// send and receive data. Further, it is required to do the respective
+    /// [`pinmux`] configuration before calling this method.
     ///
     /// [`Uart`]: struct.Uart.html
     /// [`pinmux`]: ../pinmux
-    pub fn init(&self, baud_rate: u32) {
+    pub fn init(&mut self, baud_rate: u32) {
         let controller = unsafe { &*self.registers };
 
         // Store the provided baud rate.
-        self.baud.set(baud_rate);
+        self.baud = baud_rate;
 
-        // Enable the device clock.
+        // Bring up the device clock.
         self.clock.enable();
 
         while !controller.UART_LSR_0.is_set(UART_LSR_0::TMTY) {
-            // Wait for idle state.
+            // Wait for TX FIFO idle state.
         }
 
         // Calculate the baud rate, rounded to nearest.
-        let real_baud_rate = self.get_baud_rate();
+        let rounded_baud_rate = self.round_baud_rate();
 
         // Setup UART in FIFO mode.
 
@@ -210,11 +191,13 @@ impl Uart {
         // Disable hardware flow control.
         controller.UART_MCR_0.set(0);
         // Enable DLAB and set word length to 8.
-        controller.UART_LCR_0.modify(UART_LCR_0::DLAB::SET + UART_LCR_0::WD_SIZE::WordLength8);
+        controller
+            .UART_LCR_0
+            .modify(UART_LCR_0::DLAB::SET + UART_LCR_0::WD_SIZE::WordLength8);
         // Divisor latch LSB.
-        controller.UART_THR_DLAB_0_0.set(real_baud_rate);
+        controller.UART_THR_DLAB_0_0.set(rounded_baud_rate & 0xFF);
         // Divisor latch MSB.
-        controller.UART_IER_DLAB_0_0.set(real_baud_rate >> 8);
+        controller.UART_IER_DLAB_0_0.set((rounded_baud_rate >> 8) & 0xFF);
         // Disable DLAB.
         controller.UART_LCR_0.modify(UART_LCR_0::DLAB::CLEAR);
         // Dummy read.
@@ -225,7 +208,9 @@ impl Uart {
         // Enable FIFO with default settings.
 
         // Enable FIFO mode.
-        controller.UART_IIR_FCR_0.write(UART_IIR_FCR_0::EN_FIFO::Mode16550);
+        controller
+            .UART_IIR_FCR_0
+            .write(UART_IIR_FCR_0::EN_FIFO::Mode16550);
         // Dummy read.
         controller.UART_SPR_0.get();
         // Wait for 3 baud cycles.
@@ -249,19 +234,13 @@ impl Uart {
         controller.UART_THR_DLAB_0_0.get() as u8
     }
 
-    /// Fills a mutable slice of data with bytes read over UART.
+    /// Fills a mutable buffer of data with bytes read over UART.
     ///
     /// This method blocks until the buffer is filled.
     pub fn read(&self, data: &mut [u8]) {
-        let controller = unsafe { &*self.registers };
-
         // Read the bytes one by one into the buffer.
         for i in data.iter_mut() {
             *i = self.read_byte();
-        }
-
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::RDR) {
-            // Wait for everything to be read.
         }
     }
 
@@ -279,26 +258,19 @@ impl Uart {
         controller.UART_THR_DLAB_0_0.set(byte as u32);
     }
 
-    /// Writes a slice of bytes over UART.
+    /// Writes a buffer of bytes over UART.
     ///
     /// This method blocks until everything was transferred.
     pub fn write(&self, data: &[u8]) {
-        let controller = unsafe { &*self.registers };
-
         // Write the bytes from the buffer.
-        for byte in data {
+        for byte in data.iter() {
             self.write_byte(*byte);
-        }
-
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::THRE) {
-            // Wait for everything to be written.
         }
     }
 
     /// Flushes the underlying FIFOs of the Uart.
     ///
-    /// This wipes out the data to read and the data that
-    /// should be written, so be careful when you use it.
+    /// This wipes out the data to read and the data that should be written, so be careful when you use it.
     /// In most cases, this method won't be needed.
     pub fn flush(&self) {
         let controller = unsafe { &*self.registers };
@@ -316,7 +288,11 @@ impl Uart {
         usleep(96);
 
         // Issue flush requests for TX FIFO and RX FIFO.
-        controller.UART_IIR_FCR_0.modify(UART_IIR_FCR_0::TX_CLR::SET + UART_IIR_FCR_0::RX_CLR::SET);
+        controller.UART_IIR_FCR_0.modify(
+            UART_IIR_FCR_0::EN_FIFO::Mode16550
+                + UART_IIR_FCR_0::TX_CLR::SET
+                + UART_IIR_FCR_0::RX_CLR::SET,
+        );
         // Dummy read.
         controller.UART_SPR_0.get();
         // Wait for 32 baud cycles.
@@ -327,6 +303,9 @@ impl Uart {
         {
             // Wait until the FIFOs are ready.
         }
+
+        // Re-enable hardware control flow.
+        controller.UART_MCR_0.modify(UART_MCR_0::RTS_EN::SET);
     }
 }
 
@@ -339,4 +318,6 @@ impl Write for Uart {
     }
 }
 
+// Safety: Whenever UARTs carry out an operation on the MMIOs, they
+// wait until it is safe to modify the registers to avoid race conditions.
 unsafe impl Sync for Uart {}

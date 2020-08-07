@@ -420,7 +420,7 @@ register_structs! {
         (0x24 => pub UART_RX_FIFO_CFG_0: ReadWrite<u32, UART_RX_FIFO_CFG_0::Register>),
         (0x28 => pub UART_MIE_0: ReadWrite<u32, UART_MIE_0::Register>),
         (0x2C => pub UART_VENDOR_STATUS_0_0: ReadOnly<u32, UART_VENDOR_STATUS_0_0::Register>),
-        (0x30 => _reserved: [ReadWrite<u8>; 0xC]),
+        (0x30 => _reserved),
         (0x3C => pub UART_ASR_0: ReadWrite<u32, UART_ASR_0::Register>),
         (0x40 => @END),
     }

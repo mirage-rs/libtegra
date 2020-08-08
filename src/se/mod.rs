@@ -180,6 +180,63 @@ impl SecurityEngine {
         start_normal_operation(engine, &source_ll, &mut destination_ll)
     }
 
+    /// Uses the RNG to fill the given buffer with random bytes.
+    pub fn generate_random(&self, output: &mut [u8]) -> Result<(), OperationError> {
+        // Opt out if the buffer has no capacity for data.
+        if output.len() == 0 {
+            return Ok(());
+        }
+
+        let engine = unsafe { &*self.registers };
+
+        // Determine the amount of blocks to generate.
+        let nblocks = output.len() / aes::BLOCK_SIZE as usize;
+        let aligned_size = nblocks * aes::BLOCK_SIZE as usize;
+        let _fractional = output.len() - aligned_size;
+
+        // Configure the hardware to do RNG encryption.
+        engine.SE_CONFIG_0.modify(
+            SE_CONFIG_0::ENC_MODE::Aes128
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG::Rng
+                + SE_CONFIG_0::DEC_ALG::Nop
+                + SE_CONFIG_0::DESTINATION::Memory,
+        );
+
+        engine.SE_CRYPTO_CONFIG_0.modify(
+            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
+                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
+                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
+                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
+                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
+                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
+                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
+                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
+                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
+        );
+
+        // Configure the RNG to use Entropy as source.
+        engine
+            .SE_RNG_CONFIG_0
+            .modify(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::Normal);
+
+        // Generate all the aligned blocks first.
+        if aligned_size > 0 {
+            // Load in the number of blocks to generate.
+            engine.SE_CRYPTO_LAST_BLOCK_0.set((nblocks as u32) - 1);
+
+            // Construct the Security Engine Linked Lists.
+            let source_ll = LinkedList::default();
+            let mut destination_ll = LinkedList::from(&output[..aligned_size]);
+
+            // Execute the operation.
+            start_normal_operation(engine, &source_ll, &mut destination_ll)?;
+        }
+
+        // TODO: Add support for unaligned blocks.
+        Ok(())
+    }
+
     /// Performs a hardware operation to generate the Storage Root Key (SRK).
     ///
     /// NOTE: Different entropy sources will lead to different results.

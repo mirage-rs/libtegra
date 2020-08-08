@@ -170,7 +170,6 @@ pub fn trigger_operation(
     opcode: u32,
     source: &LinkedList,
     destination: &mut LinkedList,
-    nbytes: u32,
 ) -> Result<(), OperationError> {
     // Compute memory addresses of the LLs.
     let source_address = u32::try_from(source as *const _ as usize)
@@ -204,9 +203,8 @@ pub fn start_normal_operation(
     engine: &Registers,
     source: &LinkedList,
     destination: &mut LinkedList,
-    nbytes: u32,
 ) -> Result<(), OperationError> {
-    trigger_operation(engine, opcodes::START, source, destination, nbytes)
+    trigger_operation(engine, opcodes::START, source, destination)
 }
 
 /// Triggers a Security Engine operation that saves the crypto context afterwards.
@@ -219,7 +217,6 @@ pub fn start_context_save_operation(
     engine: &Registers,
     source: &LinkedList,
     destination: &mut LinkedList,
-    nbytes: u32,
 ) -> Result<(), OperationError> {
-    trigger_operation(engine, opcodes::CTX_SAVE, source, destination, nbytes)
+    trigger_operation(engine, opcodes::CTX_SAVE, source, destination)
 }

@@ -129,43 +129,72 @@ impl SecurityEngine {
     /// Performs a hardware operation to generate the Storage Root Key (SRK).
     ///
     /// NOTE: Different entropy sources will lead to different results.
-    pub fn srk(&self) -> Result<(), OperationError> {
+    pub fn generate_srk(&self) -> Result<(), OperationError> {
         let engine = unsafe { &*self.registers };
 
-        // Prepare an SRK operation.
-        engine
-            .SE_CONFIG_0
-            .set(alg::ENC_RNG | alg::DEC_NOP | destination::SRK);
+        // Configure the hardware to do RNG encryption.
+        engine.SE_CONFIG_0.modify(
+            SE_CONFIG_0::ENC_MODE::Aes128
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG::Rng
+                + SE_CONFIG_0::DEC_ALG::Nop
+                + SE_CONFIG_0::DESTINATION::Srk,
+        );
 
-        // Configure the RNG.
+        engine.SE_CRYPTO_CONFIG_0.modify(
+            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
+                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
+                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
+                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
+                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
+                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
+                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
+                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
+                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
+        );
+
+        // Configure the RNG to use Entropy as source.
         engine
             .SE_RNG_CONFIG_0
-            .set(drbg_mode::FORCE_RESEED | drbg_src::LFSR);
+            .modify(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::ForceReseed);
 
-        // Construct the Security Engine Linked Lists.
+        // Only process a single RNG block to trigger DRBG init.
+        engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+        // Construct dummy Security Engine Linked Lists.
         let source_ll = LinkedList::default();
         let mut destination_ll = LinkedList::default();
 
         // Kick off the hardware operation.
-        start_normal_operation(engine, &source_ll, &mut destination_ll, 0)?;
+        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
 
         Ok(())
     }
 
     /// Performs a hashing operation on a given buffer of data using the SHA256 algorithm.
-    pub fn sha256(&self, source: &[u8]) -> Result<[u8; 32], OperationError> {
+    pub fn calculate_sha256(&self, source: &[u8]) -> Result<[u8; 32], OperationError> {
         let engine = unsafe { &*self.registers };
         let mut output = [0; 32];
 
-        // Prepare a SHA256 hardware operation.
+        // Configure the hardware to perform a SHA256 hashing operation.
+        engine.SE_CONFIG_0.modify(
+            SE_CONFIG_0::HASH_MODE::Sha256
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG::Sha
+                + SE_CONFIG_0::DEC_ALG::Nop
+                + SE_CONFIG_0::DESTINATION::HashReg,
+        );
         engine
-            .SE_CONFIG_0
-            .set(enc_mode::SHA256_ENC | alg::ENC_SHA | destination::HASHREG);
-        engine.SE_SHA_CONFIG_0.set(1);
+            .SE_SHA_CONFIG_0
+            .modify(SE_SHA_CONFIG_0::HW_INIT_HASH::SET);
+
+        // Set the message size.
         engine.SE_SHA_MSG_LENGTH_0[0].set((source.len() << 3) as u32);
         engine.SE_SHA_MSG_LENGTH_0[1].set(0);
         engine.SE_SHA_MSG_LENGTH_0[2].set(0);
         engine.SE_SHA_MSG_LENGTH_0[3].set(0);
+
+        // Set the message remaining size.
         engine.SE_SHA_MSG_LEFT_0[0].set((source.len() << 3) as u32);
         engine.SE_SHA_MSG_LEFT_0[1].set(0);
         engine.SE_SHA_MSG_LEFT_0[2].set(0);
@@ -175,8 +204,8 @@ impl SecurityEngine {
         let source_ll = LinkedList::from(source);
         let mut destination_ll = LinkedList::default();
 
-        // Kick off the hardware operation.
-        start_normal_operation(engine, &source_ll, &mut destination_ll, 0)?;
+        // Kick off the operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
 
         // Read and copy back the resulting hash.
         for i in 0..8 {
@@ -187,4 +216,6 @@ impl SecurityEngine {
     }
 }
 
+// Safety: The driver waits until previous operations have completed unconditionally
+// before querying a new one.
 unsafe impl Sync for SecurityEngine {}

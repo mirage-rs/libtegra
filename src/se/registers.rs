@@ -1,6 +1,6 @@
 //! Abstractions over the Tegra X1 Security Engine registers.
 
-use register::{register_bitfields, register_structs, mmio::*};
+use register::{mmio::*, register_bitfields, register_structs};
 
 use crate::memory_map::SE1;
 #[cfg(feature = "mariko")]

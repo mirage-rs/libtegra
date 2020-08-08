@@ -22,14 +22,11 @@ pub struct AddressInfo {
 
 impl<'a> From<&'a [u8]> for AddressInfo {
     fn from(buffer: &[u8]) -> Self {
-        let address = u32::try_from(buffer.as_ptr() as usize)
-            .expect("Address does not fit an u32!");
+        let address =
+            u32::try_from(buffer.as_ptr() as usize).expect("Address does not fit an u32!");
         let data_len = buffer.len() as u32;
 
-        AddressInfo {
-            address,
-            data_len,
-        }
+        AddressInfo { address, data_len }
     }
 }
 
@@ -172,10 +169,10 @@ pub fn trigger_operation(
     destination: &mut LinkedList,
 ) -> Result<(), OperationError> {
     // Compute memory addresses of the LLs.
-    let source_address = u32::try_from(source as *const _ as usize)
-        .expect("Address does not fit an u32!");
-    let destination_address = u32::try_from(destination as *mut _ as usize)
-        .expect("Address does not fit an u32!");
+    let source_address =
+        u32::try_from(source as *const _ as usize).expect("Address does not fit an u32!");
+    let destination_address =
+        u32::try_from(destination as *mut _ as usize).expect("Address does not fit an u32!");
 
     // Load in the LLs.
     engine.SE_IN_LL_ADDR_0.set(source_address);
@@ -185,7 +182,9 @@ pub fn trigger_operation(
     prepare_operation(engine)?;
 
     // Start the hardware operation.
-    engine.SE_OPERATION_0.modify(SE_OPERATION_0::OPCODE.val(opcode));
+    engine
+        .SE_OPERATION_0
+        .modify(SE_OPERATION_0::OPCODE.val(opcode));
 
     // Wait for the operation to complete.
     complete_operation(engine)?;

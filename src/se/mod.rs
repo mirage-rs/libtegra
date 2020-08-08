@@ -126,6 +126,60 @@ impl SecurityEngine {
         engine.SE_SE_SECURITY_0.set(2);
     }
 
+    /// Initializes the RNG (Random Numer Generator).
+    ///
+    /// Calling this function is a prerequisite for all functions that use random
+    /// input sources to perform cryptographic operations.
+    pub fn initialize_rng(&self) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Lock the entropy source.
+        engine.SE_RNG_SRC_CONFIG_0.modify(
+            SE_RNG_SRC_CONFIG_0::RO_ENTROPY_SOURCE::SET
+                + SE_RNG_SRC_CONFIG_0::RO_ENTROPY_SOURCE_LOCK::SET,
+        );
+
+        // Set the reseed interval to force a reseed every 70.000 blocks.
+        engine.SE_RNG_RESEED_INTERVAL_0.set(70_001);
+
+        // Configure the hardware to force DRBG instantiation.
+        engine.SE_CONFIG_0.modify(
+            SE_CONFIG_0::ENC_MODE::Aes128
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG::Rng
+                + SE_CONFIG_0::DEC_ALG::Nop
+                + SE_CONFIG_0::DESTINATION::Memory,
+        );
+
+        engine.SE_CRYPTO_CONFIG_0.modify(
+            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
+                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
+                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
+                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
+                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
+                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
+                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
+                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
+                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
+        );
+
+        // Configure the RNG to use Entropy as source.
+        engine
+            .SE_RNG_CONFIG_0
+            .modify(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::ForceInstantiation);
+
+        // Only process a single RNG block to trigger DRBG initialization.
+        engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+        // Construct dummy Security Engine Linked Lists.
+        let buffer = [0; aes::BLOCK_SIZE as usize];
+        let source_ll = LinkedList::from(buffer.as_ref());
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the hardware operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll)
+    }
+
     /// Performs a hardware operation to generate the Storage Root Key (SRK).
     ///
     /// NOTE: Different entropy sources will lead to different results.
@@ -158,7 +212,7 @@ impl SecurityEngine {
             .SE_RNG_CONFIG_0
             .modify(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::ForceReseed);
 
-        // Only process a single RNG block to trigger DRBG init.
+        // Only process a single RNG block to trigger DRBG initialization.
         engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
 
         // Construct dummy Security Engine Linked Lists.
@@ -166,9 +220,7 @@ impl SecurityEngine {
         let mut destination_ll = LinkedList::default();
 
         // Kick off the hardware operation.
-        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
-
-        Ok(())
+        start_normal_operation(engine, &source_ll, &mut destination_ll)
     }
 
     /// Performs a hashing operation on a given buffer of data using the SHA256 algorithm.

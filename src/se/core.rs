@@ -4,7 +4,7 @@ use core::convert::TryFrom;
 
 use crate::{ahb::mem, timer};
 
-use super::{constants::*, Registers};
+use super::{constants::*, registers::*};
 
 /// Address information of a DMA buffer.
 ///
@@ -100,9 +100,6 @@ pub enum OperationError {
 ///
 /// This function also clears pending interrupts from previous operations.
 fn prepare_operation(engine: &Registers) -> Result<(), OperationError> {
-    // Disable interrupts to be issued by a Security Engine operation.
-    engine.SE_INT_ENABLE_0.set(0);
-
     // Wait for the previous operation to finish.
     let timeout = timer::get_milliseconds() + 100;
     while engine.SE_STATUS_0.get() != 0 {
@@ -112,6 +109,7 @@ fn prepare_operation(engine: &Registers) -> Result<(), OperationError> {
     }
 
     // Clear any pending interrupts from the previous operation.
+    engine.SE_ERR_STATUS_0.set(engine.SE_ERR_STATUS_0.get());
     engine.SE_INT_STATUS_0.set(engine.SE_INT_STATUS_0.get());
 
     Ok(())
@@ -127,17 +125,22 @@ fn complete_operation(engine: &Registers) -> Result<(), OperationError> {
 
     let mut timeout;
 
-    // Ensure that the operation has completed by polling the interrupt register.
+    // Wait until the operation has completed.
     timeout = timer::get_milliseconds() + 100;
-    while (engine.SE_INT_STATUS_0.get() & 0x10) == 0 {
+    while !engine.SE_INT_STATUS_0.is_set(SE_INT_STATUS_0::SE_OP_DONE) {
         if timer::get_milliseconds() > timeout {
             return Err(OperationError::Timeout);
         }
     }
 
-    // Ensure that the operation has completed by polling the status register.
+    // Ensure that no errors occurred.
+    if engine.SE_INT_STATUS_0.is_set(SE_INT_STATUS_0::ERR_STAT) {
+        return Err(OperationError::Exception);
+    }
+
+    // Ensure that the engine has gone back into idle state.
     timeout = timer::get_milliseconds() + 100;
-    while engine.SE_STATUS_0.get() != 0 {
+    while !engine.SE_STATUS_0.matches_all(SE_STATUS_0::STATE::Idle) {
         if timer::get_milliseconds() > timeout {
             return Err(OperationError::Timeout);
         }
@@ -151,7 +154,7 @@ fn complete_operation(engine: &Registers) -> Result<(), OperationError> {
         }
     }
 
-    // Ensure that no errors occurred during the operation.
+    // Ensure that no error status is set.
     if engine.SE_ERR_STATUS_0.get() != 0 {
         return Err(OperationError::Exception);
     }
@@ -182,14 +185,8 @@ pub fn trigger_operation(
     // Ensure that the previous operation has fully completed.
     prepare_operation(engine)?;
 
-    // Program the operation size in blocks.
-    let nblocks = nbytes / aes::BLOCK_SIZE;
-    if nblocks > 0 {
-        engine.SE_CRYPTO_LAST_BLOCK_0.set(nblocks - 1);
-    }
-
     // Start the hardware operation.
-    engine.SE_OPERATION_0.set(opcode);
+    engine.SE_OPERATION_0.modify(SE_OPERATION_0::OPCODE.val(opcode));
 
     // Wait for the operation to complete.
     complete_operation(engine)?;

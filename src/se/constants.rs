@@ -62,7 +62,7 @@ pub mod drbg_src {
 pub mod opcodes {
     pub const ABORT: u32 = 0;
     pub const START: u32 = 1;
-    pub const RESTART: u32 = 2;
+    pub const RESTART_OUT: u32 = 2;
     pub const CTX_SAVE: u32 = 3;
     pub const RESTART_IN: u32 = 4;
 }

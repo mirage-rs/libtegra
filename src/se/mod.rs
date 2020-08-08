@@ -69,9 +69,10 @@ impl SecurityEngine {
     pub fn lock(&self) {
         let engine = unsafe { &*self.registers };
 
-        let mut value = engine.SE_SE_SECURITY_0.get();
-        value |= 0 << 16; // Clear no-lockdown bit.
-        engine.SE_SE_SECURITY_0.set(value);
+        // Configure the hardware to restrict SE access from non-TZ clients.
+        engine
+            .SE_SE_SECURITY_0
+            .modify(SE_SE_SECURITY_0::SOFT_SECURITY::Secure);
 
         // Confirm the write.
         engine.SE_SE_SECURITY_0.get();
@@ -83,9 +84,10 @@ impl SecurityEngine {
     pub fn unlock(&self) {
         let engine = unsafe { &*self.registers };
 
-        let mut value = engine.SE_SE_SECURITY_0.get();
-        value |= 1 << 16; // Set no-lockdown bit.
-        engine.SE_SE_SECURITY_0.set(value);
+        // Configure the hardware to extend SE access to all clients.
+        engine
+            .SE_SE_SECURITY_0
+            .modify(SE_SE_SECURITY_0::SOFT_SECURITY::NonSecure);
 
         // Confirm the write.
         engine.SE_SE_SECURITY_0.get();
@@ -95,14 +97,17 @@ impl SecurityEngine {
     pub fn lock_per_key(&self) {
         let engine = unsafe { &*self.registers };
 
+        // Configure the hardware for lockdown.
         engine.SE_CRYPTO_SECURITY_PERKEY_0.set(0);
+        engine.SE_CRYPTO_SECURITY_PERKEY_0.get(); // Confirm the write.
 
-        let mut value = engine.SE_SE_SECURITY_0.get();
-        value |= 0 << 2; // Set per-key secure setting.
-        engine.SE_SE_SECURITY_0.set(value);
+        engine.SE_RSA_SECURITY_PERKEY_0.set(0);
+        engine.SE_RSA_SECURITY_PERKEY_0.get(); // Confirm the write.
 
-        // Confirm the write.
-        engine.SE_SE_SECURITY_0.get();
+        engine
+            .SE_SE_SECURITY_0
+            .modify(SE_SE_SECURITY_0::PERKEY_SECURITY::Secure);
+        engine.SE_SE_SECURITY_0.get(); // Confirm the write.
     }
 
     /// Disables the Security Engine.
@@ -123,7 +128,12 @@ impl SecurityEngine {
         self.lock_per_key();
 
         // Adjust lockdown settings.
-        engine.SE_SE_SECURITY_0.set(2);
+        engine.SE_SE_SECURITY_0.modify(
+            SE_SE_SECURITY_0::HARD_SECURITY::Secure
+                + SE_SE_SECURITY_0::ENGINE_DISABLE::Disable
+                + SE_SE_SECURITY_0::PERKEY_SECURITY::Secure
+                + SE_SE_SECURITY_0::SOFT_SECURITY::Secure,
+        );
     }
 
     /// Initializes the RNG (Random Numer Generator).

@@ -169,7 +169,7 @@ impl I2c {
 
         // Set size and receive mode.
         register_base.I2C_I2C_CNFG_0.modify(
-            I2C_I2C_CNFG_0::LENGTH.val(packet.len() as u32 - 1)
+            I2C_I2C_CNFG_0::LENGTH.val(buffer.len() as u32 - 1)
                 + I2C_I2C_CNFG_0::DEBOUNCE_CNT::FourT
                 + I2C_I2C_CNFG_0::NEW_MASTER_FSM::SET
                 + I2C_I2C_CNFG_0::CMD1::Read,

@@ -84,14 +84,20 @@ impl I2c {
     fn load_config(&self) {
         let register_base = unsafe { &*self.registers };
 
-        // Set MSTR_CONFIG_LOAD, TIMEOUT_CONFIG_LOAD, undocumented bit.
-        register_base.I2C_I2C_CONFIG_LOAD_0.set(0x25);
+        register_base.I2C_I2C_CONFIG_LOAD_0.modify(
+            I2C_I2C_CONFIG_LOAD_0::UNKNOWN::SET
+                + I2C_I2C_CONFIG_LOAD_0::TIMEOUT_CONFIG_LOAD::SET
+                + I2C_I2C_CONFIG_LOAD_0::MSTR_CONFIG_LOAD::SET,
+        );
 
         // Wait a bit for master configuration to be loaded.
         for _ in 0..20 {
             timer::usleep(1);
 
-            if register_base.I2C_I2C_CONFIG_LOAD_0.get() & 1 == 0 {
+            if !register_base
+                .I2C_I2C_CONFIG_LOAD_0
+                .is_set(I2C_I2C_CONFIG_LOAD_0::MSTR_CONFIG_LOAD)
+            {
                 break;
             }
         }
@@ -101,7 +107,9 @@ impl I2c {
         let register_base = unsafe { &*self.registers };
 
         // Set device for 7-bit write mode.
-        register_base.I2C_I2C_CMD_ADDR0_0.set(slave << 1);
+        register_base
+            .I2C_I2C_CMD_ADDR0_0
+            .modify(I2C_I2C_CMD_ADDR0_0::ADDR0.val((slave << 1) | 0));
 
         // Load in data to transmit.
         let (data1, data2) = packet.split_at(4);
@@ -113,10 +121,13 @@ impl I2c {
             register_base.I2C_I2C_CMD_DATA2_0.set(data2_value); // Set the MS value.
         }
 
-        // Set config with LENGTH = packet.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
-        register_base
-            .I2C_I2C_CNFG_0
-            .set((((packet.len() - 1) << 1) | 0x2800) as u32);
+        // Set packet size and send mode.
+        register_base.I2C_I2C_CNFG_0.modify(
+            I2C_I2C_CNFG_0::LENGTH.val(packet.len() as u32 - 1)
+                + I2C_I2C_CNFG_0::DEBOUNCE_CNT::FourT
+                + I2C_I2C_CNFG_0::NEW_MASTER_FSM::SET
+                + I2C_I2C_CNFG_0::CMD1::Write,
+        );
 
         // Kick off the transaction.
         self.load_config();
@@ -124,10 +135,13 @@ impl I2c {
         // Set CONFIG |= SEND.
         register_base
             .I2C_I2C_CNFG_0
-            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
+            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_F9FF) | 0x200);
 
-        let timeout = timer::get_milliseconds() + 1500;
-        while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
+        let timeout = timer::get_milliseconds() + 100;
+        while register_base
+            .I2C_I2C_STATUS_0
+            .is_set(I2C_I2C_STATUS_0::BUSY)
+        {
             // Wait until not busy or facing a timeout.
             if timer::get_milliseconds() > timeout {
                 return Err(Error::Timeout);
@@ -135,7 +149,10 @@ impl I2c {
         }
 
         // Check whether the transaction was successful and determine the appropriate Result.
-        if (register_base.I2C_I2C_STATUS_0.get() & 0xF) == 0 {
+        if register_base
+            .I2C_I2C_STATUS_0
+            .matches_all(I2C_I2C_STATUS_0::CMD1_STAT::Success)
+        {
             Ok(())
         } else {
             Err(Error::IoError)
@@ -146,12 +163,17 @@ impl I2c {
         let register_base = unsafe { &*self.registers };
 
         // Set device for 7-bit read mode.
-        register_base.I2C_I2C_CMD_ADDR0_0.set((slave << 1) | 1);
-
-        // Set config with LENGTH = buffer.len(), NEW_MASTER_FSM, DEBOUNCE_CNT = 4T.
         register_base
-            .I2C_I2C_CNFG_0
-            .set((((buffer.len() - 1) << 1) | 0x2840) as u32);
+            .I2C_I2C_CMD_ADDR0_0
+            .modify(I2C_I2C_CMD_ADDR0_0::ADDR0.val((slave << 1) | 1));
+
+        // Set size and receive mode.
+        register_base.I2C_I2C_CNFG_0.modify(
+            I2C_I2C_CNFG_0::LENGTH.val(packet.len() as u32 - 1)
+                + I2C_I2C_CNFG_0::DEBOUNCE_CNT::FourT
+                + I2C_I2C_CNFG_0::NEW_MASTER_FSM::SET
+                + I2C_I2C_CNFG_0::CMD1::Read,
+        );
 
         // Kick off the transaction.
         self.load_config();
@@ -159,10 +181,13 @@ impl I2c {
         // Set CONFIG |= SEND.
         register_base
             .I2C_I2C_CNFG_0
-            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_FDFF) | 0x200);
+            .set((register_base.I2C_I2C_CNFG_0.get() & 0xFFFF_F9FF) | 0x200);
 
-        let timeout = timer::get_milliseconds() + 1500;
-        while (register_base.I2C_I2C_STATUS_0.get() & 0x100) != 0 {
+        let timeout = timer::get_milliseconds() + 100;
+        while register_base
+            .I2C_I2C_STATUS_0
+            .is_set(I2C_I2C_STATUS_0::BUSY)
+        {
             // Wait until not busy or facing a timeout.
             if timer::get_milliseconds() > timeout {
                 return Err(Error::Timeout);
@@ -170,11 +195,15 @@ impl I2c {
         }
 
         // Check whether the transaction was successful and determine the appropriate Result.
-        if (register_base.I2C_I2C_STATUS_0.get() & 0xF) == 0 {
+        if register_base
+            .I2C_I2C_STATUS_0
+            .matches_all(I2C_I2C_STATUS_0::CMD1_STAT::Success)
+        {
             // Read and copy back the result.
             let data1 = register_base.I2C_I2C_CMD_DATA1_0.get().to_le_bytes();
-            let data2 = register_base.I2C_I2C_CMD_DATA2_0.get().to_le_bytes();
             if buffer.len() > 4 {
+                let data2 = register_base.I2C_I2C_CMD_DATA2_0.get().to_le_bytes();
+
                 // Copy both, LS and MS values.
                 buffer[..4].copy_from_slice(&data1);
                 {
@@ -206,8 +235,15 @@ impl I2c {
         self.clock.enable();
 
         // Setup divisor and clear the bus.
-        register_base.I2C_I2C_CLK_DIVISOR_REGISTER_0.set(0x50001);
-        register_base.I2C_I2C_BUS_CLEAR_CONFIG_0.set(0x90003);
+        register_base.I2C_I2C_CLK_DIVISOR_REGISTER_0.modify(
+            I2C_I2C_CLK_DIVISOR_REGISTER_0::I2C_CLK_DIVISOR_STD_FAST_MODE.val(5)
+                + I2C_I2C_CLK_DIVISOR_REGISTER_0::I2C_CLK_DIVISOR_HSMODE::SET,
+        );
+        register_base.I2C_I2C_BUS_CLEAR_CONFIG_0.modify(
+            I2C_I2C_BUS_CLEAR_CONFIG_0::BC_SCLK_THRESHOLD.val(9)
+                + I2C_I2C_BUS_CLEAR_CONFIG_0::BC_TERMINATE::SET
+                + I2C_I2C_BUS_CLEAR_CONFIG_0::BC_ENABLE::SET,
+        );
 
         // Load hardware configuration.
         self.load_config();
@@ -216,7 +252,10 @@ impl I2c {
         for _ in 0..10 {
             timer::usleep(20_000);
 
-            if (register_base.I2C_INTERRUPT_STATUS_REGISTER_0.get() & 0x800) != 0 {
+            if register_base
+                .I2C_INTERRUPT_STATUS_REGISTER_0
+                .is_set(I2C_INTERRUPT_STATUS_REGISTER_0::BUS_CLEAR_DONE)
+            {
                 break;
             }
         }

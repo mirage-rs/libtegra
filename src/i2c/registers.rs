@@ -832,6 +832,9 @@ register_bitfields! {
 
     /// Bitfields of the `I2C_I2C_CONFIG_LOAD_0` register.
     pub I2C_I2C_CONFIG_LOAD_0 [
+        /// An undocumented/unknown bit that is required by the driver.
+        UNKNOWN OFFSET(5) NUMBITS(1) [],
+
         /// Loads the timeout configuration from the `pclk` domain to the `i2c_slow_clk` domain.
         TIMEOUT_CONFIG_LOAD OFFSET(2) NUMBITS(1) [],
 

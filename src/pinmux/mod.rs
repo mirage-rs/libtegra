@@ -1900,8 +1900,11 @@ impl PinGrP {
             return;
         }
 
+        // Compute the register offset that corresponds to this pin.
         let pin = self as usize;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4) as u32) as *const ReadWrite<u32>) };
 
+        // Compute the corresponding mux value.
         let mux = if function >= PinFunction::Rsvd0 {
             (function as u32 - PinFunction::Rsvd0 as u32) & 3
         } else {
@@ -1913,42 +1916,40 @@ impl PinGrP {
                 i += 1;
             }
 
+            if i > 3 {
+                panic!("Invalid mux value!");
+            }
+
             i
         };
 
-        if mux > 3 {
-            panic!("Invalid mux value!");
-        }
-
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4) as u32) as *const ReadWrite<u32>) };
-
+        // Set the bits accordingly.
         let mut value = register.get();
-        value &= !3;
-        value |= mux;
-
+        value &= !(3 << 0);
+        value |= mux << 0;
         register.set(value);
     }
 
     /// Configures a given Pin Pull state for this Pin Group.
     pub fn set_pull(self, pull: PinPull) {
+        // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let pull_value = pull as u32;
-
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
+        // Set the bits accordingly.
         let mut value = register.get();
         value &= !(3 << 2);
-        value |= pull_value << 2;
-
+        value |= (pull as u32) << 2;
         register.set(value);
     }
 
     /// Configures a given Tri-State for this Pin Group.
     pub fn set_tristate(self, tristate: PinTristate) {
+        // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
+        // Set or clear the bit accordingly.
         let mut value = register.get();
         match tristate {
             PinTristate::Passthrough => {
@@ -1958,39 +1959,40 @@ impl PinGrP {
                 value |= 1 << 4;
             }
         }
-
         register.set(value);
     }
 
     /// Sets a given I/O configuration of this Pin Group.
     pub fn set_io(self, io: PinIo) {
+        // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
+        // Set or clear the bit accordingly.
         let mut value = register.get();
         match io {
             PinIo::Input => {
-                value |= 1 << 5;
+                value |= 1 << 6;
             }
             _ => {
-                value &= !(1 << 5);
+                value &= !(1 << 6);
             }
         }
-
         register.set(value);
     }
 
     /// Configures a given Lock control state for this Pin Group.
     pub fn set_lock(self, lock: PinLock) {
+        // If the state should be default, leave it as-is.
         if lock == PinLock::Default {
             return;
         }
 
+        // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
+        // Set or clear the bit accordingly.
         let mut value = register.get();
         match lock {
             PinLock::Enable => {
@@ -1999,44 +2001,23 @@ impl PinGrP {
             PinLock::Disable => {
                 value &= !(1 << 7);
             }
-            _ => panic!(),
+            _ => unreachable!(),
         }
-
-        register.set(value);
-    }
-
-    /// Configures a given OD state for this Pin Group.
-    pub fn set_od(self, od: PinOd) {
-        if od == PinOd::Default {
-            return;
-        }
-
-        let pin = self as u32;
-
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
-
-        let mut value = register.get();
-        match od {
-            PinOd::Enable => panic!("NEVER EVER SET THIS!"),
-            PinOd::Disable => {
-                value &= !(1 << 6);
-            }
-            _ => panic!(),
-        }
-
         register.set(value);
     }
 
     /// Configures the given operation voltage state for this Pin Group.
     pub fn set_e_io_hv(self, hv: PinEIoHv) {
+        // If the state should be default, leave it as-is.
         if hv == PinEIoHv::Default {
             return;
         }
 
+        // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
+        // Set or clear the bit accordingly.
         let mut value = register.get();
         match hv {
             PinEIoHv::High => {
@@ -2045,9 +2026,31 @@ impl PinGrP {
             PinEIoHv::Normal => {
                 value &= !(1 << 10);
             }
-            _ => panic!(),
+            _ => unreachable!(),
+        }
+        register.set(value);
+    }
+
+    /// Configures a given OD state for this Pin Group.
+    pub fn set_od(self, od: PinOd) {
+        // If the state should be default, leave it as-is.
+        if od == PinOd::Default {
+            return;
         }
 
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Set or clear the bit accordingly.
+        let mut value = register.get();
+        match od {
+            PinOd::Enable => panic!("NEVER EVER SET THIS!"),
+            PinOd::Disable => {
+                value &= !(1 << 11);
+            }
+            _ => unreachable!(),
+        }
         register.set(value);
     }
 }

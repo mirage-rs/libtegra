@@ -52,6 +52,8 @@
 //! [`PinEIoHv`]: enum.PinEIoHv.html
 //! [`PinGrP::config`]: enum.PinGrP.html#method.config
 
+// Inspired by https://github.com/NVIDIA/tegra-pinmux-scripts.
+
 use register::mmio::ReadWrite;
 
 pub use registers::*;
@@ -310,7 +312,7 @@ pub enum PinFunction {
     Reserved,
 }
 
-/// Enumeration over possible Pin Pull-up/down states.
+/// Possible Pin Pull-up/down states.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum PinPull {
     /// Nothing.
@@ -330,7 +332,18 @@ pub enum PinTristate {
     Tristate,
 }
 
-/// Enumeration over possible I/O configurations of a pin.
+/// Parking configurations for LP0.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub enum PinPark {
+    /// Default state.
+    Default,
+    /// Normal state.
+    Normal,
+    /// Parked state.
+    Parked,
+}
+
+/// Possible I/O configurations of a pin.
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum PinIo {
     /// No I/O configuration.
@@ -349,6 +362,17 @@ pub enum PinLock {
     /// No lock control.
     Disable,
     /// Lock control.
+    Enable,
+}
+
+/// Base Driver control settings.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub enum PinLpdr {
+    /// Default state.
+    Default,
+    /// Disables LPDR.
+    Disable,
+    /// Enables LPDR.
     Enable,
 }
 
@@ -374,6 +398,17 @@ pub enum PinEIoHv {
     Normal,
     /// Enables high-voltage operation (3.3V).
     High,
+}
+
+/// Schmitt mode configuration options.
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+pub enum PinSchmt {
+    /// Default mode.
+    Default,
+    /// Disables Schmitt mode on a pin.
+    Disable,
+    /// Enables Schmitt mode on a pin.
+    Enable,
 }
 
 /// Representation of a pin group of the SoC, including the respective functions.
@@ -1952,17 +1987,33 @@ impl PinGrP {
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match tristate {
-            PinTristate::Passthrough => {
-                value &= !(1 << 4);
-            }
-            PinTristate::Tristate => {
-                value |= 1 << 4;
-            }
-        }
+            PinTristate::Passthrough => value &= !(1 << 4),
+            PinTristate::Tristate => value |= 1 << 4,
+        };
         register.set(value);
     }
 
-    /// Sets a given I/O configuration of this Pin Group.
+    /// Sets the Parking state for this Pin Group.
+    pub fn set_park(self, park: PinPark) {
+        // If the state should be default, leave it as-is.
+        if park == PinPark::Default {
+            return;
+        }
+
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        let mut value = register.get();
+        match park {
+            PinPark::Parked => value |= 1 << 5,
+            PinPark::Normal => value &= !(1 << 5),
+            _ => unreachable!(),
+        };
+        register.set(value);
+    }
+
+    /// Sets a given I/O configuration for this Pin Group.
     pub fn set_io(self, io: PinIo) {
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
@@ -1971,13 +2022,9 @@ impl PinGrP {
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match io {
-            PinIo::Input => {
-                value |= 1 << 6;
-            }
-            _ => {
-                value &= !(1 << 6);
-            }
-        }
+            PinIo::Input => value |= 1 << 6,
+            PinIo::Output | PinIo::None => value &= !(1 << 6),
+        };
         register.set(value);
     }
 
@@ -1995,14 +2042,31 @@ impl PinGrP {
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match lock {
-            PinLock::Enable => {
-                value |= 1 << 7;
-            }
-            PinLock::Disable => {
-                value &= !(1 << 7);
-            }
+            PinLock::Enable => value |= 1 << 7,
+            PinLock::Disable => value &= !(1 << 7),
             _ => unreachable!(),
+        };
+        register.set(value);
+    }
+
+    /// Configures a given LPDR state for this Pin Group.
+    pub fn set_lpdr(self, lpdr: PinLpdr) {
+        // If the state should be default, leave it as-is.
+        if lpdr == PinLpdr::Default {
+            return;
         }
+
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Set or clear the bit accordingly.
+        let mut value = register.get();
+        match lpdr {
+            PinLpdr::Enable => value |= 1 << 7,
+            PinLpdr::Disable => value &= !(1 << 7),
+            _ => unreachable!(),
+        };
         register.set(value);
     }
 
@@ -2020,14 +2084,10 @@ impl PinGrP {
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match hv {
-            PinEIoHv::High => {
-                value |= 1 << 10;
-            }
-            PinEIoHv::Normal => {
-                value &= !(1 << 10);
-            }
+            PinEIoHv::High => value |= 1 << 10,
+            PinEIoHv::Normal => value &= !(1 << 10),
             _ => unreachable!(),
-        }
+        };
         register.set(value);
     }
 
@@ -2046,11 +2106,30 @@ impl PinGrP {
         let mut value = register.get();
         match od {
             PinOd::Enable => panic!("NEVER EVER SET THIS!"),
-            PinOd::Disable => {
-                value &= !(1 << 11);
-            }
+            PinOd::Disable => value &= !(1 << 11),
             _ => unreachable!(),
+        };
+        register.set(value);
+    }
+
+    /// Configures Schmitt mode for this Pin Group.
+    pub fn set_schmt(self, schmt: PinSchmt) {
+        // If the state should be default, leave it as-is.
+        if schmt == PinSchmt::Default {
+            return;
         }
+
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Set or clear the bit accordingly.
+        let mut value = register.get();
+        match schmt {
+            PinSchmt::Enable => value |= 1 << 12,
+            PinSchmt::Disable => value &= !(1 << 12),
+            _ => unreachable!(),
+        };
         register.set(value);
     }
 }

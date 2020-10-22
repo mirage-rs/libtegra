@@ -1,4 +1,4 @@
-//! Driver for the Tegra X1 Inter-Integrated Circuit master and slave controllers.
+//! Driver for the Tegra X1 Inter-Integrated Circuit Controller and Devices.
 //!
 //! See Chapter 35 in the Tegra X1 Technical Reference Manual for details.
 //!
@@ -7,17 +7,39 @@
 //! The I²C controller (I2C) implements an I²C 3.0 specification-compliant I²C
 //! master and slave controller that supports multiple masters and slaves.
 //!
+//! # I2C controllers
+//!
 //! There are six instances of the I2C controller within Tegra X1 devices, all
 //! of them providing the same functionality. These six instances are represented
-//! as publicly exposed constants of the [`I2c`] structure, labeled from `C1`
-//! through `C6`.
+//! as publicly exposed constants of the [`I2c`] structure.
 //!
-//! [`I2c`]: struct.I2c.html
+//! # Transmission speed
+//!
+//! By default, the I2C controller instances which are exposed by this module have
+//! pre-defined clocks, which are configured for 100KHz data transfer rate over the
+//! I²C protocol.
+//!
+//! If desired clocks are appreciated, one must create a custom instance of an I2C
+//! controller with the desired [`Clock`] settings.
+//!
+//! # Implementation details
+//!
+//! The implementation of the I2c controller provides lower-level and higher-level
+//! methods for driving the host MMIO driver in Normal Mode with 7-bit addressing
+//! transactions. That being said, if one wishes to use Packet Mode (which may be
+//! added in the future) or 10-bit addressing transactions, one would have to
+//! implement the functionality themselves.
+//!
+//! [`I2c`]: struct.I2c.html\
+//! [`Clock`]: ../car/struct.Clock.html
 
-pub use device::*;
+pub use controller::*;
 pub use registers::*;
 
-// TODO: I2C Slave implementation.
+// TODO: I2C Device implementation.
 
-mod device;
+mod controller;
 mod registers;
+
+#[cfg(feature = "embedded-hal")]
+mod hal;

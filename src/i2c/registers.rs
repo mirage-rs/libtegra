@@ -1,8 +1,3 @@
-//! Abstractions over the registers of the Tegra X1 I2C controllers.
-//!
-//! See Chapter 35.6 in the Tegra X1 Technical Reference Manual
-//! for details.
-
 use register::{mmio::*, register_bitfields, register_structs};
 
 use crate::memory_map::i2c::*;

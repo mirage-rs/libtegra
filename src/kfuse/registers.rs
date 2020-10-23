@@ -1,8 +1,3 @@
-//! Abstractions over the HDCP KFUSE Control registers of the Tegra X1.
-//!
-//! See Chapter 27.9 in the Tegra X1 Technical Reference Manual
-//! for details.
-
 use register::{mmio::*, register_bitfields, register_structs};
 
 use crate::memory_map::KFUSE;

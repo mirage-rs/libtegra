@@ -1,38 +1,32 @@
 //! Driver for the Tegra X1 for the HDCP KFUSE Controller.
 //!
-//! See Chapter 27.5 in the Tegra X1 Technical Reference Manual
-//! for details.
+//! See Chapter 27.5 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!
-//! The KFUSE stores upstream and downstream HDCP keys which
-//! are used by the HDMI module.
+//! The KFUSE stores upstream and downstream HDCP keys which are used by the HDMI
+//! module to enforce Digital Rights Management (DRM) with hardware protection of
+//! the cryptographic secrets.
 //!
-//! ## Initialization
+//! # Initialization
 //!
-//! In certain cases, the KFUSE is busy initializing data and
-//! thus cannot be used, which may lead to unexpected errors
-//! (for example with the TSEC). The [`wait_until_ready`]
-//! function serves the purpose of preventing that from
-//! happening.
+//! In certain cases, the KFUSE is busy initializing data in the background and thus
+//! cannot be used at a point where the host controller is being queried, which may
+//! lead to unexpected errors (for example with the TSEC). The [`wait_until_ready`]
+//! function serves the purpose of preventing that from happening.
 //!
-//! ## Key Copying
+//! # Key Copying
 //!
-//! HDCP keys are stored encrypted in the KFUSE module. Before
-//! starting HDCP, software must copy the keys (576 bytes) from
-//! the KFUSE to the HDMI registers.
+//! HDCP keys are stored encrypted in the KFUSE block. Before starting HDCP, software
+//! must copy the keys (576 bytes) from the KFUSE to the HDMI registers.
 //!
-//! ```no_run
-//! use libtegra::kfuse;
+//! # HDCP
 //!
-//! // Copy the keys.
-//! let mut buffer = [0; kfuse::MAX_WORD_LENGTH];
-//! kfuse::read(&mut buffer).unwrap();
-//!
-//! // Process them...
-//! ```
+//! HDCP is usually implemented by running a secure firmware on the [`Tsec`] which can
+//! interface with KFUSE hardware to do the cryptographic operations on digital content.
 //!
 //! [`wait_until_ready`]: fn.wait_until_ready.html
+//! [`Tsec`]: ../tsec/struct.Tsec.html
 
 use crate::car::Clock;
 
@@ -45,8 +39,7 @@ pub const MAX_WORD_LENGTH: usize = 144;
 
 /// Waits until KFUSE is ready to be used.
 ///
-/// NOTE: This function expects the KFUSE [`Clock`] to be up
-/// before calling to it.
+/// NOTE: This function expects the KFUSE [`Clock`] to be brought up before calling it.
 ///
 /// [`Clock`]: ../car/struct.Clock.html
 pub fn wait_until_ready() -> Result<(), ()> {

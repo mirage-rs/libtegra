@@ -1,67 +1,50 @@
 //! Driver for Tegra X1 Multi-Purpose Pins and Pin Multiplexing.
 //!
-//! See Chapter 9 in the Tegra X1 Technical Reference Manual for
-//! details.
+//! See Chapter 9 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!
-//! Tegra X1 devices can be configured with different I/O functions
-//! on particular pins to allow use in a variety of different
-//! configurations.
+//! Tegra X1 devices can be configured with different I/O functions on particular pins
+//! to enable their operation in a variety of different configurations.
 //!
-//! Many of the pins on Tegra X1 devices are connected to Multi-Purpose
-//! I/O (MPIO) pads. An MPIO can operate in two modes: either acting
-//! as a signal for a particular I/O controller, referred to as
-//! Special-Function I/O (SFIO) or as a software-controlled
-//! General-Purpose I/O function, referred to as [`Gpio`]. Each MPIO
-//! has up to four SFIO [`PinFunction`]s as well as being a [`Gpio`].
+//! Many of the pins on Tegra X1 devices are connected to Multi-Purpose I/O (MPIO) pads.
+//! An MPIO can operate in two modes: either acting as a signal for a particular I/O controller,
+//! referred to as Special-Function I/O (SFIO) or as a software-controlled General-Purpose
+//! I/O function, referred to as [`Gpio`].
 //!
-//! Though each MPIO has up to 5 functions (a [`Gpio`] function and up
-//! to 4 SFIO functions), a given MPIO can only act as a single function
-//! at a given point in time. The Pinmux controller in Tegra X1 devices
-//! includes the logic and registers to select a particular function for
-//! each MPIO.
+//! Though each MPIO has up to 5 functions (a GPIO function and up to 4 SFIO functions),
+//! a given MPIO can only act as a single function at a given point in time. The Pinmux
+//! controller in Tegra X1 devices includes the logic and registers to select a particular
+//! function for each MPIO.
 //!
-//! ## Configuration
+//! # Configuration
 //!
-//! Every MPIO on the SoC belongs to a particular [`PinGrP`] which provides
-//! the functionality for configuration of [`PinFunction`], [`PinPull`] state,
-//! [`PinTristate`] mode, [`PinIo`] settings, [`PinLock`] controls, [`PinOd`]
-//! state, and [`PinEIoHv`] mode. All of these options can either be configured
-//! individually via a respective method or universally via the [`PinGrP::config`]
-//! method.
+//! Various `get_` and `set_` methods are provided to configure [`PinGrP`]s (Pin Group Pads)
+//! or to query their state. Many devices depend on proper Pin Multiplexing, so this module
+//! provides the required functionality to drive the desired pins.
 //!
-//! ```no_run
-//! use libtegra::pinmux;
-//! use libtegra::pinmux::PinGrP;
+//! # Safety
 //!
-//! // I2C5 Pinmux configuration for the Nintendo Switch.
-//! PinGrP::PwrI2CSclPy3.set_io(pinmux::PinIo::Input);
-//! PinGrP::PwrI2CSdaPy4.set_io(pinmux::PinIo::Input);
-//! ```
+//! Many of the configuration methods on a [`PinGrP`] are actually considered `unsafe` because
+//! wrong usage of them can cause permanent damage to the hardware which is at the user's risk.
 //!
 //! [`Gpio`]: ../gpio/struct.Gpio.html
-//! [`PinFunction`]: enum.PinFunction.html
 //! [`PinGrP`]: enum.PinGrP.html
-//! [`PinFunction`]: enum.PinFunction.html
-//! [`PinPull`]: enum.PinPull.html
-//! [`PinTristate`]: enum.PinTristate.html
-//! [`PinIo`]: enum.PinIo.html
-//! [`PinLock`]: enum.PinLock.html
-//! [`PinOd`]: enum.PinOd.html
-//! [`PinEIoHv`]: enum.PinEIoHv.html
-//! [`PinGrP::config`]: enum.PinGrP.html#method.config
 
 // Inspired by https://github.com/NVIDIA/tegra-pinmux-scripts.
 
+use enum_primitive::FromPrimitive;
 use register::mmio::ReadWrite;
 
 pub use registers::*;
 
 mod registers;
 
-/// Enumeration over possible Pin Groups.
-#[derive(Clone, Copy, Debug, PartialEq)]
+/// Pin Groups on the Tegra X1 SoC that can be customized and variably configured.
+///
+/// Many drivers of the `libtegra` crate depend on proper Pin Multiplexing settings
+/// for the specific board before they can be used.
+#[derive(Debug, PartialEq, PartialOrd)]
 pub enum PinGrP {
     Sdmmc1ClkPm0,
     Sdmmc1CmdPm1,
@@ -230,192 +213,275 @@ pub enum PinGrP {
     Reserved,
 }
 
-/// Enumeration over possible Pin Functions.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinFunction {
-    Default,
-    Aud,
-    Bcl,
-    Blink,
-    Ccla,
-    Cec,
-    Cldvfs,
-    Clk,
-    Core,
-    Cpu,
-    Displaya,
-    Displayb,
-    Dmic1,
-    Dmic2,
-    Dmic3,
-    Dp,
-    Dtv,
-    Extperiph3,
-    I2C1,
-    I2C2,
-    I2C3,
-    I2Cpmu,
-    I2Cvi,
-    I2S1,
-    I2S2,
-    I2S3,
-    I2S4A,
-    I2S4B,
-    I2S5A,
-    I2S5B,
-    Iqc0,
-    Iqc1,
-    Jtag,
-    Pe,
-    Pe0,
-    Pe1,
-    Pmi,
-    Pwm0,
-    Pwm1,
-    Pwm2,
-    Pwm3,
-    Qspi,
-    Sata,
-    Sdmmc1,
-    Sdmmc3,
-    Shutdown,
-    Soc,
-    Sor0,
-    Sor1,
-    Spdif,
-    Spi1,
-    Spi2,
-    Spi3,
-    Spi4,
-    Sys,
-    Touch,
-    Uart,
-    Uarta,
-    Uartb,
-    Uartc,
-    Uartd,
-    Usb,
-    Vgp1,
-    Vgp2,
-    Vgp3,
-    Vgp4,
-    Vgp5,
-    Vgp6,
-    Vimclk,
-    Vimclk2,
-    Rsvd0,
-    Rsvd1,
-    Rsvd2,
-    Rsvd3,
-
-    // not expected
-    Reserved,
-}
-
-/// Possible Pin Pull-up/down states.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinPull {
-    /// Nothing.
-    None,
-    /// Enables internal Pull-down resistors.
-    Down,
-    /// Enables internal Pull-up resistors.
-    Up,
-}
-
-/// Tri-State (high-Z) option.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinTristate {
-    /// Disables the pad's output driver.
-    Passthrough,
-    /// Enables the pad's output driver.
-    Tristate,
-}
-
-/// Parking configurations for LP0.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinPark {
-    /// Default state.
-    Default,
-    /// Normal state.
-    Normal,
-    /// Parked state.
-    Parked,
-}
-
-/// Possible I/O configurations of a pin.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinIo {
-    /// No I/O configuration.
-    None,
-    /// Output configuration.
-    Output,
-    /// Input configuration.
-    Input,
-}
-
-/// Lock control for writing to a pin.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinLock {
-    /// Default state.
-    Default,
-    /// No lock control.
-    Disable,
-    /// Lock control.
-    Enable,
-}
-
-/// Base Driver control settings.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinLpdr {
-    /// Default state.
-    Default,
-    /// Disables LPDR.
-    Disable,
-    /// Enables LPDR.
-    Enable,
-}
-
-/// Reserved.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinOd {
-    /// Default state.
-    Default,
-    /// Disables Od.
-    Disable,
-    /// Enables Od.
+enum_from_primitive! {
+    /// Pin Functions that can be loaded onto a pin to control its behavior.
     ///
-    /// NOTE: **NEVER EVER USE THIS!**
-    Enable,
+    /// Note that most pins are actually predestined for a specific pin functions among
+    /// reserved ones. The driver will make sure that no unsupported pin function can be
+    /// set on the wrong pin.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    pub enum PinFunction {
+        Default,
+        Aud,
+        Bcl,
+        Blink,
+        Ccla,
+        Cec,
+        Cldvfs,
+        Clk,
+        Core,
+        Cpu,
+        Displaya,
+        Displayb,
+        Dmic1,
+        Dmic2,
+        Dmic3,
+        Dp,
+        Dtv,
+        Extperiph3,
+        I2C1,
+        I2C2,
+        I2C3,
+        I2Cpmu,
+        I2Cvi,
+        I2S1,
+        I2S2,
+        I2S3,
+        I2S4A,
+        I2S4B,
+        I2S5A,
+        I2S5B,
+        Iqc0,
+        Iqc1,
+        Jtag,
+        Pe,
+        Pe0,
+        Pe1,
+        Pmi,
+        Pwm0,
+        Pwm1,
+        Pwm2,
+        Pwm3,
+        Qspi,
+        Sata,
+        Sdmmc1,
+        Sdmmc3,
+        Shutdown,
+        Soc,
+        Sor0,
+        Sor1,
+        Spdif,
+        Spi1,
+        Spi2,
+        Spi3,
+        Spi4,
+        Sys,
+        Touch,
+        Uart,
+        Uarta,
+        Uartb,
+        Uartc,
+        Uartd,
+        Usb,
+        Vgp1,
+        Vgp2,
+        Vgp3,
+        Vgp4,
+        Vgp5,
+        Vgp6,
+        Vimclk,
+        Vimclk2,
+        Rsvd0,
+        Rsvd1,
+        Rsvd2,
+        Rsvd3,
+
+        // not expected
+        Reserved,
+    }
 }
 
-/// Enumeration over possible operation states.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinEIoHv {
-    /// Default state.
-    Default,
-    /// Enables regular-voltage operation.
-    Normal,
-    /// Enables high-voltage operation (3.3V).
-    High,
+enum_from_primitive! {
+    /// State control for the Pull bit as a part of Pin configuration.
+    ///
+    /// The Pull Resistor bit can be configured to Pull-up, Pull-down or nothing per pad.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinPull {
+        /// Nothing.
+        None,
+        /// Enables internal Pull-down resistors.
+        Down,
+        /// Enables internal Pull-up resistors.
+        Up,
+        /// Reserved.
+        Reserved,
+    }
 }
 
-/// Schmitt mode configuration options.
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum PinSchmt {
-    /// Default mode.
-    Default,
-    /// Disables Schmitt mode on a pin.
-    Disable,
-    /// Enables Schmitt mode on a pin.
-    Enable,
+enum_from_primitive! {
+    /// State control for the Tristate bit as a part of Pin configuration.
+    ///
+    /// Enables or disables the pad's output driver and thus overrides whether the pad is
+    /// used as an SFIO or GPIO. For normal operations, a pad should be set to Passthrough.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinTristate {
+        /// Disables the pad's Tristate.
+        Passthrough,
+        /// Enables the pad's Tristate.
+        Tristate,
+    }
 }
 
-/// Representation of a pin group of the SoC, including the respective functions.
+enum_from_primitive! {
+    /// State control for the Parking bit as a part of Pin configuration.
+    ///
+    /// This state holds control during LP0 (Deep Sleep) and on LP0 entry, most pads will
+    /// be put into PARKING state. Until pinmux recovery code on LP0 exit clears this bit,
+    /// the pin will remain in LP0 state in the same value as that of LP0 entry. A Default
+    /// state is provided to preserve the setting of this bit without touching it.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinPark {
+        /// Normal state.
+        Normal,
+        /// Parked state.
+        Parked,
+        /// Default state.
+        Default,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the I/O direction bit as a part of Pin configuration.
+    ///
+    /// Depending on whether or not the Input Receiver of a pad is enabled through this setting,
+    /// the pad will have either input or output direction for I/O.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinIo {
+        /// Output direction configuration.
+        Output,
+        /// Input direction configuration.
+        Input,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the Lock bit as a part of Pin configuration.
+    ///
+    /// The Lock bit, as the name may suggest, locks down or grants write access
+    /// to the pad that is configured with it, respectively. A Default state is
+    /// provided to preserve the setting of the bit without touching it.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinLock {
+        /// No lock control.
+        Disable,
+        /// Lock control.
+        Enable,
+        /// Default state.
+        Default,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the Base Driver control bit as a part of pin configuration.
+    ///
+    /// When interfacing chips require minimal rise and fall times, this can be set to
+    /// enable Base Drivers to fine-tune their behavior. A Default state is provided
+    /// to preserve the setting of this bit without touching it.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinLpdr {
+        /// Disables LPDR.
+        Disable,
+        /// Enables LPDR.
+        Enable,
+        /// Default state.
+        Default,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the OD control bit as a part of pin configuration.
+    ///
+    /// This is marked as reserved by the Tegra Reference Manual and should never be set
+    /// to another value than its default. For that reason, a Default state is provided
+    /// to enforce this rule and skip direct modification of the bit's value.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinOd {
+        /// Disables OD.
+        Disable,
+        /// Enables OD.
+        ///
+        /// NOTE: **NEVER EVER USE THIS!**
+        Enable,
+        /// Default state.
+        Default,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the I/O High Voltage control bit as a part of pin configuration.
+    ///
+    /// If pins are in need of 3.3V operation, open-drain pull-up capability can be enabled
+    /// on them using this setting. A Default state is provided to preserve the setting of
+    /// this bit without touching it.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinIoHv {
+        /// Enables regular-voltage operation.
+        Normal,
+        /// Enables high-voltage operation (3.3V).
+        High,
+        /// Default state.
+        Default,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the Schmitt Trigger control bit as a part of pin configuration.
+    ///
+    /// Enables or disables the Schmitt trigger on a given pad. A Default state is provided
+    /// to preserve the setting of this bit without touching it.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinSchmt {
+        /// Disables Schmitt mode on a pin.
+        Disable,
+        /// Enables Schmitt mode on a pin.
+        Enable,
+        /// Default mode.
+        Default,
+    }
+}
+
+enum_from_primitive! {
+    /// State control for the Drive Type control bit as a part of pin configuration.
+    ///
+    /// Enables different combinations of impedance code mapping on a given pad. This
+    /// can be configured for every supported pad individually and allows for fine-tuning
+    /// the impedance of an individual pad.
+    #[derive(Debug, PartialEq, PartialOrd)]
+    #[repr(u32)]
+    pub enum PinDrive {
+        /// 1X drive.
+        Drive1X,
+        /// 2X drive.
+        Drive2X,
+        /// 3X drive.
+        Drive3X,
+        /// 4X drive.
+        Drive4X,
+    }
+}
+
 #[derive(Debug)]
 struct SocPinGrP(PinGrP, [PinFunction; 4]);
 
-/// A representation of the pins of the SoC.
 const SOC_PINS: [SocPinGrP; 165] = [
     SocPinGrP(
         PinGrP::Sdmmc1ClkPm0,
@@ -1905,28 +1971,20 @@ const SOC_PINS: [SocPinGrP; 165] = [
 ];
 
 impl PinGrP {
-    /// Configures this Pin Group with a set of options.
-    pub fn config(
-        self,
-        function: PinFunction,
-        pull: PinPull,
-        tristate: PinTristate,
-        io: PinIo,
-        lock: PinLock,
-        od: PinOd,
-        hv: PinEIoHv,
-    ) {
-        self.set_function(function);
-        self.set_pull(pull);
-        self.set_tristate(tristate);
-        self.set_io(io);
-        self.set_lock(lock);
-        self.set_od(od);
-        self.set_e_io_hv(hv);
-    }
-
     /// Configures a given Pin Function for this Pin Group.
-    pub fn set_function(self, function: PinFunction) {
+    ///
+    /// Applicable to all pads, but only certain functions may be supported per pad.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the user attempts to set an unsupported pin function on this pad.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_function(self, function: PinFunction) {
         // Avoid setting of reserved pins.
         if function == PinFunction::Default
             || function == PinFunction::Reserved
@@ -1937,7 +1995,7 @@ impl PinGrP {
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as usize;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4) as u32) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4) as u32) as *const ReadWrite<u32>);
 
         // Compute the corresponding mux value.
         let mux = if function >= PinFunction::Rsvd0 {
@@ -1965,11 +2023,30 @@ impl PinGrP {
         register.set(value);
     }
 
-    /// Configures a given Pin Pull state for this Pin Group.
-    pub fn set_pull(self, pull: PinPull) {
+    /// Extracts the currently configured Pull resistor state from this Pin Group.
+    pub fn get_pull(self) -> PinPull {
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (3 << 2)) >> 2;
+        PinPull::from_u32(value).unwrap()
+    }
+
+    /// Configures a given Pull resistor state for this Pin Group.
+    ///
+    /// Applicable to all pads.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_pull(self, pull: PinPull) {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set the bits accordingly.
         let mut value = register.get();
@@ -1978,11 +2055,30 @@ impl PinGrP {
         register.set(value);
     }
 
-    /// Configures a given Tri-State for this Pin Group.
-    pub fn set_tristate(self, tristate: PinTristate) {
+    /// Extracts the currently configured Tri-State from this Pin Group.
+    pub fn get_tristate(self) -> PinTristate {
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 4)) >> 4;
+        PinTristate::from_u32(value).unwrap()
+    }
+
+    /// Configures a given Tri-State for this Pin Group.
+    ///
+    /// Applicable to all pads.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_tristate(self, tristate: PinTristate) {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
@@ -1993,8 +2089,29 @@ impl PinGrP {
         register.set(value);
     }
 
+    /// Extracts the currently configured Parking state from this Pin Group.
+    pub fn get_park(self) -> PinPark {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 5)) >> 5;
+        PinPark::from_u32(value).unwrap()
+    }
+
     /// Sets the Parking state for this Pin Group.
-    pub fn set_park(self, park: PinPark) {
+    ///
+    /// Applicable to all pads except for a few ones in the AO region. This method does not
+    /// validate the settings it is being called with, the user must ensure that they are
+    /// calling this method correctly. See the advice below.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_park(self, park: PinPark) {
         // If the state should be default, leave it as-is.
         if park == PinPark::Default {
             return;
@@ -2002,7 +2119,7 @@ impl PinGrP {
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         let mut value = register.get();
         match park {
@@ -2013,23 +2130,61 @@ impl PinGrP {
         register.set(value);
     }
 
-    /// Sets a given I/O configuration for this Pin Group.
-    pub fn set_io(self, io: PinIo) {
+    /// Extracts the currently configured I/O state from this Pin Group.
+    pub fn get_io(self) -> PinIo {
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 6)) >> 6;
+        PinIo::from_u32(value).unwrap()
+    }
+
+    /// Sets a given I/O configuration for this Pin Group.
+    ///
+    /// Applicable to all pads.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_io(self, io: PinIo) {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match io {
             PinIo::Input => value |= 1 << 6,
-            PinIo::Output | PinIo::None => value &= !(1 << 6),
+            PinIo::Output => value &= !(1 << 6),
         };
         register.set(value);
     }
 
+    /// Extracts the currently configured Lock control state from this Pin Group.
+    pub fn get_lock(self) -> PinLock {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 7)) >> 7;
+        PinLock::from_u32(value).unwrap()
+    }
+
     /// Configures a given Lock control state for this Pin Group.
-    pub fn set_lock(self, lock: PinLock) {
+    ///
+    /// Applicable to all pads.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_lock(self, lock: PinLock) {
         // If the state should be default, leave it as-is.
         if lock == PinLock::Default {
             return;
@@ -2037,7 +2192,7 @@ impl PinGrP {
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
@@ -2049,8 +2204,29 @@ impl PinGrP {
         register.set(value);
     }
 
+    /// Extracts the currently configured LPDR state from this Pin Group.
+    pub fn get_lpdr(self) -> PinLpdr {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 8)) >> 8;
+        PinLpdr::from_u32(value).unwrap()
+    }
+
     /// Configures a given LPDR state for this Pin Group.
-    pub fn set_lpdr(self, lpdr: PinLpdr) {
+    ///
+    /// Applicable to ST and DD pads. This method does not validate the settings it is
+    /// being called with, the user must ensure that they are calling this method
+    /// correctly. See the advice below.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_lpdr(self, lpdr: PinLpdr) {
         // If the state should be default, leave it as-is.
         if lpdr == PinLpdr::Default {
             return;
@@ -2058,41 +2234,81 @@ impl PinGrP {
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match lpdr {
-            PinLpdr::Enable => value |= 1 << 7,
-            PinLpdr::Disable => value &= !(1 << 7),
+            PinLpdr::Enable => value |= 1 << 8,
+            PinLpdr::Disable => value &= !(1 << 8),
             _ => unreachable!(),
         };
         register.set(value);
     }
 
+    /// Extracts the currently configured operation voltage state from this Pin Group.
+    pub fn get_io_hv(self) -> PinIoHv {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 10)) >> 10;
+        PinIoHv::from_u32(value).unwrap()
+    }
+
     /// Configures the given operation voltage state for this Pin Group.
-    pub fn set_e_io_hv(self, hv: PinEIoHv) {
+    ///
+    /// Applicable to DD pads. This method does not validate the settings it is being called
+    /// with, the user must ensure that they are calling this method correctly. See the
+    /// advice below.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_io_hv(self, hv: PinIoHv) {
         // If the state should be default, leave it as-is.
-        if hv == PinEIoHv::Default {
+        if hv == PinIoHv::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
         match hv {
-            PinEIoHv::High => value |= 1 << 10,
-            PinEIoHv::Normal => value &= !(1 << 10),
+            PinIoHv::High => value |= 1 << 10,
+            PinIoHv::Normal => value &= !(1 << 10),
             _ => unreachable!(),
         };
         register.set(value);
     }
 
+    /// Extracts the currently configured OD state from this Pin Group.
+    pub fn get_od(self) -> PinOd {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 11)) >> 11;
+        PinOd::from_u32(value).unwrap()
+    }
+
     /// Configures a given OD state for this Pin Group.
-    pub fn set_od(self, od: PinOd) {
+    ///
+    /// This field is marked and should never be set by user code for any pin.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_od(self, od: PinOd) {
         // If the state should be default, leave it as-is.
         if od == PinOd::Default {
             return;
@@ -2100,7 +2316,7 @@ impl PinGrP {
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
@@ -2112,8 +2328,27 @@ impl PinGrP {
         register.set(value);
     }
 
+    /// Extracts the currently configured Schmitt state from this Pin Group.
+    pub fn get_schmt(self) -> PinSchmt {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (1 << 12)) >> 12;
+        PinSchmt::from_u32(value).unwrap()
+    }
+
     /// Configures Schmitt mode for this Pin Group.
-    pub fn set_schmt(self, schmt: PinSchmt) {
+    ///
+    /// Applicable to all pads.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_schmt(self, schmt: PinSchmt) {
         // If the state should be default, leave it as-is.
         if schmt == PinSchmt::Default {
             return;
@@ -2121,7 +2356,7 @@ impl PinGrP {
 
         // Compute the register offset that corresponds to this pin.
         let pin = self as u32;
-        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
         let mut value = register.get();
@@ -2130,6 +2365,40 @@ impl PinGrP {
             PinSchmt::Disable => value &= !(1 << 12),
             _ => unreachable!(),
         };
+        register.set(value);
+    }
+
+    /// Extracts the currently configured impedance state from this Pin Group.
+    pub fn get_drive(self) -> PinDrive {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
+
+        // Extract the desired bit and wrap it into the enum.
+        let value = (register.get() & (3 << 13)) >> 13;
+        PinDrive::from_u32(value).unwrap()
+    }
+
+    /// Configures a given impedance drive for this Pin Group.
+    ///
+    /// Applicable to CZ/LV_CZ pads. This method does not validate whether the drive
+    /// setting is valid on the pin, the user must ensure that they are calling this
+    /// method correctly. See the advice below.
+    ///
+    /// # Safety
+    ///
+    /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
+    /// please make sure that you know exactly what you are doing before calling this
+    /// function.
+    pub unsafe fn set_drive(self, drive: PinDrive) {
+        // Compute the register offset that corresponds to this pin.
+        let pin = self as u32;
+        let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
+
+        // Set the bits accordingly.
+        let mut value = register.get();
+        value &= !(3 << 13);
+        value |= (drive as u32) << 13;
         register.set(value);
     }
 }

@@ -1,11 +1,11 @@
-//! Driver for the Tegra X1 Inter-Integrated Circuit Controller and Devices.
+//! Driver for the Tegra X1 Inter-Integrated Circuit Controller and its Devices.
 //!
 //! See Chapter 35 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!
-//! The I²C controller (I2C) implements an I²C 3.0 specification-compliant I²C
-//! master and slave controller that supports multiple masters and slaves.
+//! The I²C controller (I2C) provides a specification-compliant I²C 3.0 driver that
+//! supports multiple controllers and devices.
 //!
 //! # I2C controllers
 //!
@@ -19,7 +19,7 @@
 //! pre-defined clocks, which are configured for 100KHz data transfer rate over the
 //! I²C protocol.
 //!
-//! If desired clocks are appreciated, one must create a custom instance of an I2C
+//! If customized clocks are needed, one must create a custom instance of an I2C
 //! controller with the desired [`Clock`] settings.
 //!
 //! # Implementation details

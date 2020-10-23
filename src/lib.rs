@@ -26,6 +26,7 @@ pub mod car;
 pub mod flow;
 pub mod fuse;
 pub mod gpio;
+#[cfg(feature = "hal")]
 pub mod hal;
 pub mod i2c;
 pub mod kfuse;

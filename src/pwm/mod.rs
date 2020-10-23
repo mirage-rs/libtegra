@@ -9,9 +9,12 @@
 //! a programmable frequency divider and a programmable pulse
 //! width generator.
 
-pub use registers::*;
-
 mod registers;
+
+#[cfg(feature = "hal")]
+mod hal;
+
+pub use crate::pwm::registers::*;
 
 /// Representation of a Pulse Width Modulator channel.
 ///
@@ -52,14 +55,18 @@ impl PwmChannel {
     pub fn enable(&self) {
         let controller = unsafe { &*self.registers };
 
-        controller.PWM_CONTROLLER_PWM_CSR_0.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::SET);
+        controller
+            .PWM_CONTROLLER_PWM_CSR_0
+            .modify(PWM_CONTROLLER_PWM_CSR_0::ENB::SET);
     }
 
     /// Disables pulse generation through this channel.
     pub fn disable(&self) {
         let controller = unsafe { &*self.registers };
 
-        controller.PWM_CONTROLLER_PWM_CSR_0.modify(PWM_CONTROLLER_PWM_CSR_0::ENB::CLEAR);
+        controller
+            .PWM_CONTROLLER_PWM_CSR_0
+            .modify(PWM_CONTROLLER_PWM_CSR_0::ENB::CLEAR);
     }
 
     /// Configures the pulse width of the channel.
@@ -73,9 +80,9 @@ impl PwmChannel {
             return Err(());
         }
 
-        controller.PWM_CONTROLLER_PWM_CSR_0.modify(
-            PWM_CONTROLLER_PWM_CSR_0::PWM_0.val((duty * 256.0) as u32)
-        );
+        controller
+            .PWM_CONTROLLER_PWM_CSR_0
+            .modify(PWM_CONTROLLER_PWM_CSR_0::PWM_0.val((duty * 256.0) as u32));
 
         Ok(())
     }
@@ -86,7 +93,9 @@ impl PwmChannel {
     pub fn get_duty(&self) -> f32 {
         let controller = unsafe { &*self.registers };
 
-        let pulse_width = controller.PWM_CONTROLLER_PWM_CSR_0.read(PWM_CONTROLLER_PWM_CSR_0::PWM_0) as f32;
+        let pulse_width = controller
+            .PWM_CONTROLLER_PWM_CSR_0
+            .read(PWM_CONTROLLER_PWM_CSR_0::PWM_0) as f32;
         pulse_width / 256.0
     }
 

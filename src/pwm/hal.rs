@@ -1,5 +1,6 @@
-use crate::pwm::PwmChannel;
 use embedded_hal::PwmPin;
+
+use super::PwmChannel;
 
 impl PwmPin for PwmChannel {
     type Duty = f32;

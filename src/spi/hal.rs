@@ -1,6 +1,6 @@
 use embedded_hal::blocking::spi::{Transfer, Write};
 
-use crate::spi::Spi;
+use super::Spi;
 
 impl Write<u8> for Spi {
     type Error = ();

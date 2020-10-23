@@ -70,7 +70,7 @@
 
 mod registers;
 
-#[cfg(feature = "embedded-hal")]
+#[cfg(feature = "hal")]
 mod hal;
 
 use core::{

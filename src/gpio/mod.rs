@@ -41,15 +41,17 @@
 //! pin.write(gpio::Level::High);
 //! ```
 
-#[doc(hidden)]
-pub use paste::expr;
+mod controller;
 
-pub use controller::CONTROLLER;
+#[cfg(feature = "hal")]
+mod hal;
+
+pub use crate::gpio::controller::*;
 
 use enum_primitive::FromPrimitive;
+#[doc(hidden)]
+pub use paste::expr;
 use register::mmio::ReadWrite;
-
-mod controller;
 
 /// The GPIO ports that are supported by the platform.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

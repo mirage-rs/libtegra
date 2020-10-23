@@ -1,12 +1,14 @@
 //! Driver for the Tegra X1 Serial Peripheral Interface Controller.
 
+mod registers;
+
+#[cfg(feature = "hal")]
+mod hal;
+
 use core::{convert::TryInto, marker::Sync};
 
+pub use crate::spi::registers::*;
 use crate::timer::usleep;
-
-pub use registers::*;
-
-mod registers;
 
 /// Representation of an SPI.
 ///
@@ -16,10 +18,6 @@ mod registers;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Spi {
     // TODO: SPI device clocks?
-
-    /// A pointer to the [`Registers`] of the device.
-    ///
-    /// [`Registers`]: struct.Registers.html
     registers: *const Registers,
 }
 
@@ -65,9 +63,9 @@ impl Spi {
 impl Spi {
     /// Waits for the SPI Controller to complete all transactions.
     fn wait_until_ready(&self) {
-        let controller = unsafe { &*self.registers };
+        let spi = unsafe { &*self.registers };
 
-        while !controller.SPI_TRANSFER_STATUS_0.is_set(SPI_TRANSFER_STATUS_0::RDY) {
+        while !spi.SPI_TRANSFER_STATUS_0.is_set(SPI_TRANSFER_STATUS_0::RDY) {
             // Wait until all transactions are completed.
         }
     }
@@ -76,15 +74,15 @@ impl Spi {
     ///
     /// [`SPI_FIFO_STATUS_0`]: ./SPI_FIFO_STATUS_0/index.html
     fn clear_fifo_status(&self) {
-        let controller = unsafe { &*self.registers };
+        let spi = unsafe { &*self.registers };
 
         // Clear the relevant bits.
-        controller.SPI_FIFO_STATUS_0.modify(
+        spi.SPI_FIFO_STATUS_0.write(
             SPI_FIFO_STATUS_0::ERR::CLEAR
-            + SPI_FIFO_STATUS_0::TX_FIFO_OVF::CLEAR
-            + SPI_FIFO_STATUS_0::TX_FIFO_UNR::CLEAR
-            + SPI_FIFO_STATUS_0::RX_FIFO_OVF::CLEAR
-            + SPI_FIFO_STATUS_0::RX_FIFO_UNR::CLEAR
+                + SPI_FIFO_STATUS_0::TX_FIFO_OVF::CLEAR
+                + SPI_FIFO_STATUS_0::TX_FIFO_UNR::CLEAR
+                + SPI_FIFO_STATUS_0::RX_FIFO_OVF::CLEAR
+                + SPI_FIFO_STATUS_0::RX_FIFO_UNR::CLEAR,
         );
     }
 
@@ -95,49 +93,48 @@ impl Spi {
     /// buffer boundaries. This task is delegated to the
     /// caller.
     fn pio_send_packet(&self, data: &[u8; 4]) -> Result<(), ()> {
-        let controller = unsafe { &*self.registers };
+        let spi = unsafe { &*self.registers };
 
         // Flush the FIFOs.
         self.flush_fifos();
 
         // Set 8-bit transfers, unpacked mode, most significant bit first.
-        controller.SPI_COMMAND_0.modify(
-            SPI_COMMAND_0::PACKED::CLEAR
-            + SPI_COMMAND_0::BIT_LEN.val(7)
-        );
+        spi.SPI_COMMAND_0
+            .modify(SPI_COMMAND_0::PACKED::CLEAR + SPI_COMMAND_0::BIT_LEN.val(7));
 
         // Set the size of data blocks to be transferred.
-        controller.SPI_DMA_BLK_SIZE_0.set(0);
+        spi.SPI_DMA_BLK_SIZE_0.set(0);
 
         // Clear SPI_TRANSFER_STATUS RDY bit.
-        controller.SPI_TRANSFER_STATUS_0.modify(SPI_TRANSFER_STATUS_0::RDY::CLEAR);
+        spi.SPI_TRANSFER_STATUS_0
+            .modify(SPI_TRANSFER_STATUS_0::RDY::CLEAR);
 
         // Set the transmit enable bit.
-        controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::TX_EN::SET);
+        spi.SPI_COMMAND_0.modify(SPI_COMMAND_0::TX_EN::SET);
 
         // Load in the data to write.
-        controller.SPI_TX_FIFO_0.set(u32::from_le_bytes(*data));
+        spi.SPI_TX_FIFO_0.set(u32::from_le_bytes(*data));
 
         // Make sure that the register is stabilized before setting the PIO bit.
         usleep(2);
 
         // Set the PIO bit to start transaction.
-        controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::PIO::Go);
+        spi.SPI_COMMAND_0.modify(SPI_COMMAND_0::PIO::Go);
 
         // Delay for a few CPU cycles to process the data.
         usleep(1);
 
         // Dummy read.
-        controller.SPI_COMMAND_0.get();
+        spi.SPI_COMMAND_0.get();
 
         // Wait for the transaction to complete.
         self.wait_until_ready();
 
         // Clear the transmit enable bit.
-        controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::TX_EN::CLEAR);
+        spi.SPI_COMMAND_0.modify(SPI_COMMAND_0::TX_EN::CLEAR);
 
         // Check for errors.
-        if controller.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::ERR) {
+        if spi.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::ERR) {
             self.clear_fifo_status();
             return Err(());
         }
@@ -152,52 +149,51 @@ impl Spi {
     /// buffer boundaries. This task is delegated to the
     /// caller.
     fn pio_receive_packet(&self, data: &mut [u8; 4]) -> Result<(), ()> {
-        let controller = unsafe { &*self.registers };
+        let spi = unsafe { &*self.registers };
 
         // Flush the FIFOs.
         self.flush_fifos();
 
         // Set 8-bit transfers, unpacked mode, most significant bit first.
-        controller.SPI_COMMAND_0.modify(
-            SPI_COMMAND_0::PACKED::CLEAR
-            + SPI_COMMAND_0::BIT_LEN.val(7)
-        );
+        spi.SPI_COMMAND_0
+            .modify(SPI_COMMAND_0::PACKED::CLEAR + SPI_COMMAND_0::BIT_LEN.val(7));
 
         // Set the size of data blocks to be transferred.
-        controller.SPI_DMA_BLK_SIZE_0.set(0);
+        spi.SPI_DMA_BLK_SIZE_0.set(0);
 
         // Clear SPI_TRANSFER_STATUS RDY bit.
-        controller.SPI_TRANSFER_STATUS_0.modify(SPI_TRANSFER_STATUS_0::RDY::CLEAR);
+        spi.SPI_TRANSFER_STATUS_0
+            .modify(SPI_TRANSFER_STATUS_0::RDY::CLEAR);
 
         // Set the receive enable bit.
-        controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::RX_EN::SET);
+        spi.SPI_COMMAND_0.modify(SPI_COMMAND_0::RX_EN::SET);
 
         // Make sure that the register is stabilized before setting the PIO bit.
         usleep(2);
 
         // Set the PIO bit to start transaction.
-        controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::PIO::Go);
+        spi.SPI_COMMAND_0.modify(SPI_COMMAND_0::PIO::Go);
 
         // Delay for a few CPU cycles to process the data.
         usleep(1);
 
         // Dummy read.
-        controller.SPI_COMMAND_0.get();
+        spi.SPI_COMMAND_0.get();
 
         // Wait for the transaction to complete.
         self.wait_until_ready();
 
         // Clear the receive enable bit.
-        controller.SPI_COMMAND_0.modify(SPI_COMMAND_0::RX_EN::CLEAR);
+        spi.SPI_COMMAND_0.modify(SPI_COMMAND_0::RX_EN::CLEAR);
 
         // Check for errors.
-        if controller.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::ERR) {
+        if spi.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::ERR) {
             self.clear_fifo_status();
             return Err(());
         }
 
         // Read the data bytes into the buffer.
-        *data = controller.SPI_RX_FIFO_0.get().to_le_bytes();
+        *data = spi.SPI_RX_FIFO_0.get().to_le_bytes();
 
         Ok(())
     }
@@ -210,45 +206,45 @@ impl Spi {
     ///
     /// [`pinmux`]: ../pinmux
     pub fn init(&self) {
-        let controller = unsafe { &*self.registers };
+        let spi = unsafe { &*self.registers };
 
         // Set chip-select value to high, 8-bit transfers,
         // unpacked mode and most significant bit first.
-        controller.SPI_COMMAND_0.modify(
+        spi.SPI_COMMAND_0.modify(
             SPI_COMMAND_0::CS_SW_HW::SET
-            + SPI_COMMAND_0::CS_SW_VAL::SET
-            + SPI_COMMAND_0::PACKED::CLEAR
-            + SPI_COMMAND_0::BIT_LEN.val(7)
+                + SPI_COMMAND_0::CS_SW_VAL::SET
+                + SPI_COMMAND_0::PACKED::CLEAR
+                + SPI_COMMAND_0::BIT_LEN.val(7),
         );
 
         // Flush the FIFOs.
         self.flush_fifos();
 
         // Enforce chip-select line 0 for now and drive chip-select low.
-        controller.SPI_COMMAND_0.modify(
-            SPI_COMMAND_0::CS_SEL.val(0)
-            + SPI_COMMAND_0::CS_SW_VAL::CLEAR
-        );
+        spi.SPI_COMMAND_0
+            .modify(SPI_COMMAND_0::CS_SEL.val(0) + SPI_COMMAND_0::CS_SW_VAL::CLEAR);
     }
 
-    /// Flushes the underlying FIFOs of the UART.
+    /// Flushes the underlying FIFOs of the SPI.
     ///
     /// NOTE: This method flushes both, TX FIFO and RX FIFO,
     /// so be careful when you use it.
     pub fn flush_fifos(&self) {
-        let controller = unsafe { &*self.registers };
+        let spi = unsafe { &*self.registers };
 
         // Make sure the controller is in idle state.
         self.wait_until_ready();
 
         // Issue flush requests for TX FIFO and RX FIFO.
-        controller.SPI_FIFO_STATUS_0.modify(
-            SPI_FIFO_STATUS_0::RX_FIFO_FLUSH::SET
-            + SPI_FIFO_STATUS_0::TX_FIFO_FLUSH::SET
-        );
+        spi.SPI_FIFO_STATUS_0
+            .modify(SPI_FIFO_STATUS_0::RX_FIFO_FLUSH::SET + SPI_FIFO_STATUS_0::TX_FIFO_FLUSH::SET);
 
-        while controller.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::RX_FIFO_FLUSH)
-            && controller.SPI_FIFO_STATUS_0.is_set(SPI_FIFO_STATUS_0::TX_FIFO_FLUSH)
+        while spi
+            .SPI_FIFO_STATUS_0
+            .is_set(SPI_FIFO_STATUS_0::RX_FIFO_FLUSH)
+            && spi
+                .SPI_FIFO_STATUS_0
+                .is_set(SPI_FIFO_STATUS_0::TX_FIFO_FLUSH)
         {
             // Wait for the changes to take effect.
         }

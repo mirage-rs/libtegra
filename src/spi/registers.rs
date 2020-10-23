@@ -1,11 +1,6 @@
-//! Abstractions over the SPI Controller registers of the Tegra X1.
-//!
-//! See Chapter 37.3 in the Tegra X1 Technical Reference Manual
-//! for details.
-
 use register::{mmio::*, register_bitfields, register_structs};
 
-use crate::memory_map::{QSPI, spi::*};
+use crate::memory_map::{spi::*, QSPI};
 
 /// A pointer to the SPI 2B-1 register block that can be accessed by dereferencing it.
 pub const SPI_1_REGISTERS: *const Registers = SPI_1 as *const Registers;

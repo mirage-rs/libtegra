@@ -1,6 +1,6 @@
 use embedded_hal::digital::v2;
 
-use crate::gpio::{Gpio, Level};
+use super::{Gpio, Level};
 
 impl v2::OutputPin for Gpio {
     type Error = ();

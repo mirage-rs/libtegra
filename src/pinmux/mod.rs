@@ -33,12 +33,12 @@
 
 // Inspired by https://github.com/NVIDIA/tegra-pinmux-scripts.
 
+mod registers;
+
 use enum_primitive::FromPrimitive;
 use register::mmio::ReadWrite;
 
-pub use registers::*;
-
-mod registers;
+pub use crate::pinmux::registers::*;
 
 /// Pin Groups on the Tegra X1 SoC that can be customized and variably configured.
 ///

@@ -1,8 +1,3 @@
-//! Abstractions over the PWM Controller registers of the Tegra X1.
-//!
-//! See Chapter 39.2 in the Tegra X1 Technical Reference Manual for
-//! details.
-
 use register::{mmio::ReadWrite, register_bitfields, register_structs};
 
 use crate::memory_map::PWM;

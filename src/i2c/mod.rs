@@ -36,7 +36,7 @@
 mod controller;
 mod registers;
 
-#[cfg(feature = "embedded-hal")]
+#[cfg(feature = "hal")]
 mod hal;
 
 pub use controller::*;

@@ -11,11 +11,15 @@
 //! These UARTs support both, 16450 and 16550 compatible modes, although this
 //! implementation specifically targets the 16550 mode.
 //!
-//! UARTs internally use a TX FIFO, which acts as a buffer for data to send, and
-//! an RX FIFO, which acts as a buffer for received data, to read from. Hence,
-//! UARTs provide a stream of serial data to communicate with other devices.
+//! # Transmission speed
 //!
-//! ## Initialization
+//! UART controllers support [`Clock`]s up to 200MHz with a baud rate of 12.5M.
+//!
+//! The default supported and recommended baud rate is `115_200`. If one wishes to
+//! use a custom baud rate, they may have to alter the clock divisor configuration of
+//! the corresponding UART device clock.
+//!
+//! # Initialization
 //!
 //! [`Uart`]s need to be initialized with a given baud rate before they can be used.
 //!
@@ -25,7 +29,7 @@
 //! Uart::A.init(BAUD_115200);
 //! ```
 //!
-//! ## Communication
+//! # Communication
 //!
 //! After a [`Uart`] was initialized, it can be used like this:
 //!
@@ -52,14 +56,13 @@
 //! uart.read(&mut buffer);
 //! ```
 //!
-//! ## Flushing
+//! # Flushing
 //!
 //! In some cases, you may want to flush the underlying FIFOs:
 //!
 //! ```no_run
 //! use libtegra::uart::Uart;
 //!
-//! // Clears the data from both, TX FIFO and RX FIFO.
 //! Uart::A.flush();
 //! ```
 //!
@@ -70,8 +73,8 @@ use core::{
     marker::Sync,
 };
 
+pub use crate::uart::registers::*;
 use crate::{car::Clock, timer::usleep};
-pub use registers::*;
 
 mod registers;
 
@@ -160,7 +163,7 @@ impl Uart {
         (8 * baud_rate + 408_000_000) / (16 * baud_rate)
     }
 
-    /// Initializes the Uart with a given baud rate.
+    /// Initializes the UART with a given baud rate.
     ///
     /// NOTE: This method needs to be called once before a [`Uart`] can actually
     /// send and receive data. Further, it is required to do the respective
@@ -169,7 +172,7 @@ impl Uart {
     /// [`Uart`]: struct.Uart.html
     /// [`pinmux`]: ../pinmux
     pub fn init(&mut self, baud_rate: u32) {
-        let controller = unsafe { &*self.registers };
+        let uart = unsafe { &*self.registers };
 
         // Store the provided baud rate.
         self.baud = baud_rate;
@@ -177,7 +180,7 @@ impl Uart {
         // Bring up the device clock.
         self.clock.enable();
 
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::TMTY) {
+        while !uart.UART_LSR_0.is_set(UART_LSR_0::TMTY) {
             // Wait for TX FIFO idle state.
         }
 
@@ -187,32 +190,30 @@ impl Uart {
         // Setup UART in FIFO mode.
 
         // Disable interrupts.
-        controller.UART_IER_DLAB_0_0.set(0);
+        uart.UART_IER_DLAB_0_0.set(0);
         // Disable hardware flow control.
-        controller.UART_MCR_0.set(0);
+        uart.UART_MCR_0.set(0);
         // Enable DLAB and set word length to 8.
-        controller
-            .UART_LCR_0
-            .modify(UART_LCR_0::DLAB::SET + UART_LCR_0::WD_SIZE::WordLength8);
+        uart.UART_LCR_0
+            .write(UART_LCR_0::DLAB::SET + UART_LCR_0::WD_SIZE::WordLength8);
         // Divisor latch LSB.
-        controller.UART_THR_DLAB_0_0.set(rounded_baud_rate & 0xFF);
+        uart.UART_THR_DLAB_0_0.set(rounded_baud_rate & 0xFF);
         // Divisor latch MSB.
-        controller.UART_IER_DLAB_0_0.set((rounded_baud_rate >> 8) & 0xFF);
+        uart.UART_IER_DLAB_0_0.set((rounded_baud_rate >> 8) & 0xFF);
         // Disable DLAB.
-        controller.UART_LCR_0.modify(UART_LCR_0::DLAB::CLEAR);
+        uart.UART_LCR_0.modify(UART_LCR_0::DLAB::CLEAR);
         // Dummy read.
-        controller.UART_SPR_0.get();
+        uart.UART_SPR_0.get();
         // Wait 3 symbols for the new baud rate.
         self.wait_symbols(3);
 
         // Enable FIFO with default settings.
 
         // Enable FIFO mode.
-        controller
-            .UART_IIR_FCR_0
+        uart.UART_IIR_FCR_0
             .write(UART_IIR_FCR_0::EN_FIFO::Mode16550);
         // Dummy read.
-        controller.UART_SPR_0.get();
+        uart.UART_SPR_0.get();
         // Wait for 3 baud cycles.
         self.wait_cycles(3);
 
@@ -220,18 +221,18 @@ impl Uart {
         self.flush();
     }
 
-    /// Reads a byte over UART and returns it.
+    /// Reads a singly byte over UART and returns it.
     ///
     /// This method blocks until data is available to read.
     pub fn read_byte(&self) -> u8 {
-        let controller = unsafe { &*self.registers };
+        let uart = unsafe { &*self.registers };
 
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::RDR) {
+        while !uart.UART_LSR_0.is_set(UART_LSR_0::RDR) {
             // Wait until it is possible to read data.
         }
 
         // Read the byte.
-        controller.UART_THR_DLAB_0_0.get() as u8
+        uart.UART_THR_DLAB_0_0.get() as u8
     }
 
     /// Fills a mutable buffer of data with bytes read over UART.
@@ -244,18 +245,18 @@ impl Uart {
         }
     }
 
-    /// Writes a byte over UART.
+    /// Writes a single byte over UART.
     ///
     /// This method blocks until data can be transferred.
     pub fn write_byte(&self, byte: u8) {
-        let controller = unsafe { &*self.registers };
+        let uart = unsafe { &*self.registers };
 
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::THRE) {
+        while !uart.UART_LSR_0.is_set(UART_LSR_0::THRE) {
             // Wait until it is possible to write data.
         }
 
         // Transmit the byte.
-        controller.UART_THR_DLAB_0_0.set(byte as u32);
+        uart.UART_THR_DLAB_0_0.set(byte as u32);
     }
 
     /// Writes a buffer of bytes over UART.
@@ -268,44 +269,62 @@ impl Uart {
         }
     }
 
+    /// Enables or disables inversion of the UART signal with the desired bitmask.
+    ///
+    /// See the documentation of the [`UART_IRDA_CSR_0`] bitfield for instructions
+    /// on the structure of the expected bitmask.
+    ///
+    /// [`UART_IRDA_CSR_0`]: ./UART_IRDA_CSR_0/index.html
+    pub fn invert(&self, mask: u32, enable: bool) {
+        let uart = unsafe { &*self.registers };
+
+        // Set or clear the mask on the inversion setting bits.
+        if enable {
+            uart.UART_IRDA_CSR_0.set(uart.UART_IRDA_CSR_0.get() | mask);
+        } else {
+            uart.UART_IRDA_CSR_0.set(uart.UART_IRDA_CSR_0.get() & !mask);
+        }
+
+        // Dummy read.
+        uart.UART_SPR_0.get();
+    }
+
     /// Flushes the underlying FIFOs of the Uart.
     ///
-    /// This wipes out the data to read and the data that should be written, so be careful when you use it.
-    /// In most cases, this method won't be needed.
+    /// This wipes out the data to read and the data that should be written, so be careful when
+    /// you use it. In most cases, this method won't be needed.
     pub fn flush(&self) {
-        let controller = unsafe { &*self.registers };
+        let uart = unsafe { &*self.registers };
 
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::TMTY) {
+        while !uart.UART_LSR_0.is_set(UART_LSR_0::TMTY) {
             // Make sure there is no data being written to TX FIFO.
         }
 
         // Disable hardware control flow.
-        controller.UART_MCR_0.set(0);
+        uart.UART_MCR_0.set(0);
         // Dummy read.
-        controller.UART_SPR_0.get();
+        uart.UART_SPR_0.get();
         // Wait for 1 character time.
         // XXX: Figure out how to calculate this from code.
         usleep(96);
 
         // Issue flush requests for TX FIFO and RX FIFO.
-        controller.UART_IIR_FCR_0.modify(
+        uart.UART_IIR_FCR_0.write(
             UART_IIR_FCR_0::EN_FIFO::Mode16550
                 + UART_IIR_FCR_0::TX_CLR::SET
                 + UART_IIR_FCR_0::RX_CLR::SET,
         );
         // Dummy read.
-        controller.UART_SPR_0.get();
+        uart.UART_SPR_0.get();
         // Wait for 32 baud cycles.
         self.wait_cycles(32);
 
-        while !controller.UART_LSR_0.is_set(UART_LSR_0::TMTY)
-            && controller.UART_LSR_0.is_set(UART_LSR_0::RDR)
-        {
+        while !uart.UART_LSR_0.is_set(UART_LSR_0::TMTY) && uart.UART_LSR_0.is_set(UART_LSR_0::RDR) {
             // Wait until the FIFOs are ready.
         }
 
         // Re-enable hardware control flow.
-        controller.UART_MCR_0.modify(UART_MCR_0::RTS_EN::SET);
+        uart.UART_MCR_0.modify(UART_MCR_0::RTS_EN::SET);
     }
 }
 

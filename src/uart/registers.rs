@@ -1,8 +1,3 @@
-//! Abstractions over the UART registers of the Tegra X1.
-//!
-//! See Chapter 36.3 in the Tegra X1 Technical Reference Manual
-//! for details.
-
 use register::{mmio::*, register_bitfields, register_structs};
 
 use crate::memory_map::uart::*;

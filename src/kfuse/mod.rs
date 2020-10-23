@@ -28,11 +28,10 @@
 //! [`wait_until_ready`]: fn.wait_until_ready.html
 //! [`Tsec`]: ../tsec/struct.Tsec.html
 
-use crate::car::Clock;
-
-pub use registers::*;
-
 mod registers;
+
+use crate::car::Clock;
+pub use crate::kfuse::registers::*;
 
 /// Maximum word length of a KFUSE address.
 pub const MAX_WORD_LENGTH: usize = 144;

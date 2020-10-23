@@ -88,20 +88,8 @@ pub const BAUD_115200: u32 = 115_200;
 /// the UARTs A through E.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Uart {
-    /// The baud rate this [`Uart`] is configured with.
-    ///
-    /// NOTE: This value will be overridden by [`Uart::init`],
-    /// so it is safe to initialize instances of this struct
-    /// with a dummy value, such as `Cell::new(0)`.
-    ///
-    /// [`Uart`]: struct.Uart.html
-    /// [`Uart::init`]: struct.Uart.html#method.init
     baud: u32,
-    /// A reference to the device clock that corresponds to the UART.
     clock: &'static Clock,
-    /// A pointer to the [`Registers`] of the UART.
-    ///
-    /// [`Registers`]: struct.Registers.html
     registers: *const Registers,
 }
 

@@ -1,8 +1,7 @@
 use core::convert::TryInto;
 
+use crate::i2c::registers::*;
 use crate::{car::Clock, timer};
-
-use super::registers::*;
 
 fn bytes_to_word(buf: &[u8]) -> u32 {
     if buf.len() == 4 {
@@ -54,11 +53,7 @@ pub enum Error {
 /// [`I2c::receive_normal`]: #fn.receive_normal.html
 #[derive(Debug)]
 pub struct I2c {
-    /// A reference of the device clock that corresponds to the I2C controller.
     clock: &'static Clock,
-    /// A pointer to the [`Registers`] of the device.
-    ///
-    /// [`Registers`]: struct.Registers.html
     registers: *const Registers,
 }
 

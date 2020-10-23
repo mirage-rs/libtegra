@@ -33,13 +33,13 @@
 //! [`I2c`]: struct.I2c.html\
 //! [`Clock`]: ../car/struct.Clock.html
 
-pub use controller::*;
-pub use registers::*;
-
-// TODO: I2C Device implementation.
-
 mod controller;
 mod registers;
 
 #[cfg(feature = "embedded-hal")]
 mod hal;
+
+pub use controller::*;
+pub use registers::*;
+
+// TODO: I2C Device implementation.

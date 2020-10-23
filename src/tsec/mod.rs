@@ -23,7 +23,7 @@
 //! turns the Falcon into a black box that doesn't expose any of its inner workings
 //! to, for example, the host system.
 //!
-//! ## Firmware
+//! # Firmware
 //!
 //! [envytools] have proven to be valuable tools when it comes to working with
 //! various ISAs used by NVIDIA, including the Falcon processor.
@@ -44,7 +44,7 @@
 //! envyas -m falcon -V fuc5 -F crypt faucon.asm -i -o faucon.bin
 //! ```
 //!
-//! ## Firmware Alignment
+//! # Firmware alignment
 //!
 //! Firmware blobs that should be booted on the [`Tsec`] are supposed to
 //! be aligned to the boundary denoted by [`FIRMWARE_ALIGNMENT`]. This is
@@ -77,41 +77,30 @@
 //! assert_eq!(FAUCON.value.as_ptr() as usize % FIRMWARE_ALIGNMENT, 0);
 //! ```
 //!
-//! ## Code Execution
+//! # Executing code
 //!
-//! Using our firmware blob and the static variable `FAUCON` from above,
-//! we can load the code onto the TSEC and try execute it:
+//! Using our firmware blob and the static variable `FW` from above,
+//! we can load the code onto the TSEC and try to execute it:
 //!
 //! ```no_run
-//! use libtegra::tsec::Tsec;
+//! use libtegra::tsec::{Firmware, Tsec};
 //!
-//! /// A helper that wraps around a TSEC firmware blob to ensure correct alignment.
-//! #[repr(align(256))]
-//! struct Firmware<T: Sized> {
-//!     pub value: T,
-//! }
-//!
-//! impl<T: Sized> Firmware<T> {
-//!     pub const fn new(value: T) -> Self {
-//!         Firmware { value }
-//!     }
-//! }
-//!
-//! /// The firmware blob.
-//! static FAUCON: Firmware<[u8; 15]> = Firmware::new([
+//! static FW: Firmware<u8, 13> = Firmware::new([
 //!     0xDF, 0xB0, 0xB0, 0xB0, 0xB0,   // mov $r15 0xB0B0B0B0;
-//!     0xC, 0x0,                       // mov $r12 0x0;
 //!     0x49, 0x0, 0x11,                // mov $r9 0x1100;
 //!     0xF6, 0x9F, 0x0,                // iowr I[$r9] $r15;
 //!     0xF8, 0x2,                      // exit;
 //! ]);
 //!
-//! // Load our Faucon firmware onto the TSEC.
-//! Tsec::A.load_firmware(&FAUCON.value).unwrap();
+//! // Load our firmware onto the TSEC.
+//! Tsec::A.load_firmware(&*FW).unwrap();
 //!
 //! // Boot it up!
+//! let mut mailbox0 = 0;
+//! let mut mailbox1 = 0;
 //! unsafe {
-//!     Tsec::A.boot_firmware(0).unwrap();
+//!     Tsec::A.boot_firmware(0, &mut mailbox0, &mut mailbox1).unwrap();
+//!     assert_eq!(mailbox1, 0xB0B0B0B0);
 //! }
 //! ```
 //!
@@ -120,17 +109,57 @@
 //! [`Tsec`]: struct.Tsec.html
 //! [`FIRMWARE_ALIGNMENT`]: constant.FIRMWARE_ALIGNMENT.html
 
+mod registers;
+
+use core::ops::{Deref, DerefMut};
+
 use enum_primitive::FromPrimitive;
 
+pub use crate::tsec::registers::*;
 use crate::{car::Clock, kfuse, timer::get_milliseconds};
-pub use registers::*;
-
-mod registers;
 
 /// The alignment bits for TSEC firmware blobs.
 pub const FIRMWARE_ALIGN_BITS: usize = 8;
 /// The alignment a TSEC firmware blob is expected to have.
 pub const FIRMWARE_ALIGNMENT: usize = 1 << FIRMWARE_ALIGN_BITS;
+
+/// A helper structure to align arrays containing Falcon machine code to the expected
+/// 0x100 bytes memory alignment for DMA transfers into the code segment.
+#[repr(align(256))]
+#[derive(Clone, Copy)]
+pub struct Firmware<T, const N: usize>([T; N]);
+
+impl<T, const N: usize> Firmware<T, { N }> {
+    /// Aligns the given firmware buffer to the required Falcon code page alignment.
+    pub const fn new(firmware: [T; N]) -> Self {
+        Firmware(firmware)
+    }
+
+    /// Returns the inner data.
+    pub fn into_inner(self) -> [T; N] {
+        self.0
+    }
+}
+
+impl<T, const N: usize> Deref for Firmware<T, { N }> {
+    type Target = [T; N];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T, const N: usize> DerefMut for Firmware<T, { N }> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<T, const N: usize> From<[T; N]> for Firmware<T, { N }> {
+    fn from(t: [T; N]) -> Self {
+        Firmware::new(t)
+    }
+}
 
 enum_from_primitive! {
     /// Enumeration of potential Falcon processor exception clauses
@@ -139,28 +168,28 @@ enum_from_primitive! {
     #[repr(u8)]
     pub enum FalconExceptionClause {
         /// The software trap 0 that may be triggered by the TRAP instruction.
-        Trap0,
+        Trap0 = 0,
         /// The software trap 1 that may be triggered by the TRAP instruction.
-        Trap1,
+        Trap1 = 1,
         /// The software trap 2 that may be triggered by the TRAP instruction.
-        Trap2,
+        Trap2 = 2,
         /// The software trap 3 that may be triggered by the TRAP instruction.
-        Trap3,
+        Trap3 = 3,
         /// A trap that is triggered when the Falcon encounters an opcode it
         /// cannot decode.
-        InvalidOpcode,
+        InvalidOpcode = 8,
         /// A so-called Secure Fault was indicated by jumping to a secure page,
         /// but the MAC verification for that page failed, which halted the MCU.
-        AuthenticationEntry,
+        AuthenticationEntry = 9,
         /// A page fault occurred because the TLB failed to provide mappings for
         /// a virtual address on lookup.
-        PageMiss,
+        PageMiss = 10,
         /// A page fault occurred because the TLB contained multiple mappings for
         /// a single virtual address on lookup.
-        PageMultipleMiss,
+        PageMultipleMiss = 11,
         /// A breakpoint, which was set through the integrated hardware debugging
         /// interface, was hit during code execution.
-        BreakpointHit,
+        BreakpointHit = 15,
     }
 }
 
@@ -175,8 +204,8 @@ impl From<u8> for FalconExceptionClause {
 
 assert_eq_size!(FalconExceptionClause, u8);
 
-/// Enumeration of potential Falcon processor exceptions
-/// that may occur when interacting with the TSEC.
+/// Falcon processor exceptions that may occur when interacting with it from the
+/// host system or may be caused by running code.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FalconError {
     /// The DMA engine timed out.
@@ -194,7 +223,6 @@ pub enum FalconError {
 /// Representation of the Tegra Security Co-Processor.
 #[derive(Debug)]
 pub struct Tsec {
-    /// The internal TSEC MMIO register interface.
     registers: *const Registers,
 }
 
@@ -212,11 +240,11 @@ impl Tsec {
 
 impl Tsec {
     fn dma_wait_idle(&self) -> Result<(), FalconError> {
-        let register_base = unsafe { &*self.registers };
+        let tsec = unsafe { &*self.registers };
 
         let timeout = get_milliseconds() + 10_000;
 
-        while (register_base.FALCON_DMATRFCMD.get() & (1 << 1)) == 0 {
+        while (tsec.FALCON_DMATRFCMD.get() & (1 << 1)) == 0 {
             if get_milliseconds() > timeout {
                 return Err(FalconError::DmaTimeout);
             }
@@ -226,7 +254,7 @@ impl Tsec {
     }
 
     fn try_load_firmware(&self, firmware: &[u8]) -> Result<(), FalconError> {
-        let register_base = unsafe { &*self.registers };
+        let tsec = unsafe { &*self.registers };
 
         // Check if the firmware is being aligned correctly.
         let firmware_address = firmware.as_ptr() as usize;
@@ -234,31 +262,30 @@ impl Tsec {
             return Err(FalconError::FirmwareMisaligned);
         }
 
-        // Ensure that KFUSE is ready.
+        // Ensure that KFUSE is ready (since TSEC sources the KFUSE key from it).
         kfuse::wait_until_ready().unwrap();
 
         // Configure the Falcon processor.
-        register_base.FALCON_DMACTL.set(0);
-        register_base.FALCON_IRQMSET.set(0xFFF2);
-        register_base.FALCON_IRQDEST.set(0xFFF0);
-        register_base.FALCON_ITFEN.set(3);
+        tsec.FALCON_DMACTL.set(0);
+        tsec.FALCON_IRQMSET.set(0xFFF2);
+        tsec.FALCON_IRQDEST.set(0xFFF0);
+        tsec.FALCON_ITFEN.set(3);
 
         // Make sure the DMA block is in idle state.
         self.dma_wait_idle()?;
 
         // Load in the memory address of the firmware buffer.
-        register_base
-            .FALCON_DMATRFBASE
+        tsec.FALCON_DMATRFBASE
             .set((firmware_address >> FIRMWARE_ALIGN_BITS) as u32);
 
-        // Configure DMA to transfer the physical firmware buffer to the Falcon processor.
+        // Configure DMA to transfer the physical firmware buffer into the Falcon SRAM.
         for (index, _) in firmware.chunks(FIRMWARE_ALIGNMENT).enumerate() {
             let base = (index * FIRMWARE_ALIGNMENT) as u32;
             let offset = base;
 
-            register_base.FALCON_DMATRFMOFFS.set(offset);
-            register_base.FALCON_DMATRFFBOFFS.set(base);
-            register_base.FALCON_DMATRFCMD.set(1 << 4);
+            tsec.FALCON_DMATRFMOFFS.set(offset);
+            tsec.FALCON_DMATRFFBOFFS.set(base);
+            tsec.FALCON_DMATRFCMD.set(1 << 4);
 
             self.dma_wait_idle()?;
         }
@@ -266,9 +293,9 @@ impl Tsec {
         Ok(())
     }
 
-    /// Loads a TSEC firmware buffer onto the Falcon processor.
+    /// Loads a TSEC firmware into the processor memory.
     ///
-    /// NOTE: The memory buffer is expected to be [aligned] correctly.
+    /// NOTE: The firmware buffer is expected to be [aligned] correctly.
     ///
     /// [aligned]: constant.FIRMWARE_ALIGNMENT.html
     pub fn load_firmware(&self, firmware: &[u8]) -> Result<(), FalconError> {
@@ -304,36 +331,46 @@ impl Tsec {
     /// NOTE: The firmware has to be loaded in through [`Tsec::load_firmware`]
     /// in advance, otherwise this method will fail.
     ///
-    /// UNSAFE: This method is considered unsafe because code execution on the
-    /// TSEC can fail for malformed or misaligned blobs.
+    /// # Safety
+    ///
+    /// This method is considered unsafe because code execution on the TSEC can fail
+    /// for malformed or misaligned blobs or through code fucking up internal state.
     ///
     /// [`Tsec::load_firmware`]: struct.Tsec.html#method.load_firmware
-    pub unsafe fn boot_firmware(&self, boot_vector: u32) -> Result<(), FalconError> {
-        let register_base = &*self.registers;
+    pub unsafe fn boot_firmware(
+        &self,
+        boot_vector: u32,
+        mailbox0: &mut u32,
+        mailbox1: &mut u32,
+    ) -> Result<(), FalconError> {
+        let tsec = &*self.registers;
         let mut res;
 
         // Configure Falcon and start the CPU.
-        register_base.FALCON_MAILBOX1.set(0);
-        register_base.FALCON_MAILBOX0.set(1);
-        register_base.FALCON_BOOTVEC.set(boot_vector);
-        register_base.FALCON_CPUCTL.set(2);
+        tsec.FALCON_MAILBOX0.set(*mailbox0);
+        tsec.FALCON_MAILBOX1.set(*mailbox1);
+        tsec.FALCON_BOOTVEC.set(boot_vector);
+        tsec.FALCON_CPUCTL.set(2);
 
         // Wait for the DMA engine to enter idle state.
         res = self.dma_wait_idle();
         if res.is_ok() {
             // Wait for the CPU to be halted.
-            while register_base.FALCON_CPUCTL.get() != (1 << 4) {}
+            while tsec.FALCON_CPUCTL.get() != (1 << 4) {}
 
             // Check if the CPU has crashed.
-            let exception_info = register_base.FALCON_EXCI.get();
+            let exception_info = tsec.FALCON_EXCI.get();
             if exception_info != 0 {
                 // Gather exception details.
-                let pc = exception_info & 0x80000;
-                let exception = FalconExceptionClause::from((exception_info >> 20) as u8 & 0xF);
+                let pc = exception_info & 0xFFFFF;
+                let exception = FalconExceptionClause::from(((exception_info >> 20) & 0xF) as u8);
 
                 res = Err(FalconError::Exception(pc, exception));
             }
         }
+
+        *mailbox0 = tsec.FALCON_MAILBOX0.get();
+        *mailbox1 = tsec.FALCON_MAILBOX1.get();
 
         res
     }

@@ -1,7 +1,7 @@
 #![no_std]
 #![recursion_limit = "512"]
-#![feature(const_fn)]
 #![feature(optimize_attribute)]
+#![feature(min_const_generics)]
 
 pub extern crate cortex_a;
 

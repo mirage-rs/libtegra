@@ -68,15 +68,18 @@
 //!
 //! [`Uart`]: struct.Uart.html
 
+mod registers;
+
+#[cfg(feature = "embedded-hal")]
+mod hal;
+
 use core::{
-    fmt::{Error, Write},
+    fmt::{self, Error},
     marker::Sync,
 };
 
 pub use crate::uart::registers::*;
 use crate::{car::Clock, timer::usleep};
-
-mod registers;
 
 /// The default baud rate that can be used to intiialize UARTs.
 pub const BAUD_115200: u32 = 115_200;
@@ -316,7 +319,7 @@ impl Uart {
     }
 }
 
-impl Write for Uart {
+impl fmt::Write for Uart {
     fn write_str(&mut self, s: &str) -> Result<(), Error> {
         // Write the string in its bytes representation.
         self.write(s.as_bytes());

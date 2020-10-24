@@ -1,5 +1,3 @@
-//! Abstractions over the Tegra FUSE registers.
-
 use register::{mmio::ReadWrite, register_structs};
 
 use crate::memory_map::FUSE;

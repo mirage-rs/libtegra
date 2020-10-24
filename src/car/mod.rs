@@ -25,5 +25,5 @@
 mod clock;
 mod registers;
 
-pub use crate::car::clock::Clock;
+pub use crate::car::clock::*;
 pub use crate::car::registers::*;

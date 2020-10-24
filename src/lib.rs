@@ -37,7 +37,7 @@ pub mod pmc;
 pub mod pwm;
 pub mod se;
 pub mod spi;
+pub mod system;
 pub mod timer;
 pub mod tsec;
 pub mod uart;
-pub mod utils;

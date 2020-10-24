@@ -1,26 +1,21 @@
 //! Driver for the Tegra X1 Power Management Controller.
 //!
-//! See Chapter 12 in the Tegra X1 Technical Reference Manual
-//! for details.
+//! See Chapter 12 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!
-//! The Power Management Controller (PMC) block interacts with
-//! an external Power Management Integrated Circuit (PMIC)
-//! through sideband signals. The PMC controls the entry and exit
-//! of the system from different sleep modes. It provides power-gating
-//! controllers for SoC and CPU power partitions, except for the
-//! Maxwell GPU power partition. The PMC also provides deep power down
-//! (DPD) mode control for pads, and scratch storage to save some of
-//! the context during sleep modes (when the CPU and/or SoC power rails
-//! are off).
+//! The Power Management Controller (PMC) block interacts with an external Power Management
+//! Integrated Circuit (PMIC) through sideband signals. The PMC controls the entry and exit
+//! of the system from different sleep modes. It provides power-gating controllers for SoC
+//! and CPU power partitions, except for the Maxwell GPU power partition. The PMC also
+//! provides deep power down (DPD) mode control for pads, and scratch storage to save some
+//! of the context during sleep modes (when the CPU and/or SoC power rails are off).
 //!
-//! Sleep (LP1) and Deep Sleep (LP0) require specific logic to maintain
-//! some states and control the power domains, including signaling to
-//! the external PMIC to provide power to the main logic in Tegra X1
-//! devices. All this logic is centralized in the PMC block.
+//! Sleep (LP1) and Deep Sleep (LP0) require specific logic to maintain some states and control
+//! the power domains, including signaling to the external PMIC to provide power to the main
+//! logic in Tegra X1 devices. All this logic is centralized in the PMC block.
 //!
-//! ## Power Gating/Ungating
+//! # Power Gating/Ungating
 //!
 //! This module exposes an implementation of the power-gating logic for
 //! certain [`Partition`]s through the [`powergate_partition`] function:
@@ -92,15 +87,6 @@ enum_from_primitive! {
 }
 
 /// Toggles power gating for a given partition.
-///
-/// # Example
-///
-/// ```no_run
-/// use libtegra::pmc;
-///
-/// pmc::powergate_partition(pmc::Partition::SOR, true)
-///     .expect("Failed to power gate SOR!");
-/// ```
 pub fn powergate_partition(partition: Partition, enable: bool) -> Result<(), ()> {
     let pmc = unsafe { &*REGISTERS };
 

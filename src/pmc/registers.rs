@@ -1,8 +1,3 @@
-//! Abstractions over the PMC registers of the Tegra X1.
-//!
-//! See Chapter 12.6 in the Tegra X1 Technical Reference Manual
-//! for details.
-
 use register::mmio::*;
 
 use crate::memory_map::PMC;

@@ -1,34 +1,31 @@
 //! Driver for the Tegra X1 General-Purpose Input/Output controller.
 //!
-//! See Chapter 9.10 in the Tegra X1 Technical Reference Manual for
-//! details.
+//! See Chapter 9.10 in the Tegra X1 Technical Reference Manual for details.
 //!
 //! # Description
 //!
-//! The GPIO controller for Tegra X1 devices provides the tools for
-//! configuring each MPIO for use as a software-controlled GPIO.
+//! The GPIO controller for Tegra X1 devices provides the tools for configuring each
+//! MPIO for use as a software-controlled GPIO.
 //!
-//! ## Controller Structure
+//! # Controller Structure
 //!
-//! The controller is divided into 8 banks. Each bank contains 4 GPIO
-//! ports, which in turn provide 8 available pins, numbered from 0
-//! through 7. GPIO ports a labeled consecutively from A through Z
-//! and then AA through FF. Ports A through E are in bank 0, E through
-//! H in bank 1, and so on.
+//! The controller is divided into 8 banks. Each bank contains 4 GPIO ports, which in turn
+//! provide 8 available pins, numbered from 0 through 7. GPIO ports a labeled consecutively
+//! from A through Z and then AA through FF. Ports A through E are in bank 0, E through H
+//! in bank 1, and so on.
 //!
-//! In conclusion, 256 GPIOs in total are therefore available,
-//! approximately 170 of them being physical pins.
-//! Each of them can be identified uniquely through a port and a pin.
+//! In conclusion, 256 GPIOs in total are therefore available, approximately 170 of them being
+//! physical pins. Each of them can be identified uniquely through a port and a pin.
 //!
 //! ## Configuration
 //!
-//! Each GPIO can be configured individually as Input/Output/Interrupt
-//! sources with level/edge controls.
+//! Each GPIO can be configured individually as Input/Output/Interrupt sources with level/edge
+//! controls.
 //!
 //! ```no_run
 //! use libtegra::{tegra_gpio, gpio};
 //!
-//! // The following line...
+//! // This...
 //! tegra_gpio!(D, 4).config(gpio::Config::OutputHigh);
 //!
 //! // ...is equivalent to:
@@ -56,7 +53,7 @@ use register::mmio::ReadWrite;
 /// The GPIO ports that are supported by the platform.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Port {
-    A = 0,
+    A,
     B,
     C,
     D,
@@ -93,7 +90,7 @@ pub enum Port {
 /// The GPIO pins that are provided for each port.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pin {
-    P0 = 0,
+    P0,
     P1,
     P2,
     P3,
@@ -108,7 +105,7 @@ enum_from_primitive! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub enum Mode {
         /// SFIO mode.
-        Sfio = 0,
+        Sfio,
         /// GPIO mode.
         Gpio,
     }
@@ -119,7 +116,7 @@ enum_from_primitive! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub enum Direction {
         /// Input direction.
-        Input = 0,
+        Input,
         /// Output direction.
         Output,
     }
@@ -130,7 +127,7 @@ enum_from_primitive! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub enum Level {
         /// Low level.
-        Low = 0,
+        Low,
         /// High level.
         High,
     }
@@ -151,7 +148,7 @@ pub enum Config {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InterruptType {
     /// Rising edge interrupt.
-    RisingEdge = 0,
+    RisingEdge,
     /// Falling edge interrupt.
     FallingEdge,
     /// Both edges interrupt.

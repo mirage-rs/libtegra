@@ -8,7 +8,7 @@
 //! modern cryptographic algorithms and is suited for secure operation as the engine
 //! has the ability to restrict access to it from ARM TrustZone clients.
 //!
-//! ## Hardware Operations
+//! # Hardware Operations
 //!
 //! As mentioned previously, the Security Engine performs hardware-based operations
 //! to process DMA buffers of data. These operations can be performed through the
@@ -21,8 +21,29 @@
 //! // TODO
 //! ```
 //!
-//! [`LinkedList`]: struct.LinkedList.html
+//! # Cryptographic APIs
+//!
+//! The following cryptographic APIs are exposed by the Security Engine and can be used
+//! from TrustZone clients with no regrets:
+//!
+//! ## RNG
+//!
+//! The Security Engine implements a Random Number Generator which can be used to implement
+//! secure random data generation with a high entropy for applications.
+//!
+//! - [`SecurityEngine::initialize_rng`]
+//!
+//! - [`SecurityEngine::generate_random`]
+//!
+//! - [`SecurityEngine::set_random_key`]
+//!
+//! - [`SecurityEngine::generate_srk`]
+//!
 //! [`trigger_operation`]: fn.trigger_operation.html
+//! [`SecurityEngine::initialize_rng`]: struct.SecurityEngine.html#method.initialize_rng
+//! [`SecurityEngine::generate_random`]: struct.SecurityEngine.html#method.generate_random
+//! [`SecurityEngine::set_random_key`]: struct.SecurityEngine.html#method.set_random_key
+//! [`SecurityEngine::generate_srk`]: struct.SecurityEngine.html#method.generate_srk
 
 use ::core::marker::Sync;
 

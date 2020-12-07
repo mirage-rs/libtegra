@@ -152,7 +152,7 @@ impl SecurityEngine {
 }
 
 impl SecurityEngine {
-    /// Locks the SE down.
+    /// Locks the SE down for use from the Secure World.
     ///
     /// Only TrustZone clients can access the SE anymore afterwards.
     pub fn lock(&self) {
@@ -162,12 +162,10 @@ impl SecurityEngine {
         engine
             .SE_SE_SECURITY_0
             .modify(SE_SE_SECURITY_0::SOFT_SECURITY::Secure);
-
-        // Confirm the write.
-        engine.SE_SE_SECURITY_0.get();
+        engine.SE_SE_SECURITY_0.get(); // Confirm the write.
     }
 
-    /// Unlocks the SE.
+    /// Unlocks the SE for use from the Non-Secure World.
     ///
     /// All clients can access the SE afterwards.
     pub fn unlock(&self) {
@@ -177,9 +175,7 @@ impl SecurityEngine {
         engine
             .SE_SE_SECURITY_0
             .modify(SE_SE_SECURITY_0::SOFT_SECURITY::NonSecure);
-
-        // Confirm the write.
-        engine.SE_SE_SECURITY_0.get();
+        engine.SE_SE_SECURITY_0.get(); // Confirm the write.
     }
 
     /// Locks down the Security Engine per-key.
@@ -196,6 +192,32 @@ impl SecurityEngine {
         engine
             .SE_SE_SECURITY_0
             .modify(SE_SE_SECURITY_0::PERKEY_SECURITY::Secure);
+        engine.SE_SE_SECURITY_0.get(); // Confirm the write.
+    }
+
+    /// Locks down the TZRAM to access from Secure World only.
+    pub fn lock_tzram(&self) {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware to restrict access to TZRAM.
+        engine
+            .SE_TZRAM_SECURITY_0
+            .modify(SE_TZRAM_SECURITY_0::LOCKDOWN::Secure);
+        engine.SE_TZRAM_SECURITY_0.get(); // Confirm the write.
+    }
+
+    /// Locks down the Security Engine to restrict context save operations to
+    /// Secure World clients.
+    ///
+    /// NOTE: This is available for SE1 and SE2, but only on T210B01 either way.
+    #[cfg(feature = "mariko")]
+    pub fn lock_context_save(&self) {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware to only allow context save operations from Secure World.
+        engine
+            .SE_SE_SECURITY_0
+            .modify(SE_SE_SECURITY_0::TZ_CONTEXT_SAVE_LOCK::Secure);
         engine.SE_SE_SECURITY_0.get(); // Confirm the write.
     }
 

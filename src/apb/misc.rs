@@ -1,8 +1,3 @@
-//! Abstractions over the APB Miscellaneous Registers of the Tegra X1.
-//!
-//! See Chapter 21 in the Tegra X1 Technical Reference Manual
-//! for details.
-
 use register::{mmio::ReadWrite, register_structs};
 
 use crate::memory_map::APB;

@@ -316,9 +316,12 @@ impl SecurityEngine {
     }
 
     /// Performs a hashing operation on a given buffer of data using the SHA256 algorithm.
-    pub fn calculate_sha256(&self, source: &[u8]) -> Result<[u8; 32], OperationError> {
+    pub fn calculate_sha256(
+        &self,
+        source: &[u8],
+        output: &mut [u8; 32],
+    ) -> Result<(), OperationError> {
         let engine = unsafe { &*self.registers };
-        let mut output = [0; 32];
 
         // Configure the hardware for SHA256 hashing.
         init_sha!(engine, Sha256);
@@ -347,7 +350,7 @@ impl SecurityEngine {
             BE::write_u32(&mut output[i << 2..], engine.SE_HASH_RESULT_0[i].get());
         }
 
-        Ok(output)
+        Ok(())
     }
 }
 

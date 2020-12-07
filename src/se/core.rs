@@ -1,5 +1,3 @@
-//! Implementation of the Security Engine core functionality.
-
 use core::convert::TryFrom;
 
 use crate::{ahb::mem, timer};

@@ -45,6 +45,11 @@
 //! [`SecurityEngine::set_random_key`]: struct.SecurityEngine.html#method.set_random_key
 //! [`SecurityEngine::generate_srk`]: struct.SecurityEngine.html#method.generate_srk
 
+#[allow(dead_code)]
+mod constants;
+mod core;
+mod registers;
+
 use ::core::marker::Sync;
 
 use byteorder::{ByteOrder, BE};
@@ -53,11 +58,6 @@ pub use self::core::*;
 pub use registers::*;
 
 use constants::*;
-
-#[allow(dead_code)]
-mod constants;
-mod core;
-mod registers;
 
 macro_rules! init_rng {
     ($engine:ident, $destination:ident, $mode:ident) => {

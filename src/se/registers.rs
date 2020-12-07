@@ -1,5 +1,3 @@
-//! Abstractions over the Tegra X1 Security Engine registers.
-
 use register::{mmio::*, register_bitfields, register_structs};
 
 use crate::memory_map::SE1;

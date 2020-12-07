@@ -1,5 +1,3 @@
-//! Constants for interfacing with the Security Engine.
-
 // Security Engine buffer sizes.
 pub const CTX_BUFFER_SIZE: usize = 1072;
 pub const CTX_DRBG_BUFFER_SIZE: u32 = 2112;

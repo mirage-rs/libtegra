@@ -62,16 +62,16 @@ mod registers;
 macro_rules! init_rng {
     ($engine:ident, $destination:ident, $mode:ident) => {
         // Configure the hardware to do RNG encryption.
-        $engine.SE_CONFIG_0.set(
+        $engine.SE_CONFIG_0.write(
             SE_CONFIG_0::ENC_MODE::Aes128
                 + SE_CONFIG_0::DEC_MODE::Aes128
                 + SE_CONFIG_0::ENC_ALG::Rng
                 + SE_CONFIG_0::DEC_ALG::Nop
-                + SE_CONFIG_0::$destination,
+                + SE_CONFIG_0::DESTINATION::$destination,
         );
 
         // Configure the cryptographic operation.
-        $engine.SE_CRYPTO_CONFIG_0.set(
+        $engine.SE_CRYPTO_CONFIG_0.write(
             SE_CRYPTO_CONFIG_0::MEMIF::Ahb
                 + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
                 + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
@@ -86,7 +86,23 @@ macro_rules! init_rng {
         // Configure the RNG to use Entropy as source.
         $engine
             .SE_RNG_CONFIG_0
-            .set(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::$mode);
+            .write(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::$mode);
+    };
+}
+
+macro_rules! init_sha {
+    ($engine:ident, $mode:ident) => {
+        // Configure the hardware to perform a SHA256 hashing operation.
+        $engine.SE_CONFIG_0.write(
+            SE_CONFIG_0::HASH_MODE::$mode
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG::Sha
+                + SE_CONFIG_0::DEC_ALG::Nop
+                + SE_CONFIG_0::DESTINATION::HashReg,
+        );
+        $engine
+            .SE_SHA_CONFIG_0
+            .write(SE_SHA_CONFIG_0::HW_INIT_HASH::SET);
     };
 }
 
@@ -197,7 +213,7 @@ impl SecurityEngine {
         let engine = unsafe { &*self.registers };
 
         // Lock the entropy source.
-        engine.SE_RNG_SRC_CONFIG_0.set(
+        engine.SE_RNG_SRC_CONFIG_0.write(
             SE_RNG_SRC_CONFIG_0::RO_ENTROPY_SOURCE::SET
                 + SE_RNG_SRC_CONFIG_0::RO_ENTROPY_SOURCE_LOCK::SET,
         );
@@ -262,7 +278,7 @@ impl SecurityEngine {
         init_rng!(engine, KeyTable, Normal);
 
         // Configure the keytable to be the low words of the key.
-        engine.SE_CRYPTO_KEYTABLE_DST_0.set(
+        engine.SE_CRYPTO_KEYTABLE_DST_0.write(
             SE_CRYPTO_KEYTABLE_DST_0::DST_WORD_QUAD::Keys03
                 + SE_CRYPTO_KEYTABLE_DST_0::KEY_INDEX.val(slot),
         );
@@ -274,13 +290,13 @@ impl SecurityEngine {
         start_normal_operation(engine, &LinkedList::default(), &mut LinkedList::default())?;
 
         // Configure the keytable to be the high words of the key.
-        engine.SE_CRYPTO_KEYTABLE_DST_0.set(
+        engine.SE_CRYPTO_KEYTABLE_DST_0.write(
             SE_CRYPTO_KEYTABLE_DST_0::DST_WORD_QUAD::Keys47
                 + SE_CRYPTO_KEYTABLE_DST_0::KEY_INDEX.val(slot),
         );
 
         // Execute the operation to generate random chunk of the key.
-        start_normal_operation(engine, &LinkedList::default(), &mut LinkedList::default())?;
+        start_normal_operation(engine, &LinkedList::default(), &mut LinkedList::default())
     }
 
     /// Performs a hardware operation to generate the Storage Root Key (SRK).
@@ -304,17 +320,8 @@ impl SecurityEngine {
         let engine = unsafe { &*self.registers };
         let mut output = [0; 32];
 
-        // Configure the hardware to perform a SHA256 hashing operation.
-        engine.SE_CONFIG_0.modify(
-            SE_CONFIG_0::HASH_MODE::Sha256
-                + SE_CONFIG_0::DEC_MODE::Aes128
-                + SE_CONFIG_0::ENC_ALG::Sha
-                + SE_CONFIG_0::DEC_ALG::Nop
-                + SE_CONFIG_0::DESTINATION::HashReg,
-        );
-        engine
-            .SE_SHA_CONFIG_0
-            .modify(SE_SHA_CONFIG_0::HW_INIT_HASH::SET);
+        // Configure the hardware for SHA256 hashing.
+        init_sha!(engine, Sha256);
 
         // Set the message size.
         engine.SE_SHA_MSG_LENGTH_0[0].set((source.len() << 3) as u32);

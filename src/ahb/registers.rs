@@ -1,8 +1,3 @@
-//! Abstractions over the AHB registers.
-//!
-//! See Chapter 19 in the Tegra X1 Technical Reference
-//! Manual for details.
-
 /// Abstractions over the AHB Memory Controller Slave registers.
 ///
 /// See Chapter 19.4.2 in the Tegra X1 Technical Reference

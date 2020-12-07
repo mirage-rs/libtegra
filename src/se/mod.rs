@@ -26,6 +26,26 @@
 //! The following cryptographic APIs are exposed by the Security Engine and can be used
 //! from TrustZone clients with no regrets:
 //!
+//! ## Access Management
+//!
+//! In secure systems, it is undesirable to have untrusted pieces of code access the Security
+//! Engine to perform arbitrary cryptographic operations. For that reason, the SE offers
+//! various features for locking its functionality down to Secure World clients which run in
+//! the ARM TrustZone. Great flexibility is given in how this is achieved: Full lockdown,
+//! lockdown per key, TZRAM lockdown, restriction of context save operations, full Security
+//! Engine shutdown. While not directly cryptographic, still an important aspect of retaining
+//! cryptographic security in applications.
+//!
+//! - [`SecurityEngine::lock`]
+//!
+//! - [`SecurityEngine::unlock`]
+//!
+//! - [`SecurityEngine::lock_per_key`]
+//!
+//! - [`SecurityEngine::lock_tzram`]
+//!
+//! - [`SecurityEngine::lock_context_save`]
+//!
 //! ## RNG
 //!
 //! The Security Engine implements a Random Number Generator which can be used to implement
@@ -64,6 +84,11 @@
 //! [`SecurityEngine::calculate_sha256`]: struct.SecurityEngine.html#method.sha256
 //! [`SecurityEngine::calculate_sha384`]: struct.SecurityEngine.html#method.sha384
 //! [`SecurityEngine::calculate_sha512`]: struct.SecurityEngine.html#method.sha512
+//! [`SecurityEngine::lock`]: struct.SecurityEngine.html#method.lock
+//! [`SecurityEngine::unlock`]: struct.SecurityEngine.html#method.unlock
+//! [`SecurityEngine::lock_per_key`]: struct.SecurityEngine.html#method.lock_per_key
+//! [`SecurityEngine::lock_tzram`]: struct.SecurityEngine.html#method.lock_tzram
+//! [`SecurityEngine::lock_context_save`]: struct.SecurityEngine.html#method.lock_context_save
 
 #[allow(dead_code)]
 mod constants;

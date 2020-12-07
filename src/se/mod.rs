@@ -39,11 +39,31 @@
 //!
 //! - [`SecurityEngine::generate_srk`]
 //!
+//! ## Hashing
+//!
+//! The Security Engine supports various hashing algorithms from the SHA1 and SHA2 family
+//! to calculate a fixed-size digest over a given buffer of data using the following methods.
+//!
+//! - [`SecurityEngine::calculate_sha1`]
+//!
+//! - [`SecurityEngine::calculate_sha224`]
+//!
+//! - [`SecurityEngine::calculate_sha256`]
+//!
+//! - [`SecurityEngine::calculate_sha384`]
+//!
+//! - [`SecurityEngine::calculate_sha512`]
+//!
 //! [`trigger_operation`]: fn.trigger_operation.html
 //! [`SecurityEngine::initialize_rng`]: struct.SecurityEngine.html#method.initialize_rng
 //! [`SecurityEngine::generate_random`]: struct.SecurityEngine.html#method.generate_random
 //! [`SecurityEngine::set_random_key`]: struct.SecurityEngine.html#method.set_random_key
 //! [`SecurityEngine::generate_srk`]: struct.SecurityEngine.html#method.generate_srk
+//! [`SecurityEngine::calculate_sha1`]: struct.SecurityEngine.html#method.sha1
+//! [`SecurityEngine::calculate_sha224`]: struct.SecurityEngine.html#method.sha224
+//! [`SecurityEngine::calculate_sha256`]: struct.SecurityEngine.html#method.sha256
+//! [`SecurityEngine::calculate_sha384`]: struct.SecurityEngine.html#method.sha384
+//! [`SecurityEngine::calculate_sha512`]: struct.SecurityEngine.html#method.sha512
 
 #[allow(dead_code)]
 mod constants;
@@ -52,7 +72,7 @@ mod registers;
 
 use ::core::marker::Sync;
 
-use byteorder::{ByteOrder, BE};
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
 
 pub use self::core::*;
 pub use registers::*;
@@ -315,28 +335,45 @@ impl SecurityEngine {
         start_normal_operation(engine, &LinkedList::default(), &mut LinkedList::default())
     }
 
-    /// Performs a hashing operation on a given buffer of data using the SHA256 algorithm.
-    pub fn calculate_sha256(
-        &self,
-        source: &[u8],
-        output: &mut [u8; 32],
-    ) -> Result<(), OperationError> {
+    fn set_hash_source_size(&self, size: u32) {
         let engine = unsafe { &*self.registers };
 
-        // Configure the hardware for SHA256 hashing.
-        init_sha!(engine, Sha256);
-
         // Set the message size.
-        engine.SE_SHA_MSG_LENGTH_0[0].set((source.len() << 3) as u32);
+        engine.SE_SHA_MSG_LENGTH_0[0].set(size * 8);
         engine.SE_SHA_MSG_LENGTH_0[1].set(0);
         engine.SE_SHA_MSG_LENGTH_0[2].set(0);
         engine.SE_SHA_MSG_LENGTH_0[3].set(0);
 
         // Set the message remaining size.
-        engine.SE_SHA_MSG_LEFT_0[0].set((source.len() << 3) as u32);
+        engine.SE_SHA_MSG_LEFT_0[0].set(size * 8);
         engine.SE_SHA_MSG_LEFT_0[1].set(0);
         engine.SE_SHA_MSG_LEFT_0[2].set(0);
         engine.SE_SHA_MSG_LEFT_0[3].set(0);
+    }
+
+    fn read_hash_result(&self, output: &mut [u8], byteswap: bool) {
+        let engine = unsafe { &*self.registers };
+
+        for i in 0..output.len() / 4 {
+            if byteswap {
+                BigEndian::write_u32(&mut output[i << 2..], engine.SE_HASH_RESULT_0[i].get());
+            } else {
+                LittleEndian::write_u32(&mut output[i << 2..], engine.SE_HASH_RESULT_0[i].get());
+            }
+        }
+    }
+
+    /// Calculates a SHA1 hash over a given buffer of data.
+    pub fn calculate_sha1(
+        &self,
+        source: &[u8],
+        output: &mut [u8; 20],
+    ) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware for SHA1 hashing.
+        init_sha!(engine, Sha1);
+        self.set_hash_source_size(source.len() as u32);
 
         // Construct the Security Engine Linked Lists.
         let source_ll = LinkedList::from(source);
@@ -346,9 +383,107 @@ impl SecurityEngine {
         start_normal_operation(engine, &source_ll, &mut destination_ll)?;
 
         // Read and copy back the resulting hash.
-        for i in 0..8 {
-            BE::write_u32(&mut output[i << 2..], engine.SE_HASH_RESULT_0[i].get());
-        }
+        self.read_hash_result(output, true);
+
+        Ok(())
+    }
+
+    /// Calculates a SHA224 hash over a given buffer of data.
+    pub fn calculate_sha224(
+        &self,
+        source: &[u8],
+        output: &mut [u8; 28],
+    ) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware for SHA224 hashing.
+        init_sha!(engine, Sha224);
+        self.set_hash_source_size(source.len() as u32);
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
+
+        // Read and copy back the resulting hash.
+        self.read_hash_result(output, true);
+
+        Ok(())
+    }
+
+    /// Calculates a SHA256 hash over a given buffer of data.
+    pub fn calculate_sha256(
+        &self,
+        source: &[u8],
+        output: &mut [u8; 32],
+    ) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware for SHA256 hashing.
+        init_sha!(engine, Sha256);
+        self.set_hash_source_size(source.len() as u32);
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
+
+        // Read and copy back the resulting hash.
+        self.read_hash_result(output, true);
+
+        Ok(())
+    }
+
+    /// Calculates a SHA384 hash over a given buffer of data.
+    pub fn calculate_sha384(
+        &self,
+        source: &[u8],
+        output: &mut [u8; 48],
+    ) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware for SHA384 hashing.
+        init_sha!(engine, Sha384);
+        self.set_hash_source_size(source.len() as u32);
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
+
+        // Read back the resulting hash.
+        self.read_hash_result(output, true);
+
+        Ok(())
+    }
+
+    /// Calculates a SHA512 hash over a given buffer of data.
+    pub fn calculate_sha512(
+        &self,
+        source: &[u8],
+        output: &mut [u8; 64],
+    ) -> Result<(), OperationError> {
+        let engine = unsafe { &*self.registers };
+
+        // Configure the hardware for SHA512 hashing.
+        init_sha!(engine, Sha512);
+        self.set_hash_source_size(source.len() as u32);
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::default();
+
+        // Kick off the operation.
+        start_normal_operation(engine, &source_ll, &mut destination_ll)?;
+
+        // Read back the resulting hash.
+        self.read_hash_result(output, true);
 
         Ok(())
     }

@@ -52,29 +52,17 @@
 //! An approach to getting this correct could be:
 //!
 //! ```
-//! use libtegra::tsec::FIRMWARE_ALIGNMENT;
-//!
-//! /// A helper that wraps a TSEC firmware blob to ensure correct alignment.
-//! #[repr(align(256))]
-//! struct Firmware<T: Sized> {
-//!     pub value: T,
-//! }
-//!
-//! impl<T: Sized> Firmware<T> {
-//!     pub const fn new(value: T) -> Self {
-//!         Firmware { value }
-//!     }
-//! }
+//! use libtegra::tsec::{Firmware, FIRMWARE_ALIGNMENT};
 //!
 //! /// The firmware blob.
-//! static FAUCON: Firmware<[u8; 13]> = Firmware::new([
+//! static FW: Firmware<u8, 13> = Firmware::new([
 //!     0xDF, 0xB0, 0xB0, 0xB0, 0xB0,   // mov $r15 0xB0B0B0B0;
 //!     0x49, 0x00, 0x11,               // mov $r9 0x1100;
 //!     0xF6, 0x9F, 0x00,               // iowr I[$r9] $r15;
 //!     0xF8, 0x02,                     // exit;
 //! ]);
 //!
-//! assert_eq!(FAUCON.value.as_ptr() as usize % FIRMWARE_ALIGNMENT, 0);
+//! assert_eq!(&*FW as *const u8 as usize % FIRMWARE_ALIGNMENT, 0);
 //! ```
 //!
 //! # Executing code

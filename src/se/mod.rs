@@ -38,6 +38,37 @@ mod constants;
 mod core;
 mod registers;
 
+macro_rules! init_rng {
+    ($engine:ident, $destination:ident, $mode:ident) => {
+        // Configure the hardware to do RNG encryption.
+        $engine.SE_CONFIG_0.set(
+            SE_CONFIG_0::ENC_MODE::Aes128
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG::Rng
+                + SE_CONFIG_0::DEC_ALG::Nop
+                + SE_CONFIG_0::$destination,
+        );
+
+        // Configure the cryptographic operation.
+        $engine.SE_CRYPTO_CONFIG_0.set(
+            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
+                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
+                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
+                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
+                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
+                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
+                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
+                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
+                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
+        );
+
+        // Configure the RNG to use Entropy as source.
+        $engine
+            .SE_RNG_CONFIG_0
+            .set(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::$mode);
+    };
+}
+
 /// Representation of the Security Engine used for cryptographic operations.
 pub struct SecurityEngine {
     /// A pointer to the Security Engine [`Registers`].
@@ -153,31 +184,8 @@ impl SecurityEngine {
         // Set the reseed interval to force a reseed every 70.000 blocks.
         engine.SE_RNG_RESEED_INTERVAL_0.set(70_001);
 
-        // Configure the hardware to force DRBG instantiation.
-        engine.SE_CONFIG_0.set(
-            SE_CONFIG_0::ENC_MODE::Aes128
-                + SE_CONFIG_0::DEC_MODE::Aes128
-                + SE_CONFIG_0::ENC_ALG::Rng
-                + SE_CONFIG_0::DEC_ALG::Nop
-                + SE_CONFIG_0::DESTINATION::Memory,
-        );
-
-        engine.SE_CRYPTO_CONFIG_0.set(
-            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
-                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
-                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
-                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
-                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
-                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
-                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
-                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
-                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
-        );
-
-        // Configure the RNG to use Entropy as source.
-        engine
-            .SE_RNG_CONFIG_0
-            .set(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::ForceInstantiation);
+        // Configure the RNG.
+        init_rng!(engine, Memory, ForceInstantiation);
 
         // Only process a single RNG block to trigger DRBG initialization.
         engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
@@ -205,31 +213,8 @@ impl SecurityEngine {
         let aligned_size = nblocks * aes::BLOCK_SIZE as usize;
         let _fractional = output.len() - aligned_size;
 
-        // Configure the hardware to do RNG encryption.
-        engine.SE_CONFIG_0.set(
-            SE_CONFIG_0::ENC_MODE::Aes128
-                + SE_CONFIG_0::DEC_MODE::Aes128
-                + SE_CONFIG_0::ENC_ALG::Rng
-                + SE_CONFIG_0::DEC_ALG::Nop
-                + SE_CONFIG_0::DESTINATION::Memory,
-        );
-
-        engine.SE_CRYPTO_CONFIG_0.set(
-            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
-                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
-                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
-                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
-                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
-                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
-                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
-                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
-                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
-        );
-
-        // Configure the RNG to use Entropy as source.
-        engine
-            .SE_RNG_CONFIG_0
-            .set(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::Normal);
+        // Configure the RNG.
+        init_rng!(engine, Memory, Normal);
 
         // Generate all the aligned blocks first.
         if aligned_size > 0 {
@@ -252,31 +237,8 @@ impl SecurityEngine {
     pub fn set_random_key(&self, slot: u32) -> Result<(), OperationError> {
         let engine = unsafe { &*self.registers };
 
-        // Configure the hardware to output to the keytable.
-        engine.SE_CONFIG_0.set(
-            SE_CONFIG_0::ENC_MODE::Aes128
-                + SE_CONFIG_0::DEC_MODE::Aes128
-                + SE_CONFIG_0::ENC_ALG::Rng
-                + SE_CONFIG_0::DEC_ALG::Nop
-                + SE_CONFIG_0::DESTINATION::KeyTable,
-        );
-
-        engine.SE_CRYPTO_CONFIG_0.set(
-            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
-                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
-                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
-                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
-                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
-                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
-                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
-                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
-                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
-        );
-
-        // Configure the RNG to use Entropy as source.
-        engine
-            .SE_RNG_CONFIG_0
-            .set(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::Normal);
+        // Configure the RNG.
+        init_rng!(engine, KeyTable, Normal);
 
         // Configure the keytable to be the low words of the key.
         engine.SE_CRYPTO_KEYTABLE_DST_0.set(
@@ -284,7 +246,7 @@ impl SecurityEngine {
                 + SE_CRYPTO_KEYTABLE_DST_0::KEY_INDEX.val(slot),
         );
 
-        // Only process a single RNG block to trigger DRBG initialization.
+        // Configure an RNG operation on a single block.
         engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
 
         // Execute the operation to generate a random chunk of the key.
@@ -306,41 +268,14 @@ impl SecurityEngine {
     pub fn generate_srk(&self) -> Result<(), OperationError> {
         let engine = unsafe { &*self.registers };
 
-        // Configure the hardware to do RNG encryption.
-        engine.SE_CONFIG_0.set(
-            SE_CONFIG_0::ENC_MODE::Aes128
-                + SE_CONFIG_0::DEC_MODE::Aes128
-                + SE_CONFIG_0::ENC_ALG::Rng
-                + SE_CONFIG_0::DEC_ALG::Nop
-                + SE_CONFIG_0::DESTINATION::Srk,
-        );
-
-        engine.SE_CRYPTO_CONFIG_0.set(
-            SE_CRYPTO_CONFIG_0::MEMIF::Ahb
-                + SE_CRYPTO_CONFIG_0::CTR_CNTN::CLEAR
-                + SE_CRYPTO_CONFIG_0::KEYSCH_BYPASS::CLEAR
-                + SE_CRYPTO_CONFIG_0::CORE_SEL::Encrypt
-                + SE_CRYPTO_CONFIG_0::IV_SELECT::Original
-                + SE_CRYPTO_CONFIG_0::VCTRAM_SEL::Memory
-                + SE_CRYPTO_CONFIG_0::INPUT_SEL::Random
-                + SE_CRYPTO_CONFIG_0::XOR_POS::Bypass
-                + SE_CRYPTO_CONFIG_0::HASH_ENB::CLEAR,
-        );
-
-        // Configure the RNG to use Entropy as source.
-        engine
-            .SE_RNG_CONFIG_0
-            .set(SE_RNG_CONFIG_0::SOURCE::Entropy + SE_RNG_CONFIG_0::MODE::ForceReseed);
+        // Configure the RNG.
+        init_rng!(engine, Srk, ForceReseed);
 
         // Only process a single RNG block to trigger DRBG initialization.
         engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
 
-        // Construct dummy Security Engine Linked Lists.
-        let source_ll = LinkedList::default();
-        let mut destination_ll = LinkedList::default();
-
         // Kick off the hardware operation.
-        start_normal_operation(engine, &source_ll, &mut destination_ll)
+        start_normal_operation(engine, &LinkedList::default(), &mut LinkedList::default())
     }
 
     /// Performs a hashing operation on a given buffer of data using the SHA256 algorithm.

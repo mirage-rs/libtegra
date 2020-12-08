@@ -1,3 +1,5 @@
+//! Miscellaneous system control registers.
+
 use register::{mmio::ReadWrite, register_structs};
 
 use crate::memory_map::APB;

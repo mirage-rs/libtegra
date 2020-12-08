@@ -153,9 +153,6 @@ macro_rules! init_sha {
 
 /// Representation of the Security Engine used for cryptographic operations.
 pub struct SecurityEngine {
-    /// A pointer to the Security Engine [`Registers`].
-    ///
-    /// [`Registers`]: struct.Registers.html
     registers: *const Registers,
 }
 

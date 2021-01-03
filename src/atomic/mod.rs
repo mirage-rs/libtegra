@@ -5,7 +5,25 @@
 mod registers;
 pub use registers::*;
 
-use register::FieldValue;
+/// Macro for generating a simple atomic operation,
+/// that stores `val` inside the `V` setup register, performs
+/// the `cmd` operation and returns the value from the result register.
+macro_rules! simple_op {
+    ($self:ident, $cmd:expr, $val:ident) => {{
+        let registers = unsafe { &*REGISTERS };
+
+        // setup phase: store the value inside the setup register
+        registers.ATOMICS_AP0_SETUP_V_0[$self.target_register as usize].set($val);
+
+        // trigger the operation
+        registers
+            .ATOMICS_AP0_TRIGGER_0
+            .write($cmd + TRIGGER::WIDTH64::CLEAR + TRIGGER::ID.val($self.target_register));
+
+        // read the old value out of the result register
+        registers.ATOMICS_AP0_RESULT_0[$self.target_register as usize].get()
+    }};
+}
 
 /// Abstraction for a `u32` that can be used atomically using
 /// the Tegra X1 atomic operations.
@@ -29,22 +47,15 @@ impl AtomicU32 {
             "there are only 128 target registers available"
         );
 
-        Self { target_register }
+        let atomic = Self { target_register };
+        atomic.put(value);
+        atomic
     }
 
     /// Atomically swap this value with `val`, and return the old value that
     /// was stored in this atomic.
-    pub fn exchange(&self, val: u32) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the new value inside the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(val);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::EXCHANGE);
-
-        // read the old value out of the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
+    pub fn exchange(&self, x: u32) -> u32 {
+        simple_op!(self, TRIGGER::CMD::EXCHANGE, x)
     }
 
     /// Replaces the value of this atomic with `new`, if it matches `current`.
@@ -56,7 +67,11 @@ impl AtomicU32 {
         registers.ATOMICS_AP0_SETUP_C_0[self.target_register as usize].set(current);
 
         // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::COMPARE_EXCHANGE);
+        registers.ATOMICS_AP0_TRIGGER_0.write(
+            TRIGGER::CMD::COMPARE_EXCHANGE
+                + TRIGGER::WIDTH64::CLEAR
+                + TRIGGER::ID.val(self.target_register),
+        );
 
         // if the comparison succeeded, the previous value will be in the result register,
         // but we don't return it because it may be undefined
@@ -67,16 +82,7 @@ impl AtomicU32 {
     ///
     /// Returns the previous value.
     pub fn increment(&self, x: u32) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the value to add in the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(x);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::INCREMENT);
-
-        // read the old value from the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
+        simple_op!(self, TRIGGER::CMD::INCREMENT, x)
     }
 
     /// Decrement the value of this atomic by `x`.
@@ -86,16 +92,7 @@ impl AtomicU32 {
     ///
     /// Returns the previous value.
     pub fn decrement(&self, x: u32) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the value to subtract in the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(x);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::DECREMENT);
-
-        // read the old value from the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
+        simple_op!(self, TRIGGER::CMD::DECREMENT, x)
     }
 
     /// Loads the value for this `Atomic`.
@@ -103,7 +100,9 @@ impl AtomicU32 {
         let registers = unsafe { &*REGISTERS };
 
         // for the get operation, no setup is required, so trigger the operation instantly
-        self.trigger_operation(TRIGGER::CMD::GET);
+        registers.ATOMICS_AP0_TRIGGER_0.write(
+            TRIGGER::CMD::GET + TRIGGER::WIDTH64::CLEAR + TRIGGER::ID.val(self.target_register),
+        );
 
         // read the value out of the result register
         registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
@@ -111,73 +110,27 @@ impl AtomicU32 {
 
     /// Puts `x` into this atomic value.
     pub fn put(&self, x: u32) {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the value to put inside the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(x);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::PUT);
-
-        // `PUT` will also store the previous value in the result register,
-        // like `exchange`, but we don't return it here, but we read it anyway
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get();
+        simple_op!(self, TRIGGER::CMD::PUT, x);
     }
 
     /// Performs a bit set with `x` and the value of this atomic.
     ///
     /// Returns the previous value.
     pub fn set(&self, x: u32) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the value to perfom a bit set with in the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(x);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::TEST_AND_SET);
-
-        // read the old value from the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
+        simple_op!(self, TRIGGER::CMD::TEST_AND_SET, x)
     }
 
     /// Performs a bit clear with `x` and the value of this atomic.
     ///
     /// Returns the previous value.
     pub fn clear(&self, x: u32) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the value to perfom a bit set with in the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(x);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::TEST_AND_CLEAR);
-
-        // read the old value from the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
+        simple_op!(self, TRIGGER::CMD::TEST_AND_CLEAR, x)
     }
 
     /// Performs a bit invert with `x` and the value of this atomic.
     ///
     /// Returns the previous value.
     pub fn invert(&self, x: u32) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
-        // setup phase: store the value to perfom a bit set with in the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(x);
-
-        // trigger the operation
-        self.trigger_operation(TRIGGER::CMD::TEST_AND_INVERT);
-
-        // read the old value from the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
-    }
-
-    /// Triggers the `cmd` operation by writing into the trigger register.
-    fn trigger_operation(&self, cmd: FieldValue<u32, TRIGGER::Register>) {
-        let registers = unsafe { &*REGISTERS };
-
-        registers
-            .ATOMICS_AP0_TRIGGER_0
-            .write(cmd + TRIGGER::WIDTH64::CLEAR + TRIGGER::ID.val(self.target_register));
+        simple_op!(self, TRIGGER::CMD::TEST_AND_INVERT, x)
     }
 }

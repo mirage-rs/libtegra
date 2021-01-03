@@ -55,7 +55,7 @@ register_structs! {
         (0x0E00 => _reserved3: [ReadWrite<u8>; 0x200]),
 
         (0x1000 => pub ATOMICS_AP1_SETUP_V_0: [ReadWrite<u32>; 128]),
-        (0x0E00 => _reserved4: [ReadWrite<u8>; 0x200]),
+        (0x1200 => _reserved4: [ReadWrite<u8>; 0x200]),
         (0x1400 => pub ATOMICS_AP1_SETUP_C_0: [ReadWrite<u32>; 128]),
         (0x1600 => _reserved5: [ReadWrite<u8>; 0x200]),
         (0x1800 => pub ATOMICS_AP1_RESULT_0: [ReadOnly<u32>; 128]),

@@ -379,4 +379,26 @@ impl Tsec {
 
         res
     }
+
+    /// Dumps the DMEM of the Falcon engine into the supplied buffer.
+    ///
+    /// This function is useful for debugging purposes and to examine how firmware
+    /// interacts with the data memory.
+    ///
+    /// The DMEM size of TSEC is hardcoded to `0x4000` bytes. For other Falcon
+    /// engines, the size of DMEM in words should be determined by reading
+    /// `(FALCON_HWCFG >> 9 & 0x1F) << 6`.
+    ///
+    /// NOTE: This is only usable while TSEC is in No Secure mode context.
+    pub fn dump_dmem(&self, output: &mut [u32; 0x1000]) {
+        let tsec = unsafe { &*self.registers };
+
+        // Configure a full dump of DMEM with auto-incrementing addresses.
+        tsec.FALCON_DMEMC0.set((0 << 2) | (1 << 25));
+
+        // Read all words of the DMEM into the output buffer.
+        for i in output.iter_mut() {
+            *i = tsec.FALCON_DMEMD0.get();
+        }
+    }
 }

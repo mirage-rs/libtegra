@@ -87,7 +87,7 @@
 //! let mut mailbox0 = 0;
 //! let mut mailbox1 = 0;
 //! unsafe {
-//!     Tsec::A.boot_firmware(0, &mut mailbox0, &mut mailbox1).unwrap();
+//!     Tsec::A.boot(0, &mut mailbox0, &mut mailbox1).unwrap();
 //!     assert_eq!(mailbox1, 0xB0B0B0B0);
 //! }
 //! ```
@@ -103,8 +103,10 @@ use core::ops::{Deref, DerefMut};
 
 use enum_primitive::FromPrimitive;
 
+use crate::car::Clock;
+use crate::kfuse;
+use crate::timer::get_milliseconds;
 pub use crate::tsec::registers::*;
-use crate::{car::Clock, kfuse, timer::get_milliseconds};
 
 /// The alignment bits for TSEC firmware blobs.
 pub const FIRMWARE_ALIGN_BITS: usize = 8;
@@ -227,6 +229,44 @@ impl Tsec {
 }
 
 impl Tsec {
+    /// Initializes the TSEC for use.
+    ///
+    /// NOTE: This method must be called once before the TSEC is usable.
+    /// Otherwise, the SoC will hang itself whenever the device is accessed.
+    pub fn init(&self) {
+        let tsec = unsafe { &*self.registers };
+
+        // Enable the device clocks that are required by the TSEC.
+        Clock::HOST1X.enable();
+        Clock::TSEC.enable();
+        Clock::TSECB.enable();
+        Clock::SOR_SAFE.enable();
+        Clock::SOR0.enable();
+        Clock::SOR1.enable();
+        Clock::KFUSE.enable();
+
+        // Ensure that KFUSE is ready (since TSEC sources the KFUSE key from it).
+        kfuse::wait_until_ready().unwrap();
+
+        // Configure the Falcon processor.
+        tsec.FALCON_DMACTL.set(0);
+        tsec.FALCON_IRQMSET.set(0xFFF2);
+        tsec.FALCON_IRQDEST.set(0xFFF0);
+        tsec.FALCON_ITFEN.set(3);
+    }
+
+    /// Shuts the TSEC down and makes it inaccessible.
+    pub fn finalize(&self) {
+        // Disable all device clocks for TSEC.
+        Clock::KFUSE.disable();
+        Clock::SOR1.disable();
+        Clock::SOR0.disable();
+        Clock::SOR_SAFE.disable();
+        Clock::TSECB.disable();
+        Clock::TSEC.disable();
+        Clock::HOST1X.disable();
+    }
+
     fn dma_wait_idle(&self) -> Result<(), FalconError> {
         let tsec = unsafe { &*self.registers };
 
@@ -241,7 +281,18 @@ impl Tsec {
         Ok(())
     }
 
-    fn try_load_firmware(&self, firmware: &[u8]) -> Result<(), FalconError> {
+    /// Loads Falcon microcode into the processor memory.
+    ///
+    /// This method utilizes the Falcon DMA engine to load the given firmware
+    /// into the code segment, starting from physical and virtual address `0`
+    /// and must be separately executed using [`Tsec::boot`].
+    ///
+    /// NOTE: The firmware buffer is expected to be [aligned] correctly
+    /// to the boundaries of 0x100 byte pages in order to be uploaded.
+    ///
+    /// [aligned]: constant.FIRMWARE_ALIGNMENT.html
+    /// [`Tsec::boot`]: #method.boot
+    pub fn load_firmware(&self, firmware: &[u8]) -> Result<(), FalconError> {
         let tsec = unsafe { &*self.registers };
 
         // Check if the firmware is being aligned correctly.
@@ -250,23 +301,14 @@ impl Tsec {
             return Err(FalconError::FirmwareMisaligned);
         }
 
-        // Ensure that KFUSE is ready (since TSEC sources the KFUSE key from it).
-        kfuse::wait_until_ready().unwrap();
-
-        // Configure the Falcon processor.
-        tsec.FALCON_DMACTL.set(0);
-        tsec.FALCON_IRQMSET.set(0xFFF2);
-        tsec.FALCON_IRQDEST.set(0xFFF0);
-        tsec.FALCON_ITFEN.set(3);
-
-        // Make sure the DMA block is in idle state.
+        // Make sure the DMA engine is in idle state.
         self.dma_wait_idle()?;
 
-        // Load in the memory address of the firmware buffer.
+        // Load in the memory base address of the firmware buffer.
         tsec.FALCON_DMATRFBASE
             .set((firmware_address >> FIRMWARE_ALIGN_BITS) as u32);
 
-        // Configure DMA to transfer the physical firmware buffer into the Falcon SRAM.
+        // Configure the DMA engine to transfer the firmware buffer into the Falcon IMEM.
         for (index, _) in firmware.chunks(FIRMWARE_ALIGNMENT).enumerate() {
             let base = (index * FIRMWARE_ALIGNMENT) as u32;
             let offset = base;
@@ -281,51 +323,26 @@ impl Tsec {
         Ok(())
     }
 
-    /// Loads a TSEC firmware into the processor memory.
+    /// Boots the Falcon from the specified boot vector.
     ///
-    /// NOTE: The firmware buffer is expected to be [aligned] correctly.
+    /// The firmware must have been loaded into the Falcon in advance, either by
+    /// calling [`Tsec::load_firmware`] or doing the necessary transfers manually.
+    /// The boot vector then specifies from where code should be executed, most code
+    /// blobs presumably expect `0` to be passed, and the CPU boots up.
     ///
-    /// [aligned]: constant.FIRMWARE_ALIGNMENT.html
-    pub fn load_firmware(&self, firmware: &[u8]) -> Result<(), FalconError> {
-        // Enable the device clocks that are required by the TSEC.
-        Clock::HOST1X.enable();
-        Clock::TSEC.enable();
-        Clock::TSECB.enable();
-        Clock::SOR_SAFE.enable();
-        Clock::SOR0.enable();
-        Clock::SOR1.enable();
-        Clock::KFUSE.enable();
-
-        // Attempt to load the firmware.
-        match self.try_load_firmware(firmware) {
-            Ok(()) => Ok(()),
-            Err(err) => {
-                // The operation has failed, the clocks aren't needed anymore.
-                Clock::KFUSE.disable();
-                Clock::SOR1.disable();
-                Clock::SOR0.disable();
-                Clock::SOR_SAFE.disable();
-                Clock::TSECB.disable();
-                Clock::TSEC.disable();
-                Clock::HOST1X.disable();
-
-                Err(err)
-            }
-        }
-    }
-
-    /// Boots a TSEC firmware blob at a specified boot vector start address.
-    ///
-    /// NOTE: The firmware has to be loaded in through [`Tsec::load_firmware`]
-    /// in advance, otherwise this method will fail.
+    /// There is also support for both shared mailboxes which act as scratch registers
+    /// to share data between the Falcon and the host system. Through the respective
+    /// arguments, mailboxes can be filled with supplied values and at the end of
+    /// execution, the variables will be overridden with the final state of the TSEC
+    /// mailboxes (e.g. to check result codes on the host processor).
     ///
     /// # Safety
     ///
     /// This method is considered unsafe because code execution on the TSEC can fail
     /// for malformed or misaligned blobs or through code fucking up internal state.
     ///
-    /// [`Tsec::load_firmware`]: struct.Tsec.html#method.load_firmware
-    pub unsafe fn boot_firmware(
+    /// [`Tsec::load_firmware`]: #method.load_firmware
+    pub unsafe fn boot(
         &self,
         boot_vector: u32,
         mailbox0: &mut u32,
@@ -338,7 +355,7 @@ impl Tsec {
         tsec.FALCON_MAILBOX0.set(*mailbox0);
         tsec.FALCON_MAILBOX1.set(*mailbox1);
         tsec.FALCON_BOOTVEC.set(boot_vector);
-        tsec.FALCON_CPUCTL.set(2);
+        tsec.FALCON_CPUCTL.set(1 << 1);
 
         // Wait for the DMA engine to enter idle state.
         res = self.dma_wait_idle();

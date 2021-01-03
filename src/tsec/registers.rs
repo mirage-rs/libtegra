@@ -1,5 +1,3 @@
-//! Abstractions over the Tegra Security Co-Processor registers.
-
 use register::mmio::ReadWrite;
 
 use crate::memory_map::{TSEC, TSEC2};

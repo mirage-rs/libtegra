@@ -304,6 +304,9 @@ impl SecurityEngine {
 
     /// Uses the RNG to fill the given buffer with random bytes.
     pub fn generate_random(&self, output: &mut [u8]) -> Result<(), OperationError> {
+        #[cfg(target_arch = "arm")]
+        assert_eq!(output.len() % aes::BLOCK_SIZE, 0);
+
         // Opt out if the buffer has no capacity for data.
         if output.len() == 0 {
             return Ok(());
@@ -314,7 +317,8 @@ impl SecurityEngine {
         // Determine the amount of blocks to generate.
         let nblocks = output.len() / aes::BLOCK_SIZE as usize;
         let aligned_size = nblocks * aes::BLOCK_SIZE as usize;
-        let _fractional = output.len() - aligned_size;
+        #[cfg(target_arch = "aarch64")]
+        let fractional = output.len() - aligned_size;
 
         // Configure the RNG.
         init_rng!(engine, Memory, Normal);
@@ -332,7 +336,33 @@ impl SecurityEngine {
             start_normal_operation(engine, &source_ll, &mut destination_ll)?;
         }
 
-        // TODO: Add support for unaligned blocks.
+        // If one unaligned block is left, process it through an extra operation.
+        #[cfg(target_arch = "aarch64")]
+        if fractional > 0 {
+            use cortex_a::barrier;
+
+            // Load in the number of bloccks to generate.
+            engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+            // Align the block properly to a cache line and retrieve the wrapped data.
+            let pad = utils::CachePad::<u8, { aes::BLOCK_SIZE }>::from(&output[aligned_size..]);
+            let data = pad.into_inner();
+
+            // Execute the single-block operation.
+            let mut ll = LinkedList::from(&data[..]);
+            start_normal_operation(engine, &ll, &mut ll)?;
+
+            // Ensure data cache coherency to get correct output.
+            unsafe {
+                barrier::dsb(barrier::ISH);
+                utils::flush_data_cache_line(data.as_ptr() as usize);
+                barrier::dsb(barrier::ISH);
+            }
+
+            // Copy the remaining bytes back into the output buffer.
+            output[aligned_size..].copy_from_slice(&data[..fractional]);
+        }
+
         Ok(())
     }
 

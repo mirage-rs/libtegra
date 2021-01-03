@@ -1,4 +1,5 @@
 use core::convert::TryFrom;
+#[allow(unused)]
 use core::mem::size_of;
 
 use crate::{ahb::mem, timer};
@@ -19,7 +20,7 @@ pub struct AddressInfo {
     pub data_len: u32,
 }
 
-impl<'a> From<&'a [u8]> for AddressInfo {
+impl From<&[u8]> for AddressInfo {
     fn from(buffer: &[u8]) -> Self {
         let address = el3_translate_vaddr_to_paddr(buffer.as_ptr() as usize);
         let data_len = buffer.len() as u32;
@@ -63,7 +64,7 @@ impl LinkedList {
     }
 }
 
-impl<'a> From<&'a [u8]> for LinkedList {
+impl From<&[u8]> for LinkedList {
     fn from(buffer: &[u8]) -> Self {
         LinkedList {
             entries: 0,
@@ -191,6 +192,17 @@ pub fn trigger_operation(
     source: &LinkedList,
     destination: &mut LinkedList,
 ) -> Result<(), OperationError> {
+    // Load in the Linked Lists.
+    engine
+        .SE_IN_LL_ADDR_0
+        .set(el3_translate_vaddr_to_paddr(source as *const _ as usize));
+    engine
+        .SE_OUT_LL_ADDR_0
+        .set(el3_translate_vaddr_to_paddr(destination as *mut _ as usize));
+
+    // Ensure that the previous operation has fully completed.
+    prepare_operation(engine)?;
+
     #[cfg(target_arch = "aarch64")]
     unsafe {
         use cortex_a::barrier;
@@ -203,17 +215,6 @@ pub fn trigger_operation(
         // Construct a data synchronization barrier.
         barrier::dsb(barrier::ISH);
     }
-
-    // Load in the Linked Lists.
-    engine
-        .SE_IN_LL_ADDR_0
-        .set(el3_translate_vaddr_to_paddr(source as *const _ as usize));
-    engine
-        .SE_OUT_LL_ADDR_0
-        .set(el3_translate_vaddr_to_paddr(destination as *mut _ as usize));
-
-    // Ensure that the previous operation has fully completed.
-    prepare_operation(engine)?;
 
     // Start the hardware operation.
     engine

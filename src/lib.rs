@@ -1,6 +1,6 @@
 #![no_std]
 #![recursion_limit = "512"]
-#![feature(asm, optimize_attribute, min_const_generics)]
+#![feature(asm, optimize_attribute)]
 
 #[macro_use]
 extern crate enum_primitive;

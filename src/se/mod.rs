@@ -94,6 +94,8 @@
 mod constants;
 mod core;
 mod registers;
+#[cfg(target_arch = "aarch64")]
+mod utils;
 
 use ::core::marker::Sync;
 

@@ -1,4 +1,5 @@
 use core::convert::TryFrom;
+use core::mem::size_of;
 
 use crate::{ahb::mem, timer};
 
@@ -20,15 +21,14 @@ pub struct AddressInfo {
 
 impl<'a> From<&'a [u8]> for AddressInfo {
     fn from(buffer: &[u8]) -> Self {
-        let address =
-            u32::try_from(buffer.as_ptr() as usize).expect("Address does not fit an u32!");
+        let address = el3_translate_vaddr_to_paddr(buffer.as_ptr() as usize);
         let data_len = buffer.len() as u32;
 
         AddressInfo { address, data_len }
     }
 }
 
-assert_eq_size!(AddressInfo, [u32; 2]);
+assert_eq_size!(AddressInfo, [u32; 0x2]);
 
 /// Representation of a Security Engine Linked List.
 ///
@@ -77,7 +77,32 @@ impl<'a> From<&'a [u8]> for LinkedList {
     }
 }
 
-assert_eq_size!(LinkedList, [u32; 9]);
+assert_eq_size!(LinkedList, [u32; 0x9]);
+
+#[cfg(target_arch = "aarch64")]
+fn el3_translate_vaddr_to_paddr(vaddr: usize) -> u32 {
+    let vaddr = vaddr as u64;
+    let mut paddr: u64;
+    unsafe {
+        asm!(
+            "
+            at s1e0r, {vaddr}
+            mrs {paddr}, par_el1
+            ",
+            paddr = out(reg) paddr,
+            vaddr = in(reg) vaddr,
+            options(nostack),
+        );
+    }
+
+    u32::try_from((paddr & 0x0000_FFFF_FFFF_F000) | (vaddr & 0x0000_0000_0000_0FFF))
+        .expect("Address does not fit an u32!")
+}
+
+#[cfg(not(target_arch = "aarch64"))]
+fn el3_translate_vaddr_to_paddr(vaddr: usize) -> u32 {
+    u32::try_from(vaddr).expect("Address does not fit an u32!")
+}
 
 /// Enumeration of potential Security Engine errors that
 /// may occur during internal operations on it.
@@ -166,15 +191,26 @@ pub fn trigger_operation(
     source: &LinkedList,
     destination: &mut LinkedList,
 ) -> Result<(), OperationError> {
-    // Compute memory addresses of the LLs.
-    let source_address =
-        u32::try_from(source as *const _ as usize).expect("Address does not fit an u32!");
-    let destination_address =
-        u32::try_from(destination as *mut _ as usize).expect("Address does not fit an u32!");
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        use cortex_a::barrier;
 
-    // Load in the LLs.
-    engine.SE_IN_LL_ADDR_0.set(source_address);
-    engine.SE_OUT_LL_ADDR_0.set(destination_address);
+        // Flush the data cache lines to make the Security Engine Linked Lists coherent.
+        // This is a necessary step so the engine sees our provided data correctly.
+        super::utils::flush_data_cache(source, size_of::<LinkedList>());
+        super::utils::flush_data_cache(destination, size_of::<LinkedList>());
+
+        // Construct a data synchronization barrier.
+        barrier::dsb(barrier::ISH);
+    }
+
+    // Load in the Linked Lists.
+    engine
+        .SE_IN_LL_ADDR_0
+        .set(el3_translate_vaddr_to_paddr(source as *const _ as usize));
+    engine
+        .SE_OUT_LL_ADDR_0
+        .set(el3_translate_vaddr_to_paddr(destination as *mut _ as usize));
 
     // Ensure that the previous operation has fully completed.
     prepare_operation(engine)?;

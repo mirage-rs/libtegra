@@ -1,20 +1,9 @@
 #![no_std]
 #![recursion_limit = "512"]
-#![feature(optimize_attribute)]
-#![feature(min_const_generics)]
-
-pub extern crate cortex_a;
-
-extern crate byteorder;
-
-extern crate embedded_hal;
+#![feature(asm, optimize_attribute, min_const_generics)]
 
 #[macro_use]
 extern crate enum_primitive;
-
-extern crate paste;
-
-extern crate register;
 
 #[macro_use]
 extern crate static_assertions;

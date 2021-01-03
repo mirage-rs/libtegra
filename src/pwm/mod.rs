@@ -36,17 +36,17 @@ impl PwmChannel {
 
     /// Representation of the PWM 1 channel.
     pub const PWM_1: Self = PwmChannel {
-        registers: PWM_0_REGISTERS,
+        registers: PWM_1_REGISTERS,
     };
 
     /// Representation of the PWM 2 channel.
     pub const PWM_2: Self = PwmChannel {
-        registers: PWM_0_REGISTERS,
+        registers: PWM_2_REGISTERS,
     };
 
     /// Representation of the PWM 3 channel.
     pub const PWM_3: Self = PwmChannel {
-        registers: PWM_0_REGISTERS,
+        registers: PWM_3_REGISTERS,
     };
 }
 

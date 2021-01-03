@@ -10,18 +10,42 @@ pub use registers::*;
 /// the `cmd` operation and returns the value from the result register.
 macro_rules! simple_op {
     ($self:ident, $cmd:expr, $val:ident) => {{
-        let registers = unsafe { &*REGISTERS };
-
         // setup phase: store the value inside the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[$self.target_register as usize].set($val);
+        register!(SETUP_V_0)[$self.target_register as usize].set($val);
 
         // trigger the operation
-        registers
-            .ATOMICS_AP0_TRIGGER_0
+        register!(TRIGGER_0)
             .write($cmd + TRIGGER::WIDTH64::CLEAR + TRIGGER::ID.val($self.target_register));
 
         // read the old value out of the result register
-        registers.ATOMICS_AP0_RESULT_0[$self.target_register as usize].get()
+        register!(RESULT_0)[$self.target_register as usize].get()
+    }};
+}
+
+/// Macro to get a register from a registers block.
+///
+/// We use this macro to get registers for Aperture 0 if
+/// we are on the normal CPU, and Aperture 1 if we are
+/// on the BPMP.
+macro_rules! register {
+    ($name:ident) => {{
+        let __regs = unsafe { &*$crate::atomic::REGISTERS };
+
+        #[cfg(target_arch = "aarch64")]
+        let __reg = paste::paste! { &__regs.[<ATOMICS_AP0_ $name>] };
+
+        #[cfg(target_arch = "arm")]
+        let __reg = paste::paste! { &__regs.[<ATOMICS_AP1_ $name>] };
+
+        #[allow(unused_variables, unreachable_code)]
+        #[cfg(not(any(target_arch = "arm", target_arch = "aarch64")))]
+        let __reg = {
+            panic!("libtegra only suppors ARM-based targets");
+            paste::paste! { &__regs.[<ATOMICS_AP0_ $name>] }
+        };
+
+        #[allow(dead_code)]
+        __reg
     }};
 }
 
@@ -60,14 +84,12 @@ impl AtomicU32 {
 
     /// Replaces the value of this atomic with `new`, if it matches `current`.
     pub fn compare_exchange(&self, current: u32, new: u32) {
-        let registers = unsafe { &*REGISTERS };
-
         // setup phase: store `current` and `new` in the setup register
-        registers.ATOMICS_AP0_SETUP_V_0[self.target_register as usize].set(new);
-        registers.ATOMICS_AP0_SETUP_C_0[self.target_register as usize].set(current);
+        register!(SETUP_V_0)[self.target_register as usize].set(new);
+        register!(SETUP_C_0)[self.target_register as usize].set(current);
 
         // trigger the operation
-        registers.ATOMICS_AP0_TRIGGER_0.write(
+        register!(TRIGGER_0).write(
             TRIGGER::CMD::COMPARE_EXCHANGE
                 + TRIGGER::WIDTH64::CLEAR
                 + TRIGGER::ID.val(self.target_register),
@@ -75,7 +97,7 @@ impl AtomicU32 {
 
         // if the comparison succeeded, the previous value will be in the result register,
         // but we don't return it because it may be undefined
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get();
+        register!(RESULT_0)[self.target_register as usize].get();
     }
 
     /// Increment the value of this atomic by `x`.
@@ -97,15 +119,13 @@ impl AtomicU32 {
 
     /// Loads the value for this `Atomic`.
     pub fn get(&self) -> u32 {
-        let registers = unsafe { &*REGISTERS };
-
         // for the get operation, no setup is required, so trigger the operation instantly
-        registers.ATOMICS_AP0_TRIGGER_0.write(
+        register!(TRIGGER_0).write(
             TRIGGER::CMD::GET + TRIGGER::WIDTH64::CLEAR + TRIGGER::ID.val(self.target_register),
         );
 
         // read the value out of the result register
-        registers.ATOMICS_AP0_RESULT_0[self.target_register as usize].get()
+        register!(RESULT_0)[self.target_register as usize].get()
     }
 
     /// Puts `x` into this atomic value.

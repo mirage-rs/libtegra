@@ -10,6 +10,7 @@ pub struct CachePad<T: Default, const N: usize>([T; N]);
 
 impl<T: Copy + Default, const N: usize> CachePad<T, { N }> {
     /// Constructs a new cache line padding that aligns the given data.
+    #[inline(always)]
     pub fn new(data: [T; N]) -> Self {
         CachePad(data)
     }
@@ -29,9 +30,9 @@ impl<T: Copy + Default, const N: usize> From<&[T]> for CachePad<T, { N }> {
         let mut pad = CachePad::new([T::default(); N]);
         pad.copy_from_slice(data);
 
-        // Make the data coherent to ensure the data is seen correctly.
+        // Make the data coherent so it is seen correctly by the SE and the CPU.
         unsafe {
-            flush_data_cache_line(pad as *const _ as usize);
+            flush_data_cache_line(&pad as *const CachePad<T, N> as usize);
             barrier::dsb(barrier::ISH);
         }
 
@@ -70,8 +71,11 @@ pub unsafe fn flush_data_cache_line(line: usize) {
 }
 
 /// Flushes the entire data cache area that is covered by the given object.
-pub unsafe fn flush_data_cache<T>(obj: &T, size: usize) {
-    let start = obj as *const T as usize;
+pub unsafe fn flush_data_cache<T>(obj: &T, size: usize)
+where
+    T: ?Sized,
+{
+    let start = &obj as *const _ as usize;
     let end = align_up(start + size, DATA_CACHE_LINE_SIZE);
 
     barrier::dmb(barrier::SY);

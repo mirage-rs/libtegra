@@ -115,6 +115,9 @@ pub enum OperationError {
     AhbTimeout,
     /// An exception was raised by the SE while processing DMA buffers.
     Exception,
+    /// A given source or destination buffer could not be used to construct a SE Linked List
+    /// because it was malformed or had an incorrect size.
+    MalformedBuffer,
 }
 
 /// Waits for the Security Engine to enter idle state before starting the next operation.
@@ -241,7 +244,7 @@ pub fn start_normal_operation(
     trigger_operation(engine, opcodes::START, source, destination)
 }
 
-/// Triggers a Security Engine operation that saves the crypto context afterwards.
+/// Triggers a Security Engine operation that saves the SE context afterwards.
 ///
 /// See [`trigger_operation`] for further explanation.
 ///

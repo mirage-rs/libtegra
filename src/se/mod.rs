@@ -563,6 +563,78 @@ impl SecurityEngine {
 
         Ok(())
     }
+
+    #[cfg(not(target_arch = "aarch64"))]
+    unsafe fn trigger_context_save_operation(
+        &self,
+        source: &[u8],
+        destination: &mut [u8],
+    ) -> Result<(), OperationError> {
+        assert_eq!(source.len() % aes::BLOCK_SIZE, 0);
+        assert_eq!(destination.len() % aes::BLOCK_SIZE, 0);
+
+        let engine = &*self.registers;
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::from(&destination[..]);
+
+        // Execute the context save operation.
+        start_context_save_operation(engine, &source_ll, &mut destination_ll)
+    }
+
+    #[cfg(target_arch = "aarch64")]
+    unsafe fn trigger_context_save_operation(
+        &self,
+        source: &[u8],
+        destination: &mut [u8],
+    ) -> Result<(), OperationError> {
+        use cortex_a::barrier;
+
+        let engine = &*self.registers;
+
+        // Make sure that the destination buffer does not exceed 1 AES block in size.
+        if destination.len() > aes::BLOCK_SIZE {
+            return Err(OperationError::MalformedBuffer);
+        }
+
+        // Construct a cache padding for output data and make it coherent.
+        let pad = {
+            let pad = utils::CachePad::<u8, { aes::BLOCK_SIZE }>::new([0; aes::BLOCK_SIZE]);
+            if destination.len() > 0 {
+                utils::flush_data_cache_line(&pad as *const _ as usize);
+                barrier::dsb(barrier::ISH);
+            }
+
+            pad.into_inner()
+        };
+
+        // Make the source data coherent, if necessary.
+        if source.len() > 0 {
+            utils::flush_data_cache(source, source.len());
+            barrier::dsb(barrier::ISH);
+        }
+
+        // Construct the Security Engine Linked Lists.
+        let source_ll = LinkedList::from(source);
+        let mut destination_ll = LinkedList::from(&pad[..]);
+
+        // Execute the context save operation.
+        start_context_save_operation(engine, &source_ll, &mut destination_ll)?;
+
+        // Copy back the resulting output data, if necessary.
+        if destination.len() > 0 {
+            barrier::dsb(barrier::ISH);
+            utils::flush_data_cache_line(pad.as_ptr() as usize);
+            barrier::dsb(barrier::ISH);
+
+            for (x, y) in destination.iter_mut().zip(pad.iter().cycle()) {
+                *x = *y;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 // Safety: The driver waits until previous operations have completed unconditionally

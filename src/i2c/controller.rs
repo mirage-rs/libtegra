@@ -360,6 +360,6 @@ impl I2c {
         let mut buffer = [0; 1];
         self.read(device, register, &mut buffer)?;
 
-        Ok(u8::from_le_bytes(buffer.try_into().unwrap()))
+        Ok(u8::from_le_bytes(buffer))
     }
 }

@@ -12,7 +12,7 @@ const JEDEC_NVIDIA_MFID: u32 = 0x6B;
 const JEDEC_NVIDIA_BKID: u32 = 0x03;
 
 unsafe fn get_chip_id() -> (u32, u32, u32, u32, u32) {
-    let hidrev = (&*apb::misc::REGISTERS).gp.APB_MISC_GP_HIDREV_0.get();
+    let hidrev = (*apb::misc::REGISTERS).gp.APB_MISC_GP_HIDREV_0.get();
 
     (
         hidrev >> 20 & 0xF, // pre_si_platform revision.
@@ -40,6 +40,7 @@ pub enum Error {
 /// in the future and must not be exhaustively matched against that to preserve compatibility
 /// of existing code. Instead, add a `_` catch arm to match future variants.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Model {
     /// A Tegra132 SoC.
     T132,
@@ -49,9 +50,6 @@ pub enum Model {
     T194,
     /// A Tegra210 SoC.
     T210,
-    /// `Model` might be extended in the future and must not be exhaustively matched against.
-    #[doc(hidden)]
-    __NonExhaustive,
 }
 
 impl Model {
@@ -72,6 +70,7 @@ impl Model {
 /// in the future and must not be exhaustively matched against that to preserve compatibility
 /// of existing code. Instead, add a `_` catch arm to match future variants.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Platform {
     /// A silicon Tegra SoC.
     Silicon,
@@ -89,9 +88,6 @@ pub enum Platform {
     /// The Virtualizer Development Kit (VDK) is the standard chip development from
     /// Synopsis.
     Vdk,
-    /// `Platform` might be extended in the future and must not be exhaustively matched against.
-    #[doc(hidden)]
-    __NonExhaustive,
 }
 
 impl Platform {
@@ -127,6 +123,7 @@ impl Platform {
 /// in the future and must not be exhaustively matched against that to preserve compatibility
 /// of existing code. Instead, add a `_` catch arm to match future variants.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Family {
     /// GPU family.
     Gpu,
@@ -144,9 +141,6 @@ pub enum Family {
     Vaio,
     /// Handheld SoC family.
     HandheldSoC,
-    /// `Family` might be extended in the future and must not be exhaustively matched against.
-    #[doc(hidden)]
-    __NonExhaustive,
 }
 
 impl Family {

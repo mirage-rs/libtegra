@@ -308,7 +308,7 @@ impl SecurityEngine {
         assert_eq!(output.len() % aes::BLOCK_SIZE, 0);
 
         // Opt out if the buffer has no capacity for data.
-        if output.len() == 0 {
+        if output.is_empty() {
             return Ok(());
         }
 

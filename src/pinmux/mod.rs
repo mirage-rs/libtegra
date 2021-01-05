@@ -219,7 +219,7 @@ enum_from_primitive! {
     /// Note that most pins are actually predestined for a specific pin functions among
     /// reserved ones. The driver will make sure that no unsupported pin function can be
     /// set on the wrong pin.
-    #[derive(Clone, Copy, Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
     pub enum PinFunction {
         Default,
         Aud,

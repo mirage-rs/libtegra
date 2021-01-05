@@ -44,7 +44,7 @@ pub use crate::pinmux::registers::*;
 ///
 /// Many drivers of the `libtegra` crate depend on proper Pin Multiplexing settings
 /// for the specific board before they can be used.
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub enum PinGrP {
     Sdmmc1ClkPm0,
     Sdmmc1CmdPm1,
@@ -1984,17 +1984,17 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_function(self, function: PinFunction) {
+    pub unsafe fn set_function(&self, function: PinFunction) {
         // Avoid setting of reserved pins.
         if function == PinFunction::Default
             || function == PinFunction::Reserved
-            || self == PinGrP::Reserved
+            || self == &PinGrP::Reserved
         {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as usize;
+        let pin = self.clone() as usize;
         let register = &*((PINMUX_BASE + (pin * 4) as u32) as *const ReadWrite<u32>);
 
         // Compute the corresponding mux value.
@@ -2024,9 +2024,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured Pull resistor state from this Pin Group.
-    pub fn get_pull(self) -> PinPull {
+    pub fn get_pull(&self) -> PinPull {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2043,9 +2043,9 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_pull(self, pull: PinPull) {
+    pub unsafe fn set_pull(&self, pull: PinPull) {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set the bits accordingly.
@@ -2056,9 +2056,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured Tri-State from this Pin Group.
-    pub fn get_tristate(self) -> PinTristate {
+    pub fn get_tristate(&self) -> PinTristate {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2075,9 +2075,9 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_tristate(self, tristate: PinTristate) {
+    pub unsafe fn set_tristate(&self, tristate: PinTristate) {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2090,9 +2090,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured Parking state from this Pin Group.
-    pub fn get_park(self) -> PinPark {
+    pub fn get_park(&self) -> PinPark {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2111,14 +2111,14 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_park(self, park: PinPark) {
+    pub unsafe fn set_park(&self, park: PinPark) {
         // If the state should be default, leave it as-is.
         if park == PinPark::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         let mut value = register.get();
@@ -2150,9 +2150,9 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_io(self, io: PinIo) {
+    pub unsafe fn set_io(&self, io: PinIo) {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2165,9 +2165,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured Lock control state from this Pin Group.
-    pub fn get_lock(self) -> PinLock {
+    pub fn get_lock(&self) -> PinLock {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2184,14 +2184,14 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_lock(self, lock: PinLock) {
+    pub unsafe fn set_lock(&self, lock: PinLock) {
         // If the state should be default, leave it as-is.
         if lock == PinLock::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2205,9 +2205,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured LPDR state from this Pin Group.
-    pub fn get_lpdr(self) -> PinLpdr {
+    pub fn get_lpdr(&self) -> PinLpdr {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2226,14 +2226,14 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_lpdr(self, lpdr: PinLpdr) {
+    pub unsafe fn set_lpdr(&self, lpdr: PinLpdr) {
         // If the state should be default, leave it as-is.
         if lpdr == PinLpdr::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2247,9 +2247,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured operation voltage state from this Pin Group.
-    pub fn get_io_hv(self) -> PinIoHv {
+    pub fn get_io_hv(&self) -> PinIoHv {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2268,14 +2268,14 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_io_hv(self, hv: PinIoHv) {
+    pub unsafe fn set_io_hv(&self, hv: PinIoHv) {
         // If the state should be default, leave it as-is.
         if hv == PinIoHv::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2289,9 +2289,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured OD state from this Pin Group.
-    pub fn get_od(self) -> PinOd {
+    pub fn get_od(&self) -> PinOd {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2308,14 +2308,14 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_od(self, od: PinOd) {
+    pub unsafe fn set_od(&self, od: PinOd) {
         // If the state should be default, leave it as-is.
         if od == PinOd::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2329,9 +2329,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured Schmitt state from this Pin Group.
-    pub fn get_schmt(self) -> PinSchmt {
+    pub fn get_schmt(&self) -> PinSchmt {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2348,14 +2348,14 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_schmt(self, schmt: PinSchmt) {
+    pub unsafe fn set_schmt(&self, schmt: PinSchmt) {
         // If the state should be default, leave it as-is.
         if schmt == PinSchmt::Default {
             return;
         }
 
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set or clear the bit accordingly.
@@ -2369,9 +2369,9 @@ impl PinGrP {
     }
 
     /// Extracts the currently configured impedance state from this Pin Group.
-    pub fn get_drive(self) -> PinDrive {
+    pub fn get_drive(&self) -> PinDrive {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = unsafe { &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>) };
 
         // Extract the desired bit and wrap it into the enum.
@@ -2390,9 +2390,9 @@ impl PinGrP {
     /// Playing around with Pin Multiplexing settings can irreparably damage your hardware,
     /// please make sure that you know exactly what you are doing before calling this
     /// function.
-    pub unsafe fn set_drive(self, drive: PinDrive) {
+    pub unsafe fn set_drive(&self, drive: PinDrive) {
         // Compute the register offset that corresponds to this pin.
-        let pin = self as u32;
+        let pin = self.clone() as u32;
         let register = &*((PINMUX_BASE + (pin * 4)) as *const ReadWrite<u32>);
 
         // Set the bits accordingly.

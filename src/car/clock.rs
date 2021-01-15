@@ -269,6 +269,16 @@ pub struct Clock {
 }
 
 impl Clock {
+    /// Representation of the Atomics clock.
+    pub const ATOMICS: Self = Clock {
+        reset: CLK_RST_CONTROLLER_RST_DEVICES_V,
+        enable: CLK_RST_CONTROLLER_CLK_OUT_ENB_V,
+        source: CLK_NO_SOURCE,
+        index: CLK_V_ATOMICS,
+        clock_source: 0,
+        clock_divisor: 0,
+    };
+
     /// Representation of the UART A clock.
     pub const UART_A: Self = Clock {
         reset: CLK_RST_CONTROLLER_RST_DEVICES_L,

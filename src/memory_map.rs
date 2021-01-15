@@ -314,6 +314,9 @@ pub const SE1: u32 = 0x7001_2000;
 /// NOTE: Only available with the `mariko` feature enabled.
 pub const SE2: u32 = 0x7041_2000;
 
+/// Start of the Atomics register block.
+pub const ATOMICS: u32 = 0x7001_6000;
+
 /// Start of the MC register block.
 pub const MC: u32 = 0x7001_9000;
 

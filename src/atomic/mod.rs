@@ -7,6 +7,14 @@
 mod registers;
 pub use registers::*;
 
+/// A raw pointer which can be used atomically.
+#[cfg(target_arch = "arm")]
+pub type AtomicPtr = AtomicU32;
+
+/// A raw pointer which can be used atomically.
+#[cfg(target_arch = "aarch64")]
+pub type AtomicPtr = AtomicU64;
+
 /// Macro for generating a simple atomic operation,
 /// that stores `val` inside the `V` setup register, performs
 /// the `cmd` operation and returns the value from the result register.

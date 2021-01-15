@@ -2,6 +2,8 @@
 //!
 //! See Chapter 7 in the Tegra X1 Technical Reference Manual for details.
 
+#![allow(unused)]
+
 mod registers;
 pub use registers::*;
 

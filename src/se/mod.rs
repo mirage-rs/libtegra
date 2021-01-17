@@ -90,6 +90,7 @@
 //! [`SecurityEngine::lock_tzram`]: struct.SecurityEngine.html#method.lock_tzram
 //! [`SecurityEngine::lock_context_save`]: struct.SecurityEngine.html#method.lock_context_save
 
+mod aes;
 #[allow(dead_code)]
 mod constants;
 mod core;
@@ -104,8 +105,6 @@ use ::core::marker::Sync;
 
 pub use self::core::*;
 pub use registers::*;
-
-use constants::*;
 
 /// Representation of the Security Engine used for cryptographic operations.
 pub struct SecurityEngine {
@@ -204,12 +203,12 @@ impl SecurityEngine {
         let engine = unsafe { &*self.registers };
 
         // Lock access to the AES key slots.
-        for i in 0..aes::KEY_SLOT_COUNT {
+        for i in 0..constants::aes::KEY_SLOT_COUNT {
             engine.SE_CRYPTO_KEYTABLE_ACCESS_0[i].set(0);
         }
 
         // Lock access to the RSA key slots.
-        for i in 0..rsa::KEY_SLOT_COUNT {
+        for i in 0..constants::rsa::KEY_SLOT_COUNT {
             engine.SE_RSA_KEYTABLE_ACCESS_0[i].set(0);
         }
 
@@ -272,8 +271,8 @@ impl SecurityEngine {
         source: &[u8],
         destination: &mut [u8],
     ) -> Result<(), OperationError> {
-        assert_eq!(source.len() % aes::BLOCK_SIZE, 0);
-        assert_eq!(destination.len() % aes::BLOCK_SIZE, 0);
+        assert_eq!(source.len() % constants::aes::BLOCK_SIZE, 0);
+        assert_eq!(destination.len() % constants::aes::BLOCK_SIZE, 0);
 
         let engine = &*self.registers;
 
@@ -296,13 +295,15 @@ impl SecurityEngine {
         let engine = &*self.registers;
 
         // Make sure that the destination buffer does not exceed 1 AES block in size.
-        if destination.len() > aes::BLOCK_SIZE {
+        if destination.len() > constants::aes::BLOCK_SIZE {
             return Err(OperationError::MalformedBuffer);
         }
 
         // Construct a cache padding for output data and make it coherent.
         let pad = {
-            let pad = utils::CachePad::<u8, { aes::BLOCK_SIZE }>::new([0; aes::BLOCK_SIZE]);
+            let pad = utils::CachePad::<u8, { constants::aes::BLOCK_SIZE }>::new(
+                [0; constants::aes::BLOCK_SIZE],
+            );
             if destination.len() > 0 {
                 utils::flush_data_cache_line(&pad as *const _ as usize);
                 barrier::dsb(barrier::ISH);

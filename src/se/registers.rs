@@ -216,7 +216,7 @@ register_bitfields! {
         VCTRAM_SEL OFFSET(5) NUMBITS(2) [
             Memory = 0,
             InitAesOut = 2,
-            InitPrevMemory = 3
+            InitPrevMem = 3
         ],
 
         INPUT_SEL OFFSET(3) NUMBITS(2) [

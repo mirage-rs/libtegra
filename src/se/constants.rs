@@ -35,6 +35,8 @@ pub mod rng {
     pub const KEY_SIZE: usize = 16;
 
     pub const SEED_SIZE: usize = IV_SIZE + DT_SIZE + KEY_SIZE;
+
+    pub const RESEED_INTERVAL: u32 = 70_000 + 1;
 }
 
 /// Data sizes related to RSA.

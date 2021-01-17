@@ -2,8 +2,6 @@ use crate::se::constants::*;
 use crate::se::core::*;
 use crate::se::registers::*;
 
-const RNG_RESEED_INTERVAL: u32 = 70_000 + 1;
-
 macro_rules! init_rng {
     ($registers:ident, $dest:ident, $mode:ident) => {
         // Configure the hardware to do RNG encryption.
@@ -43,7 +41,7 @@ pub fn initialize(registers: &Registers) -> Result<(), OperationError> {
     );
 
     // Set the reseed interval to force a reseed every 70.000 blocks.
-    registers.SE_RNG_RESEED_INTERVAL_0.set(RNG_RESEED_INTERVAL);
+    registers.SE_RNG_RESEED_INTERVAL_0.set(rng::RESEED_INTERVAL);
 
     // Configure the RNG.
     init_rng!(registers, Memory, ForceInstantiation);

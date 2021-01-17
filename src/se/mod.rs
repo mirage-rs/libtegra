@@ -345,12 +345,15 @@ impl SecurityEngine {
             engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
 
             // Align the block properly to a cache line and retrieve the wrapped data.
-            let pad = utils::CachePad::<u8, { aes::BLOCK_SIZE }>::from(&output[aligned_size..]);
-            let data = pad.into_inner();
+            let data = {
+                let pad = utils::CachePad::<u8, { aes::BLOCK_SIZE }>::from(&output[aligned_size..]);
+                pad.into_inner()
+            };
 
             // Execute the single-block operation.
-            let mut ll = LinkedList::from(&data[..]);
-            start_normal_operation(engine, &ll, &mut ll)?;
+            let source_ll = LinkedList::default();
+            let mut destination_ll = LinkedList::from(&data[..]);
+            start_normal_operation(engine, &source_ll, &mut destination_ll)?;
 
             // Ensure data cache coherency to get correct output.
             unsafe {

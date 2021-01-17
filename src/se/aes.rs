@@ -170,7 +170,7 @@ pub fn do_ecb_operation(
     #[allow(unreachable_patterns)]
     let output = match () {
         #[cfg(target_arch = "aarch64")]
-        () => CachePad::new([0u8; aes::BLOCK_SIZE]).into_inner(),
+        () => CachePad::from(&destination[..]).into_inner(),
         () => [0; aes::BLOCK_SIZE],
     };
 
@@ -185,7 +185,7 @@ pub fn do_ecb_operation(
         use cortex_a::barrier;
 
         barrier::dsb(barrier::ISH);
-        flush_data_cache_line(source.as_ptr() as usize);
+        flush_data_cache_line(output.as_ptr() as usize);
         barrier::dsb(barrier::ISH);
     }
 

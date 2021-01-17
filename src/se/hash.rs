@@ -2,18 +2,17 @@ use byteorder::{ByteOrder, BE, LE};
 
 use crate::se::registers::*;
 
-#[allow(unused_macros)]
 macro_rules! init_sha {
     ($registers:ident, $mode:ident) => {
         // Configure the hardware to perform a SHA hashing operation.
-        $engine.SE_CONFIG_0.write(
+        $registers.SE_CONFIG_0.write(
             SE_CONFIG_0::HASH_MODE::$mode
                 + SE_CONFIG_0::DEC_MODE::Aes128
                 + SE_CONFIG_0::ENC_ALG::Sha
                 + SE_CONFIG_0::DEC_ALG::Nop
                 + SE_CONFIG_0::DESTINATION::HashReg,
         );
-        $engine
+        $registers
             .SE_SHA_CONFIG_0
             .write(SE_SHA_CONFIG_0::HW_INIT_HASH::SET);
     };

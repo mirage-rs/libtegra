@@ -59,6 +59,23 @@
 //!
 //! - [`SecurityEngine::generate_srk`]
 //!
+//! ## AES
+//!
+//! The AES APIs of the Security Engine expose the APIs to operate with various AES block and
+//! ciphermodes and manage access and contents of AES keyslots.
+//!
+//! - [`SecurityEngine::clear_aes_keyslot`]
+//!
+//! - [`SecurityEngine::clear_aes_key_iv`]
+//!
+//! - [`SecurityEngine::aes_ecb_encrypt`]
+//!
+//! - [`SecurityEngine::aes_ecb_decrypt`]
+//!
+//! - [`SecurityEngine::aes_cbc_encrypt`]
+//!
+//! - [`SecurityEngine::aes_cbc_decrypt`]
+//!
 //! ## Hashing
 //!
 //! The Security Engine supports various hashing algorithms from the SHA1 and SHA2 family
@@ -79,6 +96,12 @@
 //! [`SecurityEngine::generate_random`]: struct.SecurityEngine.html#method.generate_random
 //! [`SecurityEngine::set_random_key`]: struct.SecurityEngine.html#method.set_random_key
 //! [`SecurityEngine::generate_srk`]: struct.SecurityEngine.html#method.generate_srk
+//! [`SecurityEngine::clear_aes_keyslot`]: struct.SecurityEngine.html#method.clear_aes_keyslot
+//! [`SecurityEngine::clear_aes_key_iv`]: struct.SecurityEngine.html#method.clear_aes_key_iv
+//! [`SecurityEngine::aes_ecb_encrypt`]: struct.SecurityEngine.html#method.aes_ecb_encrypt
+//! [`SecurityEngine::aes_ecb_decrypt`]: struct.SecurityEngine.html#method.aes_ecb_decrypt
+//! [`SecurityEngine::aes_cbc_encrypt`]: struct.SecurityEngine.html#method.aes_cbc_encrypt
+//! [`SecurityEngine::aes_cbc_decrypt`]: struct.SecurityEngine.html#method.aes_cbc_decrypt
 //! [`SecurityEngine::calculate_sha1`]: struct.SecurityEngine.html#method.calculate_sha1
 //! [`SecurityEngine::calculate_sha224`]: struct.SecurityEngine.html#method.calculate_sha224
 //! [`SecurityEngine::calculate_sha256`]: struct.SecurityEngine.html#method.calculate_sha256

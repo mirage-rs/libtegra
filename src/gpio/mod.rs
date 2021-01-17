@@ -47,7 +47,7 @@ pub use crate::gpio::controller::*;
 
 use enum_primitive::FromPrimitive;
 #[doc(hidden)]
-pub use paste::expr;
+pub use paste::paste;
 use register::mmio::ReadWrite;
 
 /// The GPIO ports that are supported by the platform.
@@ -187,7 +187,7 @@ macro_rules! tegra_gpio {
     ($port:ident, $pin:tt) => {
         $crate::gpio::Gpio {
             port: $crate::gpio::Port::$port,
-            pin: $crate::gpio::expr!($crate::gpio::Pin::[<P $pin>]),
+            pin: $crate::gpio::paste!($crate::gpio::Pin::[<P $pin>]),
         }
     }
 }

@@ -271,6 +271,38 @@ impl SecurityEngine {
         aes::do_ecb_operation(engine, false, slot, source, destination, mode)
     }
 
+    /// Encrypts data from `source` to `destination` using AES-CBC.
+    pub fn aes_cbc_encrypt(
+        &self,
+        slot: u32,
+        source: &[u8],
+        destination: &mut [u8],
+        iv: &[u8; constants::aes::BLOCK_SIZE],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(source.len() % constants::aes::KEY_SLOT_COUNT, 0);
+
+        let engine = unsafe { &*self.registers };
+        aes::do_cbc_operation(engine, true, slot, source, destination, iv, mode)
+    }
+
+    /// Decrypts data from `source` to `destination` using AES-CBC.
+    pub fn aes_cbc_decrypt(
+        &self,
+        slot: u32,
+        source: &[u8],
+        destination: &mut [u8],
+        iv: &[u8; constants::aes::BLOCK_SIZE],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(source.len() % constants::aes::KEY_SLOT_COUNT, 0);
+
+        let engine = unsafe { &*self.registers };
+        aes::do_cbc_operation(engine, false, slot, source, destination, iv, mode)
+    }
+
     /// Initializes the RNG (Random Numer Generator).
     ///
     /// Calling this function is a prerequisite for all functions that use random

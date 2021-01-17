@@ -1,3 +1,4 @@
+use byteorder::{ByteOrder, LE};
 use register::FieldValue;
 
 use crate::se::constants::*;
@@ -46,7 +47,6 @@ pub enum Mode {
 }
 
 impl Mode {
-    #[allow(dead_code)]
     pub(crate) fn get_field_value(self) -> FieldValue<u32, SE_CONFIG_0::Register> {
         match self {
             Mode::Aes128 => SE_CONFIG_0::ENC_MODE::Aes128 + SE_CONFIG_0::DEC_MODE::Aes128,
@@ -120,6 +120,23 @@ pub fn clear_key_iv(registers: &Registers, slot: u32) {
     }
 }
 
+fn set_iv(registers: &Registers, slot: u32, iv: &[u8]) {
+    assert_eq!(iv.len() % aes::BLOCK_SIZE >> 2, 0);
+
+    for (i, c) in iv.chunks(aes::BLOCK_SIZE >> 2).enumerate() {
+        // Select the next original IV word in the keyslot.
+        registers.SE_CRYPTO_KEYTABLE_ADDR_0.write(
+            SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEY_SLOT.val(slot)
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEYIV_SEL::Iv
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_IV_SEL::OriginalIv
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEY_WORD.val(i as u32),
+        );
+
+        // Fill the original IV word in the keyslot.
+        registers.SE_CRYPTO_KEYTABLE_DATA_0.set(LE::read_u32(c));
+    }
+}
+
 pub fn do_ecb_operation(
     registers: &Registers,
     encrypt: bool,
@@ -176,4 +193,38 @@ pub fn do_ecb_operation(
     destination[..].copy_from_slice(&output[..]);
 
     Ok(())
+}
+
+pub fn do_cbc_operation(
+    registers: &Registers,
+    encrypt: bool,
+    slot: u32,
+    source: &[u8],
+    destination: &mut [u8],
+    iv: &[u8; aes::BLOCK_SIZE],
+    mode: Mode,
+) -> Result<(), OperationError> {
+    // Determine the amount of blocks to generate.
+    let nblocks = source.len() / aes::BLOCK_SIZE;
+    let aligned_size = nblocks * aes::BLOCK_SIZE;
+
+    // Configure an AES-CBC operation to memory.
+    init_aes!(registers, encrypt, Memory);
+    if encrypt {
+        configure_aes_cbc_encrypt(registers, slot, true);
+    } else {
+        configure_aes_cbc_decrypt(registers, slot, false);
+    }
+    registers.SE_CONFIG_0.modify(mode.get_field_value());
+
+    // Set the IV.
+    set_iv(registers, slot, &iv[..]);
+
+    // Load in the number of blocks to process.
+    registers.SE_CRYPTO_LAST_BLOCK_0.set((nblocks - 1) as u32);
+
+    // Prepare the linked lists and kick off the operation.
+    let source_ll = LinkedList::from(&source[..aligned_size]);
+    let mut destination_ll = LinkedList::from(&destination[..]);
+    start_normal_operation(registers, &source_ll, &mut destination_ll)
 }

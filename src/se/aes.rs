@@ -1,5 +1,18 @@
 use crate::se::registers::*;
 
+macro_rules! init_aes {
+    ($registers:ident, $encrypt:expr, $dest:ident) => {
+        // Configure the hardware to perform an AES operation.
+        $registers.SE_CONFIG_0.write(
+            SE_CONFIG_0::ENC_MODE::Aes128
+                + SE_CONFIG_0::DEC_MODE::Aes128
+                + SE_CONFIG_0::ENC_ALG.val($encrypt as u32)
+                + SE_CONFIG_0::DEC_ALG.val((!$encrypt) as u32)
+                + SE_CONFIG_0::DESTINATION::$dest,
+        );
+    };
+}
+
 macro_rules! aes_config {
     ($registers:ident, $slot:expr, $encrypt:expr, $cntn:ident, $vctram:ident, $input:ident, $xor:ident, $hash:ident) => {
         $registers.SE_CRYPTO_CONFIG_0.write(

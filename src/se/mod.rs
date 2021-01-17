@@ -224,6 +224,24 @@ impl SecurityEngine {
         );
     }
 
+    /// Clears the data out of a given AES keyslot.
+    pub fn clear_aes_keyslot(&self, slot: u32) {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+
+        let engine = unsafe { &*self.registers };
+        aes::clear_keyslot(engine, slot)
+    }
+
+    /// Clears the IV out of a given AES keyslot.
+    ///
+    /// This affects both, the original and the updated IV values.
+    pub fn clear_aes_key_iv(&self, slot: u32) {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+
+        let engine = unsafe { &*self.registers };
+        aes::clear_key_iv(engine, slot)
+    }
+
     /// Initializes the RNG (Random Numer Generator).
     ///
     /// Calling this function is a prerequisite for all functions that use random

@@ -104,6 +104,7 @@ mod utils;
 use ::core::marker::Sync;
 
 pub use self::core::*;
+pub use aes::Mode as AesMode;
 pub use registers::*;
 
 /// Representation of the Security Engine used for cryptographic operations.
@@ -242,6 +243,34 @@ impl SecurityEngine {
         aes::clear_key_iv(engine, slot)
     }
 
+    /// Encrypts a block of data from `source` to `destination` using AES-ECB.
+    pub fn aes_ecb_encrypt(
+        &self,
+        slot: u32,
+        source: &[u8; constants::aes::BLOCK_SIZE],
+        destination: &mut [u8; constants::aes::BLOCK_SIZE],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+
+        let engine = unsafe { &*self.registers };
+        aes::do_ecb_operation(engine, true, slot, source, destination, mode)
+    }
+
+    /// Decrypts a block of data from `source` to `destination` using AES-ECB.
+    pub fn aes_ecb_decrypt(
+        &self,
+        slot: u32,
+        source: &[u8; constants::aes::BLOCK_SIZE],
+        destination: &mut [u8; constants::aes::BLOCK_SIZE],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+
+        let engine = unsafe { &*self.registers };
+        aes::do_ecb_operation(engine, false, slot, source, destination, mode)
+    }
+
     /// Initializes the RNG (Random Numer Generator).
     ///
     /// Calling this function is a prerequisite for all functions that use random
@@ -319,9 +348,7 @@ impl SecurityEngine {
 
         // Construct a cache padding for output data and make it coherent.
         let pad = {
-            let pad = utils::CachePad::<u8, { constants::aes::BLOCK_SIZE }>::new(
-                [0; constants::aes::BLOCK_SIZE],
-            );
+            let pad = utils::CachePad::new([0u8; constants::aes::BLOCK_SIZE]);
             if destination.len() > 0 {
                 utils::flush_data_cache_line(&pad as *const _ as usize);
                 barrier::dsb(barrier::ISH);

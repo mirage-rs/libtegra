@@ -1,4 +1,7 @@
+use register::FieldValue;
+
 use crate::se::constants::*;
+use crate::se::core::*;
 use crate::se::registers::*;
 
 macro_rules! init_aes {
@@ -29,6 +32,28 @@ macro_rules! aes_config {
                 + SE_CRYPTO_CONFIG_0::HASH_ENB::$hash,
         );
     };
+}
+
+/// Representation of the different modes of operation for the AES algorithm
+/// for use in Security Engine operations.
+pub enum Mode {
+    /// 128-bit AES operation.
+    Aes128,
+    /// 192-bit AES operation.
+    Aes192,
+    /// 256-bit AES operation.
+    Aes256,
+}
+
+impl Mode {
+    #[allow(dead_code)]
+    pub(crate) fn get_field_value(self) -> FieldValue<u32, SE_CONFIG_0::Register> {
+        match self {
+            Mode::Aes128 => SE_CONFIG_0::ENC_MODE::Aes128 + SE_CONFIG_0::DEC_MODE::Aes128,
+            Mode::Aes192 => SE_CONFIG_0::ENC_MODE::Aes192 + SE_CONFIG_0::DEC_MODE::Aes192,
+            Mode::Aes256 => SE_CONFIG_0::ENC_MODE::Aes256 + SE_CONFIG_0::DEC_MODE::Aes256,
+        }
+    }
 }
 
 #[inline(always)]
@@ -93,4 +118,62 @@ pub fn clear_key_iv(registers: &Registers, slot: u32) {
         // Zero out the updated IV word in the keyslot.
         registers.SE_CRYPTO_KEYTABLE_DATA_0.set(0);
     }
+}
+
+pub fn do_ecb_operation(
+    registers: &Registers,
+    encrypt: bool,
+    slot: u32,
+    source: &[u8; aes::BLOCK_SIZE],
+    destination: &mut [u8; aes::BLOCK_SIZE],
+    mode: Mode,
+) -> Result<(), OperationError> {
+    #[cfg(target_arch = "aarch64")]
+    use crate::se::utils::*;
+
+    // Configure an AES-ECB operation to memory.
+    init_aes!(registers, encrypt, Memory);
+    configure_aes_ecb(registers, slot, encrypt);
+    if encrypt {
+        registers.SE_CONFIG_0.modify(mode.get_field_value());
+    }
+
+    // Configure an AES operation on a single block.
+    registers.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+    // On AArch64, we need to cache-align the source buffer to ensure data cache coherency.
+    #[allow(unreachable_patterns)]
+    let source = match () {
+        #[cfg(target_arch = "aarch64")]
+        () => CachePad::from(&source[..]).into_inner(),
+        () => *source,
+    };
+
+    // On AArch64, we need to cache-align the output buffer to ensure data cache coherency.
+    #[allow(unreachable_patterns)]
+    let output = match () {
+        #[cfg(target_arch = "aarch64")]
+        () => CachePad::new([0u8; aes::BLOCK_SIZE]).into_inner(),
+        () => [0; aes::BLOCK_SIZE],
+    };
+
+    // Prepare the linked lists and kick off the operation.
+    let source_ll = LinkedList::from(&source[..]);
+    let mut destination_ll = LinkedList::from(&output[..]);
+    start_normal_operation(registers, &source_ll, &mut destination_ll)?;
+
+    // On AArch64, ensure data cache coherency to get the correct output data.
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        use cortex_a::barrier;
+
+        barrier::dsb(barrier::ISH);
+        flush_data_cache_line(source.as_ptr() as usize);
+        barrier::dsb(barrier::ISH);
+    }
+
+    // Copy the output back into the destination buffer.
+    destination[..].copy_from_slice(&output[..]);
+
+    Ok(())
 }

@@ -63,8 +63,8 @@ pub const DISPLAY_A: u32 = 0x5420_0000;
 /// Start of the Display B register block.
 pub const DISPLAY_B: u32 = 0x5424_0000;
 
-/// Start of the DSI register block.
-pub const DSI: u32 = 0x5430_0000;
+/// Start of the DSIA register block.
+pub const DSIA: u32 = 0x5430_0000;
 
 /// Start of the VIC register block.
 pub const VIC: u32 = 0x5434_0000;

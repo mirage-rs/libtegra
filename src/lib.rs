@@ -13,6 +13,7 @@ pub mod apb;
 pub mod atomic;
 pub mod bpmp;
 pub mod car;
+pub mod dsi;
 pub mod flow;
 pub mod fuse;
 pub mod gpio;

@@ -64,6 +64,10 @@
 //! The AES APIs of the Security Engine expose the APIs to operate with various AES block and
 //! ciphermodes and manage access and contents of AES keyslots.
 //!
+//! - [`SecurityEngine::fill_aes_keyslot`]
+//!
+//! - [`SecurityEngine::get_aes_key`]
+//!
 //! - [`SecurityEngine::clear_aes_keyslot`]
 //!
 //! - [`SecurityEngine::clear_aes_key_iv`]
@@ -102,6 +106,8 @@
 //! [`SecurityEngine::generate_random`]: struct.SecurityEngine.html#method.generate_random
 //! [`SecurityEngine::set_random_key`]: struct.SecurityEngine.html#method.set_random_key
 //! [`SecurityEngine::generate_srk`]: struct.SecurityEngine.html#method.generate_srk
+//! [`SecurityEngine::fill_aes_keyslot`]: struct.SecurityEngine.html#method.fill_aes_keyslot
+//! [`SecurityEngine::get_aes_key`]: struct.SecurityEngine.html#method.get_aes_key
 //! [`SecurityEngine::clear_aes_keyslot`]: struct.SecurityEngine.html#method.clear_aes_keyslot
 //! [`SecurityEngine::clear_aes_key_iv`]: struct.SecurityEngine.html#method.clear_aes_key_iv
 //! [`SecurityEngine::aes_cmac`]: struct.SecurityEngine.html#method.aes_cmac
@@ -255,6 +261,29 @@ impl SecurityEngine {
                 + SE_SE_SECURITY_0::PERKEY_SECURITY::Secure
                 + SE_SE_SECURITY_0::SOFT_SECURITY::Secure,
         );
+    }
+
+    /// Fills a given keyslot with the supplied AES key.
+    ///
+    /// This must be done in advance and that key will be used for
+    /// AES operations until the keyslot gets cleared or overridden.
+    pub fn fill_aes_keyslot(&self, slot: u32, key: &[u8]) {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
+        assert!(key.len() <= constants::aes::MAX_KEY_SIZE);
+
+        let engine = unsafe { &*self.registers };
+        aes::set_key(engine, slot, key)
+    }
+
+    /// Copies a previously loaded AES key out of a given keyslot.
+    pub fn get_aes_key(&self, slot: u32, key: &mut [u8]) {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
+        assert!(key.len() <= constants::aes::MAX_KEY_SIZE);
+
+        let engine = unsafe { &*self.registers };
+        aes::get_key(engine, slot, key)
     }
 
     /// Clears the data out of a given AES keyslot.

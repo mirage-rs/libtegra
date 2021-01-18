@@ -95,6 +95,34 @@ pub fn clear_keyslot(registers: &Registers, slot: u32) {
     }
 }
 
+pub fn set_key(registers: &Registers, slot: u32, key: &[u8]) {
+    for (i, c) in key.chunks(aes::BLOCK_SIZE >> 2).enumerate() {
+        // Select the next word in the keyslot.
+        registers.SE_CRYPTO_KEYTABLE_ADDR_0.write(
+            SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEY_SLOT.val(slot)
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEYIV_SEL::Key
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_WORD.val(i as u32),
+        );
+
+        // Fill the word in the keyslot.
+        registers.SE_CRYPTO_KEYTABLE_DATA_0.set(LE::read_u32(c));
+    }
+}
+
+pub fn get_key(registers: &Registers, slot: u32, key: &mut [u8]) {
+    for (i, c) in key.chunks_mut(aes::BLOCK_SIZE >> 2).enumerate() {
+        // Select the next word in the keyslot.
+        registers.SE_CRYPTO_KEYTABLE_ADDR_0.write(
+            SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEY_SLOT.val(slot)
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_KEYIV_SEL::Key
+                + SE_CRYPTO_KEYTABLE_ADDR_0::KEYIV_WORD.val(i as u32),
+        );
+
+        // Read the word from the keyslot.
+        LE::write_u32(c, registers.SE_CRYPTO_KEYTABLE_DATA_0.get());
+    }
+}
+
 pub fn clear_key_iv(registers: &Registers, slot: u32) {
     for i in 0..aes::BLOCK_SIZE >> 2 {
         // Select the next original IV word in the keyslot.

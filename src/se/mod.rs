@@ -337,6 +337,7 @@ impl SecurityEngine {
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
         assert_eq!(source.len() % constants::aes::KEY_SLOT_COUNT, 0);
+        assert_eq!(source.len(), destination.len());
         if source.is_empty() {
             return Ok(());
         }
@@ -356,6 +357,7 @@ impl SecurityEngine {
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
         assert_eq!(source.len() % constants::aes::KEY_SLOT_COUNT, 0);
+        assert_eq!(source.len(), destination.len());
         if source.is_empty() {
             return Ok(());
         }
@@ -374,6 +376,7 @@ impl SecurityEngine {
         mode: AesMode,
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(source.len(), destination.len());
         if source.is_empty() {
             return Ok(());
         }
@@ -392,6 +395,7 @@ impl SecurityEngine {
         mode: AesMode,
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(source.len(), destination.len());
         if source.is_empty() {
             return Ok(());
         }

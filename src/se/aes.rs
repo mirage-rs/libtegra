@@ -138,6 +138,13 @@ fn set_iv(registers: &Registers, slot: u32, iv: &[u8]) {
     }
 }
 
+fn set_counter(registers: &Registers, counter: &[u8; aes::BLOCK_SIZE]) {
+    // Copy the given counter words to the linear CTR registers.
+    for (i, c) in counter.chunks(aes::BLOCK_SIZE >> 2).enumerate() {
+        registers.SE_CRYPTO_LINEAR_CTR_0[i].set(LE::read_u32(c));
+    }
+}
+
 fn expand_key(subkey: &mut [u8]) {
     // Shift everything left one bit.
     let mut previous = 0;
@@ -344,4 +351,93 @@ pub fn do_cbc_operation(
     let source_ll = LinkedList::from(&source[..aligned_size]);
     let mut destination_ll = LinkedList::from(&destination[..]);
     start_normal_operation(registers, &source_ll, &mut destination_ll)
+}
+
+pub fn do_ctr_operation(
+    registers: &Registers,
+    encrypt: bool,
+    slot: u32,
+    source: &[u8],
+    destination: &mut [u8],
+    iv: &[u8; aes::BLOCK_SIZE],
+    mode: Mode,
+) -> Result<(), OperationError> {
+    #[cfg(target_arch = "aarch64")]
+    use cortex_a::barrier;
+
+    // Determine the amount of blocks to generate.
+    let nblocks = source.len() / aes::BLOCK_SIZE;
+    let aligned_size = nblocks * aes::BLOCK_SIZE;
+    let unaligned_size = source.len() - aligned_size;
+
+    // Nintendo does it. I have no idea why this needs to happen.
+    registers.SE_SPARE_0.set(1);
+
+    // Configure an AES-CTR operation to memory.
+    init_aes!(registers, encrypt, Memory);
+    configure_aes_ctr(registers, slot, encrypt);
+    registers.SE_CONFIG_0.modify(mode.get_field_value());
+
+    // Initialize the counter.
+    set_counter(registers, iv);
+
+    // Process all aligned blocks first.
+    if aligned_size > 0 {
+        // Load in the number of blocks to process.
+        registers.SE_CRYPTO_LAST_BLOCK_0.set((nblocks - 1) as u32);
+
+        // Prepare the linked lists and kick off the operation.
+        let source_ll = LinkedList::from(&source[..aligned_size]);
+        let mut destination_ll = LinkedList::from(&destination[..aligned_size]);
+        start_normal_operation(registers, &source_ll, &mut destination_ll)?;
+
+        // On AArch64, synchronize the data between the SE and the CPU.
+        #[cfg(target_arch = "aarch64")]
+        unsafe {
+            barrier::dsb(barrier::ISH);
+        }
+    }
+
+    // Process the last unaligned block, if necessary.
+    if unaligned_size > 0 {
+        #[cfg(target_arch = "aarch64")]
+        use crate::se::utils;
+
+        // On AArch64, we need to cache-align the buffers to ensure data coherency.
+        #[allow(unreachable_patterns)]
+        let block = match () {
+            #[cfg(target_arch = "aarch64")]
+            () => utils::CachePad::from(&source[aligned_size..]).into_inner(),
+            () => {
+                let mut data = [0; aes::BLOCK_SIZE];
+                data.copy_from_slice(&source[aligned_size..]);
+
+                data
+            }
+        };
+        #[allow(unreachable_patterns)]
+        let output = match () {
+            #[cfg(target_arch = "aarch64")]
+            () => utils::CachePad::from(&destination[aligned_size..]).into_inner(),
+            () => [0; aes::BLOCK_SIZE],
+        };
+
+        // Prepare the linked lists and kick off the operation.
+        let source_ll = LinkedList::from(&block[..]);
+        let mut destination_ll = LinkedList::from(&output[..]);
+        start_normal_operation(registers, &source_ll, &mut destination_ll)?;
+
+        // Ensure data cache coherency to get correct output data.
+        #[cfg(target_arch = "aarch64")]
+        unsafe {
+            barrier::dsb(barrier::ISH);
+            utils::flush_data_cache_line(output.as_ptr() as usize);
+            barrier::dsb(barrier::ISH);
+        }
+
+        // Copy the remaining bytes back into the output buffer.
+        destination[aligned_size..].copy_from_slice(&output[..unaligned_size]);
+    }
+
+    Ok(())
 }

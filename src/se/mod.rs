@@ -78,6 +78,10 @@
 //!
 //! - [`SecurityEngine::aes_cbc_decrypt`]
 //!
+//! - [`SecurityEngine::aes_ctr_encrypt`]
+//!
+//! - [`SecurityEngine::aes_ctr_decrypt`]
+//!
 //! ## Hashing
 //!
 //! The Security Engine supports various hashing algorithms from the SHA1 and SHA2 family
@@ -105,6 +109,8 @@
 //! [`SecurityEngine::aes_ecb_decrypt`]: struct.SecurityEngine.html#method.aes_ecb_decrypt
 //! [`SecurityEngine::aes_cbc_encrypt`]: struct.SecurityEngine.html#method.aes_cbc_encrypt
 //! [`SecurityEngine::aes_cbc_decrypt`]: struct.SecurityEngine.html#method.aes_cbc_decrypt
+//! [`SecurityEngine::aes_ctr_encrypt`]: struct.SecurityEngine.html#method.aes_ctr_encrypt
+//! [`SecurityEngine::aes_ctr_decrypt`]: struct.SecurityEngine.html#method.aes_ctr_decrypt
 //! [`SecurityEngine::calculate_sha1`]: struct.SecurityEngine.html#method.calculate_sha1
 //! [`SecurityEngine::calculate_sha224`]: struct.SecurityEngine.html#method.calculate_sha224
 //! [`SecurityEngine::calculate_sha256`]: struct.SecurityEngine.html#method.calculate_sha256
@@ -278,6 +284,9 @@ impl SecurityEngine {
         mode: AesMode,
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        if source.is_empty() {
+            return Ok(());
+        }
 
         let engine = unsafe { &*self.registers };
         aes::do_cmac_operation(engine, slot, source, destination, mode)
@@ -292,6 +301,9 @@ impl SecurityEngine {
         mode: AesMode,
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        if source.is_empty() {
+            return Ok(());
+        }
 
         let engine = unsafe { &*self.registers };
         aes::do_ecb_operation(engine, true, slot, source, destination, mode)
@@ -306,6 +318,9 @@ impl SecurityEngine {
         mode: AesMode,
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        if source.is_empty() {
+            return Ok(());
+        }
 
         let engine = unsafe { &*self.registers };
         aes::do_ecb_operation(engine, false, slot, source, destination, mode)
@@ -322,6 +337,9 @@ impl SecurityEngine {
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
         assert_eq!(source.len() % constants::aes::KEY_SLOT_COUNT, 0);
+        if source.is_empty() {
+            return Ok(());
+        }
 
         let engine = unsafe { &*self.registers };
         aes::do_cbc_operation(engine, true, slot, source, destination, iv, mode)
@@ -338,9 +356,48 @@ impl SecurityEngine {
     ) -> Result<(), OperationError> {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
         assert_eq!(source.len() % constants::aes::KEY_SLOT_COUNT, 0);
+        if source.is_empty() {
+            return Ok(());
+        }
 
         let engine = unsafe { &*self.registers };
         aes::do_cbc_operation(engine, false, slot, source, destination, iv, mode)
+    }
+
+    /// Encrypts data from `source` to `destination` using AES-CTR.
+    pub fn aes_ctr_encrypt(
+        &self,
+        slot: u32,
+        source: &[u8],
+        destination: &mut [u8],
+        iv: &[u8; constants::aes::BLOCK_SIZE],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        if source.is_empty() {
+            return Ok(());
+        }
+
+        let engine = unsafe { &*self.registers };
+        aes::do_ctr_operation(engine, true, slot, source, destination, iv, mode)
+    }
+
+    /// Decrypts data from `source` to `destination` using AES-CTR.
+    pub fn aes_ctr_decrypt(
+        &self,
+        slot: u32,
+        source: &[u8],
+        destination: &mut [u8],
+        iv: &[u8; constants::aes::BLOCK_SIZE],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+        if source.is_empty() {
+            return Ok(());
+        }
+
+        let engine = unsafe { &*self.registers };
+        aes::do_ctr_operation(engine, false, slot, source, destination, iv, mode)
     }
 
     /// Initializes the RNG (Random Numer Generator).

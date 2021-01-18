@@ -68,6 +68,8 @@
 //!
 //! - [`SecurityEngine::clear_aes_key_iv`]
 //!
+//! - [`SecurityEngine::aes_cmac`]
+//!
 //! - [`SecurityEngine::aes_ecb_encrypt`]
 //!
 //! - [`SecurityEngine::aes_ecb_decrypt`]
@@ -98,6 +100,7 @@
 //! [`SecurityEngine::generate_srk`]: struct.SecurityEngine.html#method.generate_srk
 //! [`SecurityEngine::clear_aes_keyslot`]: struct.SecurityEngine.html#method.clear_aes_keyslot
 //! [`SecurityEngine::clear_aes_key_iv`]: struct.SecurityEngine.html#method.clear_aes_key_iv
+//! [`SecurityEngine::aes_cmac`]: struct.SecurityEngine.html#method.aes_cmac
 //! [`SecurityEngine::aes_ecb_encrypt`]: struct.SecurityEngine.html#method.aes_ecb_encrypt
 //! [`SecurityEngine::aes_ecb_decrypt`]: struct.SecurityEngine.html#method.aes_ecb_decrypt
 //! [`SecurityEngine::aes_cbc_encrypt`]: struct.SecurityEngine.html#method.aes_cbc_encrypt
@@ -264,6 +267,20 @@ impl SecurityEngine {
 
         let engine = unsafe { &*self.registers };
         aes::clear_key_iv(engine, slot)
+    }
+
+    /// Calculates an AES-CMAC from `source` to `destination`.
+    pub fn aes_cmac(
+        &self,
+        slot: u32,
+        source: &[u8],
+        destination: &mut [u8],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
+
+        let engine = unsafe { &*self.registers };
+        aes::do_cmac_operation(engine, slot, source, destination, mode)
     }
 
     /// Encrypts a block of data from `source` to `destination` using AES-ECB.

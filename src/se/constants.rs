@@ -13,6 +13,8 @@ pub mod opcodes {
 
 /// Data sizes related to AES.
 pub mod aes {
+    pub const RB: u8 = 0x87;
+
     pub const KEY_SLOT_PART_COUNT: usize = 2;
     pub const KEY_SLOT_COUNT: usize = 16;
 

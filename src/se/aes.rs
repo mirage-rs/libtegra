@@ -37,6 +37,7 @@ macro_rules! aes_config {
 
 /// Representation of the different modes of operation for the AES algorithm
 /// for use in Security Engine operations.
+#[derive(Clone, Copy, Debug)]
 pub enum Mode {
     /// 128-bit AES operation.
     Aes128,
@@ -135,6 +136,122 @@ fn set_iv(registers: &Registers, slot: u32, iv: &[u8]) {
         // Fill the original IV word in the keyslot.
         registers.SE_CRYPTO_KEYTABLE_DATA_0.set(LE::read_u32(c));
     }
+}
+
+fn expand_key(subkey: &mut [u8]) {
+    // Shift everything left one bit.
+    let mut previous = 0;
+    for i in (0..aes::BLOCK_SIZE).rev() {
+        let lsb = subkey[i] >> 7;
+        subkey[i] = (subkey[i] << 1) | previous;
+        previous = lsb;
+    }
+
+    // XOR with Rb, if necessary.
+    if previous != 0 {
+        subkey[aes::BLOCK_SIZE - 1] ^= aes::RB;
+    }
+}
+
+fn read_cmac_result(registers: &Registers, output: &mut [u8]) {
+    for i in 0..output.len() >> 2 {
+        let word = registers.SE_HASH_RESULT_0[i].get();
+        LE::write_u32(&mut output[i << 2..], word);
+    }
+}
+
+pub fn do_cmac_operation(
+    registers: &Registers,
+    slot: u32,
+    source: &[u8],
+    destination: &mut [u8],
+    mode: Mode,
+) -> Result<(), OperationError> {
+    // Determine the amount of blocks to generate.
+    let nblocks = source.len() / aes::BLOCK_SIZE;
+    let aligned_size = nblocks * aes::BLOCK_SIZE;
+    let unaligned_size = source.len() - aligned_size;
+
+    // Create the AES subkey for CMAC.
+    let subkey = {
+        // Encrypt a block of zeroes using AES-ECB.
+        let mut key = [0; aes::BLOCK_SIZE];
+        do_ecb_operation(registers, true, slot, &[0; aes::BLOCK_SIZE], &mut key, mode)?;
+
+        // Expand the key into a subkey and prepare for last block, if necessary.
+        expand_key(&mut key);
+        if unaligned_size != aes::BLOCK_SIZE {
+            expand_key(&mut key);
+        }
+
+        key
+    };
+
+    // Configure an AES-CMAC operation to hashreg.
+    init_aes!(registers, true, HashReg);
+    configure_aes_cmac(registers, slot, true);
+    registers.SE_CONFIG_0.modify(mode.get_field_value());
+
+    // Set the IV to zeroes.
+    set_iv(registers, slot, &[0; aes::BLOCK_SIZE]);
+
+    // Process all aligned blocks first.
+    if aligned_size > 0 {
+        // Load in the number of blocks to generate.
+        registers.SE_CRYPTO_LAST_BLOCK_0.set((nblocks - 1) as u32);
+
+        // Prepare the linked lists and kick off the operation.
+        let source_ll = LinkedList::from(&source[..aligned_size]);
+        let mut destination_ll = LinkedList::default();
+        start_normal_operation(registers, &source_ll, &mut destination_ll)?;
+
+        // Select the updated IV value after that.
+        registers
+            .SE_CRYPTO_CONFIG_0
+            .modify(SE_CRYPTO_CONFIG_0::IV_SELECT::Updated);
+    }
+
+    // Process the last block.
+    {
+        // Configure an operation on a single block.
+        registers.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+        // Prepare the last block.
+        let mut last_block = {
+            let mut block = [0; aes::BLOCK_SIZE];
+            if unaligned_size < aes::BLOCK_SIZE {
+                block[unaligned_size] = 0x80;
+            }
+            block.copy_from_slice(&source[aligned_size..]);
+
+            block
+        };
+
+        // XOR the block with the subkey.
+        for (x, y) in last_block.iter_mut().zip(subkey.iter().cycle()) {
+            *x ^= *y;
+        }
+
+        // On AArch64, ensure data cache coherency to get the correct output data.
+        #[cfg(target_arch = "aarch64")]
+        unsafe {
+            use crate::se::utils;
+            use cortex_a::barrier;
+
+            utils::flush_data_cache_line(last_block.as_ptr() as usize);
+            barrier::dsb(barrier::ISH);
+        }
+
+        // Prepare the linked lists and kick off the operation.
+        let source_ll = LinkedList::from(&last_block[..]);
+        let mut destination_ll = LinkedList::default();
+        start_normal_operation(registers, &source_ll, &mut destination_ll)?;
+    }
+
+    // Copy back the output into the destination buffer.
+    read_cmac_result(registers, destination);
+
+    Ok(())
 }
 
 pub fn do_ecb_operation(

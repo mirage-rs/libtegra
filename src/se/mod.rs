@@ -61,8 +61,11 @@
 //!
 //! ## AES
 //!
-//! The AES APIs of the Security Engine expose the APIs to operate with various AES block and
-//! ciphermodes and manage access and contents of AES keyslots.
+//! The AES APIs of the Security Engine expose the primitives to do cryptographic operations
+//! with various block and cipher modes. These operations source their keys from a secure
+//! hardware key table cache, whose contents can be individually manipulated. Further, access
+//! can be restricted under a specific set of circumstances to provide a secure operating
+//! environment without leaking keys to the outside.
 //!
 //! - [`SecurityEngine::fill_aes_keyslot`]
 //!

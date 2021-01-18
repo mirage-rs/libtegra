@@ -33,8 +33,9 @@ mod registers;
 use crate::car::Clock;
 pub use crate::kfuse::registers::*;
 
-/// Maximum word length of a KFUSE address.
-pub const MAX_WORD_LENGTH: usize = 144;
+/// The size of the buffer in words required for reading all encrypted HDMI keys from
+/// the KFUSE.
+pub const KFUSE_KEY_BUFFER_SIZE: usize = 576 >> 2;
 
 /// Waits until KFUSE is ready to be used.
 ///
@@ -60,13 +61,9 @@ pub fn wait_until_ready() -> Result<(), ()> {
 ///
 /// [`Clock`]: ../car/struct.Clock.html
 #[optimize(size)]
-pub fn read(buffer: &mut [u32]) -> Result<(), ()> {
+pub fn read(buffer: &mut [u32; KFUSE_KEY_BUFFER_SIZE]) -> Result<(), ()> {
     let kfuse = unsafe { &*REGISTERS };
     let mut result = Err(());
-
-    if buffer.len() > MAX_WORD_LENGTH {
-        return result;
-    }
 
     Clock::KFUSE.enable();
 

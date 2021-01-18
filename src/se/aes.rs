@@ -195,6 +195,43 @@ fn read_cmac_result(registers: &Registers, output: &mut [u8]) {
     }
 }
 
+pub fn set_encrypted_key(
+    registers: &Registers,
+    dest_slot: u32,
+    kek_slot: u32,
+    key: &[u8],
+    mode: Mode,
+) -> Result<(), OperationError> {
+    // Configure an AES-ECB operation to keytable.
+    init_aes!(registers, false, KeyTable);
+    configure_aes_ecb(registers, kek_slot, false);
+    registers.SE_CONFIG_0.modify(mode.get_field_value());
+
+    // Configure an AES operation on a single block.
+    registers.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+    // Select the destination keyslot.
+    registers.SE_CRYPTO_KEYTABLE_DST_0.write(
+        SE_CRYPTO_KEYTABLE_DST_0::KEY_INDEX.val(dest_slot)
+            + SE_CRYPTO_KEYTABLE_DST_0::DST_WORD_QUAD::Keys03,
+    );
+
+    // On AArch64, ensure cache coherency so the SE sees the correct data.
+    #[cfg(target_arch = "aarch64")]
+    unsafe {
+        use crate::se::utils;
+        use cortex_a::barrier;
+
+        utils::flush_data_cache_line(key.as_ptr() as usize);
+        barrier::dsb(barrier::ISH);
+    }
+
+    // Prepare the linked lists and kick off the operation.
+    let source_ll = LinkedList::from(&key[..]);
+    let mut destination_ll = LinkedList::default();
+    start_normal_operation(registers, &source_ll, &mut destination_ll)
+}
+
 pub fn do_cmac_operation(
     registers: &Registers,
     slot: u32,

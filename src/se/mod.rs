@@ -72,6 +72,8 @@
 //!
 //! - [`SecurityEngine::clear_aes_key_iv`]
 //!
+//! - [`SecurityEngine::set_encrypted_aes_key`]
+//!
 //! - [`SecurityEngine::aes_cmac`]
 //!
 //! - [`SecurityEngine::aes_ecb_encrypt`]
@@ -110,6 +112,7 @@
 //! [`SecurityEngine::get_aes_key`]: struct.SecurityEngine.html#method.get_aes_key
 //! [`SecurityEngine::clear_aes_keyslot`]: struct.SecurityEngine.html#method.clear_aes_keyslot
 //! [`SecurityEngine::clear_aes_key_iv`]: struct.SecurityEngine.html#method.clear_aes_key_iv
+//! [`SecurityEngine::set_encrypted_aes_key`]: struct.SecurityEngine.html#method.set_encrypted_aes_key
 //! [`SecurityEngine::aes_cmac`]: struct.SecurityEngine.html#method.aes_cmac
 //! [`SecurityEngine::aes_ecb_encrypt`]: struct.SecurityEngine.html#method.aes_ecb_encrypt
 //! [`SecurityEngine::aes_ecb_decrypt`]: struct.SecurityEngine.html#method.aes_ecb_decrypt
@@ -302,6 +305,27 @@ impl SecurityEngine {
 
         let engine = unsafe { &*self.registers };
         aes::clear_key_iv(engine, slot)
+    }
+
+    /// Loads an encrypted AES key into the given AES keyslot.
+    ///
+    /// The key in the AES keyslot denoted by `kek_slot` is used to
+    /// decrypt the supplied key via AES-ECB before loading it into
+    /// the desired `dest_slot` in the key table.
+    pub fn set_encrypted_aes_key(
+        &self,
+        dest_slot: u32,
+        kek_slot: u32,
+        key: &[u8],
+        mode: AesMode,
+    ) -> Result<(), OperationError> {
+        assert!(dest_slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert!(kek_slot < constants::aes::KEY_SLOT_COUNT as u32);
+        assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
+        assert!(key.len() <= constants::aes::MAX_KEY_SIZE);
+
+        let engine = unsafe { &*self.registers };
+        aes::set_encrypted_key(engine, dest_slot, kek_slot, key, mode)
     }
 
     /// Calculates an AES-CMAC from `source` to `destination`.

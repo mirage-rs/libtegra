@@ -129,9 +129,37 @@ pub fn generate_random(registers: &Registers, output: &mut [u8]) -> Result<(), O
         start_normal_operation(registers, &source_ll, &mut destination_ll)?;
     }
 
-    // On AArch64, generate a single unaligned block, if needed.
-    #[cfg(target_arch = "aarch64")]
+    // Generate a single unaligned block, if needed.
     generate_random_unaligned(registers, output, output.len() - aligned_size)?;
+
+    Ok(())
+}
+
+#[cfg(not(target_arch = "aarch64"))]
+fn generate_random_unaligned(
+    registers: &Registers,
+    output: &mut [u8],
+    fractional: usize,
+) -> Result<(), OperationError> {
+    // Opt out if no unaligned block is left.
+    if fractional == 0 {
+        return Ok(());
+    }
+
+    // Configure an RNG operation on a single block.
+    registers.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+    // Prepare a whole block for a SE operation.
+    let unaligned_start = output.len() - fractional;
+    let data = [0; aes::BLOCK_SIZE];
+
+    // Prepare the linked lists and kick off the operation.
+    let source_ll = LinkedList::default();
+    let mut destination_ll = LinkedList::from(&data[..]);
+    start_normal_operation(registers, &source_ll, &mut destination_ll)?;
+
+    // Copy the remaining bytes back into the output buffer.
+    output[unaligned_start..].copy_from_slice(&data[..fractional]);
 
     Ok(())
 }

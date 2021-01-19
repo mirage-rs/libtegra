@@ -841,6 +841,229 @@ register_bitfields! {
 
         /// HS Tx time out tally.
         HTX_TALLY OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CONTROL_0` register.
+    pub DSI_PAD_CONTROL_0 [
+        /// Enable pad pulldown for clock bit at power on.
+        DSI_PAD_PULLDN_CLK_ENAB OFFSET(24) NUMBITS(1) [],
+
+        /// Enable pad pulldown for data bits at power on.
+        DSI_PAD_PULLDN_ENAB OFFSET(16) NUMBITS(4) [],
+
+        /// Power down for clock bit, drivers, receivers and contention detectors.
+        DSI_PAD_PDIO_CLK OFFSET(8) NUMBITS(1) [],
+
+        /// Power down for data bit, drivers, receivers, and contention detectors.
+        DSI_PAD_PDIO OFFSET(0) NUMBITS(4) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CONTROL_CD_0` register.
+    pub DSI_PAD_CONTROL_CD_0 [
+        /// Level adjust on low limit of detection.
+        DSI_PAD_CDDNADJ OFFSET(16) NUMBITS(3) [],
+
+        /// Clock bit contention detector enable.
+        DSI_PAD_CD_EN_CLK OFFSET(8) NUMBITS(1) [],
+
+        /// Data bits contention detector enable.
+        DSI_PAD_CD_EN OFFSET(0) NUMBITS(4) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CD_STATUS_0` register.
+    pub DSI_PAD_CD_STATUS_0 [
+        DSI_PAD_CDN_CLK OFFSET(18) NUMBITS(1) [],
+
+        DSI_PAD_CDP_CLK OFFSET(16) NUMBITS(1) [],
+
+        DSI_PAD_CDN OFFSET(8) NUMBITS(4) [],
+
+        DSI_PAD_CDP OFFSET(0) NUMBITS(4) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_VID_MODE_CONTROL_0` register.
+    pub DSI_DSI_VID_MODE_CONTROL_0 [
+        /// Vertical blank. LINE TYPE on which the host command packet is to be
+        /// transmitted.
+        DSI_LINE_TYPE OFFSET(1) NUMBITS(3) [],
+
+        /// Whether host command packet during video mode should be enabled.
+        DSI_CMD_PKT_VID_ENABLE OFFSET(0) NUMBITS(1) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CONTROL_1_0` register.
+    pub DSI_PAD_CONTROL_1_0 [
+        /// Input delay trimmer for data bit 3. Each tap delays 40 ps.
+        DSI_PAD_OUTADJ3 OFFSET(12) NUMBITS(3) [],
+
+        /// Input delay trimmer for data bit 2. Each tap delays 40 ps.
+        DSI_PAD_OUTADJ2 OFFSET(8) NUMBITS(3) [],
+
+        /// Input delay trimmer for data bit 1. Each tap delays 40 ps.
+        DSI_PAD_OUTADJ1 OFFSET(4) NUMBITS(3) [],
+
+        /// Input delay trimmer for data bit 0. Each tap delays 40 ps.
+        DSI_PAD_OUTADJ0 OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CONTROL_2_0` register.
+    pub DSI_PAD_CONTROL_2_0 [
+        /// Pull-up slew rate adjust.
+        DSI_PAD_SLEWUPADJ OFFSET(16) NUMBITS(3) [],
+
+        /// Pull-down slew rate adjust.
+        DSI_PAD_SLEWDNADJ OFFSET(12) NUMBITS(3) [],
+
+        /// Driver pull-up impedance control.
+        DSI_PAD_LPUPADJ OFFSET(8) NUMBITS(3) [],
+
+        /// Driver pull-down impedance control.
+        DSI_PAD_LPDNADJ OFFSET(4) NUMBITS(3) [],
+
+        /// Output trimmer delay for clock bit. Each tap delays 40 ps.
+        DSI_PAD_OUTADJCLK OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CONTROL_3_0` register.
+    pub DSI_PAD_CONTROL_3_0 [
+        /// Power down regulator which supplies current to serializer/deserializer
+        /// logic.
+        DSI_PAD_PDVCLAMP OFFSET(28) NUMBITS(1) [],
+
+        /// Increase bandwidth of differential receiver.
+        DSI_PAD_BANDWD_IN OFFSET(16) NUMBITS(1) [],
+
+        /// Clock bit HS driver pull up pre-emphasis.
+        DSI_PAD_PREEMP_PD_CLK OFFSET(12) NUMBITS(2) [],
+
+        /// Clock bit HS driver pull up pre-emphasis.
+        DSI_PAD_PREEMP_PU_CLK OFFSET(8) NUMBITS(2) [],
+
+        /// Data bit HS driver pull down pre-emphasis.
+        DSI_PAD_PREEMP_PD OFFSET(4) NUMBITS(2) [],
+
+        /// Data bit HS driver pull up pre-emphasis.
+        DSI_PAD_PREEMP_PU OFFSET(0) NUMBITS(2) []
+    ],
+
+    /// Bitfields of the `DSI_PAD_CONTROL_4_0` register.
+    pub DSI_PAD_CONTROL_4_0 [
+        /// Enables BIAS and power regulators on for HS mode.
+        DSI_PAD_HS_BSO_CLK OFFSET(28) NUMBITS(1) [],
+
+        /// Enables BIAS and power regulators on for HS mode.
+        DSI_PAD_HS_BSO OFFSET(20) NUMBITS(4) [],
+
+        /// Enables BIAS and power regulators on for LP mode.
+        DSI_PAD_LP_BSO_CLK OFFSET(16) NUMBITS(1) [],
+
+        /// Enables BIAS and power regulators on for LP mode.
+        DSI_PAD_LP_BSO OFFSET(8) NUMBITS(4) [],
+
+        /// Increase bandwidth of output driver.
+        DSI_PAD_TXBW_EN OFFSET(4) NUMBITS(1) [],
+
+        /// Reverse clock polarity.
+        DSI_PAD_REV_CLK OFFSET(0) NUMBITS(1) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_GANGED_MODE_CONTROL_0` register.
+    pub DSI_DSI_GANGED_MODE_CONTROL_0 [
+        /// Enables dummy pixels on one side of the active pixel stream.
+        DUMMY_PIX_LEFT_RIGHT_SIDE OFFSET(1) NUMBITS(2) [
+            Left = 1,
+            Right = 2
+        ],
+
+        /// Whether ganged mode transactions should be enabled.
+        DSI_GANGED_MODE_EN OFFSET(0) NUMBITS(1) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_GANGED_MODE_START_0` register.
+    pub DSI_DSI_GANGED_MODE_START_0 [
+        /// Start pointer for indicating the start of partial active valid pixel
+        /// data to be latched from the valid pixels of the display controller in
+        /// Left-Right/Even-Odd ganged mode.
+        DSI_GANGED_START_POINTER OFFSET(0) NUMBITS(13) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_GANGED_MODE_SIZE_0` register.
+    pub DSI_DSI_GANGED_MODE_SIZE_0 [
+        /// Host RAW DATA byte count specifies the total number of bytes to send
+        /// when raw data control mode is enabled.
+        DSI_RAW_DATA_BYTE_COUNT OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_RAW_DATA_BYTE_COUNT_0` register.
+    pub DSI_DSI_RAW_DATA_BYTE_COUNT_0 [
+        /// Host RAW DATA byte count specifies the total number of bytes to send
+        /// when raw data control mode is enabled.
+        DSI_RAW_DATA_BYTE_COUNT OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_ULTRA_LOW_POWER_CONTROL_0` register.
+    pub DSI_DSI_ULTRA_LOW_POWER_CONTROL_0 [
+        /// Ultra Low Power.
+        DSI_ULTRA_LOW_POWER_DATA_LANE3 OFFSET(8) NUMBITS(2) [
+            Normal = 0,
+            EnterUlpm = 1,
+            ExitUlpm = 2
+        ],
+
+        /// Ultra Low Power.
+        DSI_ULTRA_LOW_POWER_DATA_LANE2 OFFSET(6) NUMBITS(2) [
+            Normal = 0,
+            EnterUlpm = 1,
+            ExitUlpm = 2
+        ],
+
+        /// Ultra Low Power.
+        DSI_ULTRA_LOW_POWER_DATA_LANE1 OFFSET(4) NUMBITS(2) [
+            Normal = 0,
+            EnterUlpm = 1,
+            ExitUlpm = 2
+        ],
+
+        /// Ultra Low Power.
+        DSI_ULTRA_LOW_POWER_DATA_LANE0 OFFSET(2) NUMBITS(2) [
+            Normal = 0,
+            EnterUlpm = 1,
+            ExitUlpm = 2
+        ],
+
+        /// Ultra Low Power.
+        DSI_ULTRA_LOW_POWER_CLK_LANE OFFSET(0) NUMBITS(2) [
+            Normal = 0,
+            EnterUlpm = 1,
+            ExitUlpm = 2
+        ]
+    ],
+
+    /// Bitfields of the `DSI_DUMMY_PIX_CNT_0` register.
+    pub DSI_DUMMY_PIX_CNT_0 [
+        /// Number of dummy pixels padded to the right of the active pixel stream.
+        RIGHT_DUMMY_PIX_CNT OFFSET(16) NUMBITS(8) [],
+
+        /// Number of dummy pixels padded to the left of the active pixel stream.
+        LEFT_DUMMY_PIX_CNT OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_DSC_CONTROL_0` register.
+    pub DSI_DSI_DSC_CONTROL_0 [
+        /// Number of compressed image packets per row between two sync events.
+        /// Multiple packets option is for Video mode only. Always program ONE
+        /// packet for Command mode.
+        NUM_COMPRESS_PKTS_PER_ROW OFFSET(16) NUMBITS(2) [],
+
+        /// Compression bit rate. Only 8/12/16 bpp compression rates are supported.
+        COMPRESS_RATE OFFSET(2) NUMBITS(10) [
+            Bpp8 = 128,
+            Bpp12 = 192,
+            Bpp16 = 256
+        ],
+
+        /// Enables compressed bitstream transport mode.
+        COMPRESS_MODE_EN OFFSET(0) NUMBITS(1) []
     ]
 }
 
@@ -903,8 +1126,32 @@ register_structs! {
         (0x110 => pub DSI_DSI_TIMEOUT_0_0: ReadWrite<u32, DSI_DSI_TIMEOUT_0_0::Register>),
         (0x114 => pub DSI_DSI_TIMEOUT_1_0: ReadWrite<u32, DSI_DSI_TIMEOUT_1_0::Register>),
         (0x118 => pub DSI_DSI_TO_TALLY_0: ReadWrite<u32, DSI_DSI_TO_TALLY_0::Register>),
-        (0x11C => @END),
+        (0x11C => _reserved5),
+        (0x12C => pub DSI_PAD_CONTROL_0: ReadWrite<u32, DSI_PAD_CONTROL_0::Register>),
+        (0x130 => pub DSI_PAD_CONTROL_CD_0: ReadWrite<u32, DSI_PAD_CONTROL_CD_0::Register>),
+        (0x134 => pub DSI_PAD_CD_STATUS_0: ReadWrite<u32, DSI_PAD_CD_STATUS_0::Register>),
+        (0x138 => pub DSI_DSI_VID_MODE_CONTROL_0: ReadWrite<u32, DSI_DSI_VID_MODE_CONTROL_0::Register>),
+        (0x13C => pub DSI_PAD_CONTROL_1_0: ReadWrite<u32, DSI_PAD_CONTROL_1_0::Register>),
+        (0x140 => pub DSI_PAD_CONTROL_2_0: ReadWrite<u32, DSI_PAD_CONTROL_2_0::Register>),
+        (0x144 => pub DSI_PAD_CONTROL_3_0: ReadWrite<u32, DSI_PAD_CONTROL_3_0::Register>),
+        (0x148 => pub DSI_PAD_CONTROL_4_0: ReadWrite<u32, DSI_PAD_CONTROL_4_0::Register>),
+        (0x14C => pub DSI_DSI_GANGED_MODE_CONTROL_0: ReadWrite<u32, DSI_DSI_GANGED_MODE_CONTROL_0::Register>),
+        (0x150 => pub DSI_DSI_GANGED_MODE_START_0: ReadWrite<u32, DSI_DSI_GANGED_MODE_START_0::Register>),
+        (0x154 => pub DSI_DSI_GANGED_MODE_SIZE_0: ReadWrite<u32, DSI_DSI_GANGED_MODE_SIZE_0::Register>),
+        (0x158 => pub DSI_DSI_RAW_DATA_BYTE_COUNT_0: ReadWrite<u32, DSI_DSI_RAW_DATA_BYTE_COUNT_0::Register>),
+        (0x15C => pub DSI_DSI_ULTRA_LOW_POWER_CONTROL_0: ReadWrite<u32, DSI_DSI_ULTRA_LOW_POWER_CONTROL_0::Register>),
+        (0x160 => pub DSI_DSI_INIT_SEQ_DATA_8_0: ReadWrite<u32>),
+        (0x164 => pub DSI_DSI_INIT_SEQ_DATA_9_0: ReadWrite<u32>),
+        (0x168 => pub DSI_DSI_INIT_SEQ_DATA_10_0: ReadWrite<u32>),
+        (0x16C => pub DSI_DSI_INIT_SEQ_DATA_11_0: ReadWrite<u32>),
+        (0x170 => pub DSI_DSI_INIT_SEQ_DATA_12_0: ReadWrite<u32>),
+        (0x174 => pub DSI_DSI_INIT_SEQ_DATA_13_0: ReadWrite<u32>),
+        (0x178 => pub DSI_DSI_INIT_SEQ_DATA_14_0: ReadWrite<u32>),
+        (0x17C => pub DSI_DSI_INIT_SEQ_DATA_15_0: ReadWrite<u32>),
+        (0x180 => pub DSI_DUMMY_PIX_CNT_0: ReadWrite<u32>),
+        (0x184 => pub DSI_DSI_DSC_CONTROL_0: ReadWrite<u32>),
+        (0x188 => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0x11C]);
+assert_eq_size!(Registers, [u8; 0x188]);

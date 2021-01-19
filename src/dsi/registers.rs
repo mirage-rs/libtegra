@@ -306,6 +306,16 @@ register_bitfields! {
 
         /// Count of how many data words are left in the Host Read Data Return FIFO.
         RD_FIFO_COUNT OFFSET(0) NUMBITS(5) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_INIT_SEQ_CONTROL_0` register.
+    pub DSI_DSI_INIT_SEQ_CONTROL_0 [
+        /// Frame Initialization Sequence Byte Count. This specifies the number of
+        /// frame initialization sequence cycles to send.
+        DSI_FRAME_INIT_BYTE_COUNT OFFSET(8) NUMBITS(7) [],
+
+        /// Send Initialization Sequence.
+        DSI_SEND_INIT_SEQUENCE OFFSET(0) NUMBITS(1) []
     ]
 }
 
@@ -316,7 +326,7 @@ register_structs! {
         (0x00 => pub DSI_INCR_SYNCPT_0: ReadWrite<u32, DSI_INCR_SYNCPT_0::Register>),
         (0x04 => pub DSI_INCR_SYNCPT_CNTRL_0: ReadWrite<u32, DSI_INCR_SYNCPT_CNTRL_0::Register>),
         (0x08 => pub DSI_INCR_SYNCPT_ERROR_0: ReadWrite<u32, DSI_INCR_SYNCPT_ERROR_0::Register>),
-        (0x0C => _reserved),
+        (0x0C => _reserved0),
         (0x20 => pub DSI_CTXSW_0: ReadWrite<u32, DSI_CTXSW_0::Register>),
         (0x24 => pub DSI_DSI_RD_DATA_0: ReadOnly<u32>),
         (0x28 => pub DSI_DSI_WR_DATA_0: ReadWrite<u32>),
@@ -331,8 +341,18 @@ register_structs! {
         (0x4C => pub DSI_DSI_TRIGGER_0: ReadWrite<u32, DSI_DSI_TRIGGER_0::Register>),
         (0x50 => pub DSI_DSI_TX_CRC_0: ReadOnly<u32>),
         (0x54 => pub DSI_DSI_STATUS_0: ReadOnly<u32, DSI_DSI_STATUS_0::Register>),
-        (0x58 => @END),
+        (0x58 => _reserved1),
+        (0x68 => pub DSI_DSI_INIT_SEQ_CONTROL_0: ReadWrite<u32, DSI_DSI_INIT_SEQ_CONTROL_0::Register>),
+        (0x6C => pub DSI_DSI_INIT_SEQ_DATA_0_0: ReadWrite<u32>),
+        (0x70 => pub DSI_DSI_INIT_SEQ_DATA_1_0: ReadWrite<u32>),
+        (0x74 => pub DSI_DSI_INIT_SEQ_DATA_2_0: ReadWrite<u32>),
+        (0x78 => pub DSI_DSI_INIT_SEQ_DATA_3_0: ReadWrite<u32>),
+        (0x7C => pub DSI_DSI_INIT_SEQ_DATA_4_0: ReadWrite<u32>),
+        (0x80 => pub DSI_DSI_INIT_SEQ_DATA_5_0: ReadWrite<u32>),
+        (0x84 => pub DSI_DSI_INIT_SEQ_DATA_6_0: ReadWrite<u32>),
+        (0x88 => pub DSI_DSI_INIT_SEQ_DATA_7_0: ReadWrite<u32>),
+        (0x8C => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0x58]);
+assert_eq_size!(Registers, [u8; 0x8C]);

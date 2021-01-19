@@ -803,6 +803,44 @@ register_bitfields! {
 
         /// Time to drive LP00 at start of BTA (4 * TTLPX).
         DSI_TTAGO OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_TIMEOUT_0_0` register.
+    pub DSI_DSI_TIMEOUT_0_0 [
+        /// Low Power Receive (Host) Time Out terminal count.
+        LRXH_TO OFFSET(16) NUMBITS(16) [],
+
+        /// High Speed Transmit Time Out terminal count.
+        HTX_TO OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_TIMEOUT_1_0` register.
+    pub DSI_DSI_TIMEOUT_1_0 [
+        /// Peripheral Reset duration.
+        PR_TO OFFSET(16) NUMBITS(16) [],
+
+        /// Turn Around Time Out terminal count.
+        TA_TO OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_TO_TALLY_0` register.
+    pub DSI_DSI_TO_TALLY_0 [
+        /// Peripheral Reset time out status.
+        ///
+        /// NOTE: This field is read-only.
+        P_RESET_STATUS OFFSET(24) NUMBITS(1) [
+            InReset = 0,
+            Ready = 1
+        ],
+
+        /// Turn Around time out tally.
+        TA_TALLY OFFSET(16) NUMBITS(8) [],
+
+        /// LP Rx time out tally.
+        LRXH_TALLY OFFSET(8) NUMBITS(8) [],
+
+        /// HS Tx time out tally.
+        HTX_TALLY OFFSET(0) NUMBITS(8) []
     ]
 }
 
@@ -861,8 +899,12 @@ register_structs! {
         (0x0F4 => pub DSI_DSI_PHY_TIMING_1_0: ReadWrite<u32, DSI_DSI_PHY_TIMING_1_0::Register>),
         (0x0F8 => pub DSI_DSI_PHY_TIMING_2_0: ReadWrite<u32, DSI_DSI_PHY_TIMING_2_0::Register>),
         (0x0FC => pub DSI_DSI_BTA_TIMING_0: ReadWrite<u32, DSI_DSI_BTA_TIMING_0::Register>),
-        (0x100 => @END),
+        (0x100 => _reserved4),
+        (0x110 => pub DSI_DSI_TIMEOUT_0_0: ReadWrite<u32, DSI_DSI_TIMEOUT_0_0::Register>),
+        (0x114 => pub DSI_DSI_TIMEOUT_1_0: ReadWrite<u32, DSI_DSI_TIMEOUT_1_0::Register>),
+        (0x118 => pub DSI_DSI_TO_TALLY_0: ReadWrite<u32, DSI_DSI_TO_TALLY_0::Register>),
+        (0x11C => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0x100]);
+assert_eq_size!(Registers, [u8; 0x11C]);

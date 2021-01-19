@@ -700,6 +700,51 @@ register_bitfields! {
 
         /// Packet 3 size pointer.
         PKT_53_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_DCS_CMDS_0` register.
+    pub DSI_DSI_DCS_CMDS_0 [
+        /// DCS command for Line Type 5.
+        LT5_DCS_CMD OFFSET(8) NUMBITS(8) [],
+
+        /// DCS command for Line Type 3.
+        LT3_DCS_CMD OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_LEN_0_1_0` register.
+    pub DSI_DSI_PKT_LEN_0_1_0 [
+        /// Packet length 1 (in bytes).
+        LENGTH_1 OFFSET(16) NUMBITS(16) [],
+
+        /// Packet length 0 (in bytes).
+        LENGTH_0 OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_LEN_2_3_0` register.
+    pub DSI_DSI_PKT_LEN_2_3_0 [
+        /// Packet length 3 (in bytes).
+        LENGTH_3 OFFSET(16) NUMBITS(16) [],
+
+        /// Packet length 2 (in bytes).
+        LENGTH_2 OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_LEN_4_5_0` register.
+    pub DSI_DSI_PKT_LEN_4_5_0 [
+        /// Packet length 5 (in bytes).
+        LENGTH_5 OFFSET(16) NUMBITS(16) [],
+
+        /// Packet length 4 (in bytes).
+        LENGTH_4 OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_LEN_6_7_0` register.
+    pub DSI_DSI_PKT_LEN_6_7_0 [
+        /// Packet length 7 (in bytes).
+        LENGTH_7 OFFSET(16) NUMBITS(16) [],
+
+        /// Packet length 6 (in bytes).
+        LENGTH_6 OFFSET(0) NUMBITS(16) []
     ]
 }
 
@@ -747,8 +792,14 @@ register_structs! {
         (0xB0 => pub DSI_DSI_PKT_SEQ_4_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_HI_0::Register>),
         (0xB4 => pub DSI_DSI_PKT_SEQ_5_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_LO_0::Register>),
         (0xB8 => pub DSI_DSI_PKT_SEQ_5_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_HI_0::Register>),
-        (0xBC => @END),
+        (0xBC => _reserved2),
+        (0xCC => pub DSI_DSI_DCS_CMDS_0: ReadWrite<u32, DSI_DSI_DCS_CMDS_0::Register>),
+        (0xD0 => pub DSI_DSI_PKT_LEN_0_1_0: ReadWrite<u32, DSI_DSI_PKT_LEN_0_1_0::Register>),
+        (0xD4 => pub DSI_DSI_PKT_LEN_2_3_0: ReadWrite<u32, DSI_DSI_PKT_LEN_2_3_0::Register>),
+        (0xD8 => pub DSI_DSI_PKT_LEN_4_5_0: ReadWrite<u32, DSI_DSI_PKT_LEN_4_5_0::Register>),
+        (0xDC => pub DSI_DSI_PKT_LEN_6_7_0: ReadWrite<u32, DSI_DSI_PKT_LEN_6_7_0::Register>),
+        (0xE0 => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0xBC]);
+assert_eq_size!(Registers, [u8; 0xE0]);

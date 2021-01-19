@@ -316,6 +316,390 @@ register_bitfields! {
 
         /// Send Initialization Sequence.
         DSI_SEND_INIT_SEQUENCE OFFSET(0) NUMBITS(1) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_0_LO_0` register.
+    pub DSI_DSI_PKT_SEQ_0_LO_0 [
+        /// For packet sequence 0, forces the D-PHY to go to LP mode after the last
+        /// packet of the sequence has been transmitted.
+        SEQ_0_FORCE_LP OFFSET(30) NUMBITS(1) [],
+
+        /// Packet 2 enable.
+        PKT_02_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 2 Packet ID.
+        PKT_02_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 2 size pointer.
+        PKT_02_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 1 enable.
+        PKT_01_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 1 Packet ID.
+        PKT_01_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 1 size pointer.
+        PKT_01_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 0 enable.
+        PKT_00_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 0 Packet ID.
+        PKT_00_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 0 size pointer.
+        PKT_00_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_0_HI_0` register.
+    pub DSI_DSI_PKT_SEQ_0_HI_0 [
+        /// Packet 5 enable.
+        PKT_05_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 5 Packet ID.
+        PKT_05_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 5 size pointer.
+        PKT_05_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 4 enable.
+        PKT_04_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 4 Packet ID.
+        PKT_04_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 4 size pointer.
+        PKT_04_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 3 enable.
+        PKT_03_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 3 Packet ID.
+        PKT_03_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 3 size pointer.
+        PKT_03_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_1_LO_0` register.
+    pub DSI_DSI_PKT_SEQ_1_LO_0 [
+        /// For packet sequence 1, forces the D-PHY to go to LP mode after the last
+        /// packet of the sequence has been transmitted.
+        SEQ_1_FORCE_LP OFFSET(30) NUMBITS(1) [],
+
+        /// Packet 2 enable.
+        PKT_12_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 2 Packet ID.
+        PKT_12_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 2 size pointer.
+        PKT_12_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 1 enable.
+        PKT_11_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 1 Packet ID.
+        PKT_11_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 1 size pointer.
+        PKT_11_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 0 enable.
+        PKT_10_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 0 Packet ID.
+        PKT_10_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 0 size pointer.
+        PKT_10_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_1_HI_0` register.
+    pub DSI_DSI_PKT_SEQ_1_HI_0 [
+        /// Packet 5 enable.
+        PKT_15_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 5 Packet ID.
+        PKT_15_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 5 size pointer.
+        PKT_15_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 4 enable.
+        PKT_14_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 4 Packet ID.
+        PKT_14_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 4 size pointer.
+        PKT_14_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 3 enable.
+        PKT_13_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 3 Packet ID.
+        PKT_13_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 3 size pointer.
+        PKT_13_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_2_LO_0` register.
+    pub DSI_DSI_PKT_SEQ_2_LO_0 [
+        /// For packet sequence 2, forces the D-PHY to go to LP mode after the last
+        /// packet of the sequence has been transmitted.
+        SEQ_2_FORCE_LP OFFSET(30) NUMBITS(1) [],
+
+        /// Packet 2 enable.
+        PKT_22_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 2 Packet ID.
+        PKT_22_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 2 size pointer.
+        PKT_22_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 1 enable.
+        PKT_21_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 1 Packet ID.
+        PKT_21_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 1 size pointer.
+        PKT_21_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 0 enable.
+        PKT_20_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 0 Packet ID.
+        PKT_20_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 0 size pointer.
+        PKT_20_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_2_HI_0` register.
+    pub DSI_DSI_PKT_SEQ_2_HI_0 [
+        /// Packet 5 enable.
+        PKT_25_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 5 Packet ID.
+        PKT_25_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 5 size pointer.
+        PKT_25_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 4 enable.
+        PKT_24_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 4 Packet ID.
+        PKT_24_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 4 size pointer.
+        PKT_24_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 3 enable.
+        PKT_23_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 3 Packet ID.
+        PKT_23_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 3 size pointer.
+        PKT_23_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_3_LO_0` register.
+    pub DSI_DSI_PKT_SEQ_3_LO_0 [
+        /// For packet sequence 3, forces the D-PHY to go to LP mode after the last
+        /// packet of the sequence has been transmitted.
+        SEQ_3_FORCE_LP OFFSET(30) NUMBITS(1) [],
+
+        /// Packet 2 enable.
+        PKT_32_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 2 Packet ID.
+        PKT_32_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 2 size pointer.
+        PKT_32_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 1 enable.
+        PKT_31_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 1 Packet ID.
+        PKT_31_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 1 size pointer.
+        PKT_31_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 0 enable.
+        PKT_30_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 0 Packet ID.
+        PKT_30_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 0 size pointer.
+        PKT_30_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_3_HI_0` register.
+    pub DSI_DSI_PKT_SEQ_3_HI_0 [
+        /// Packet 5 enable.
+        PKT_35_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 5 Packet ID.
+        PKT_35_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 5 size pointer.
+        PKT_35_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 4 enable.
+        PKT_34_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 4 Packet ID.
+        PKT_34_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 4 size pointer.
+        PKT_34_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 3 enable.
+        PKT_33_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 3 Packet ID.
+        PKT_33_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 3 size pointer.
+        PKT_33_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_4_LO_0` register.
+    pub DSI_DSI_PKT_SEQ_4_LO_0 [
+        /// For packet sequence 4, forces the D-PHY to go to LP mode after the last
+        /// packet of the sequence has been transmitted.
+        SEQ_4_FORCE_LP OFFSET(30) NUMBITS(1) [],
+
+        /// Packet 2 enable.
+        PKT_42_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 2 Packet ID.
+        PKT_42_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 2 size pointer.
+        PKT_42_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 1 enable.
+        PKT_41_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 1 Packet ID.
+        PKT_41_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 1 size pointer.
+        PKT_41_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 0 enable.
+        PKT_40_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 0 Packet ID.
+        PKT_40_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 0 size pointer.
+        PKT_40_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_4_HI_0` register.
+    pub DSI_DSI_PKT_SEQ_4_HI_0 [
+        /// Packet 5 enable.
+        PKT_45_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 5 Packet ID.
+        PKT_45_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 5 size pointer.
+        PKT_45_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 4 enable.
+        PKT_44_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 4 Packet ID.
+        PKT_44_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 4 size pointer.
+        PKT_44_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 3 enable.
+        PKT_43_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 3 Packet ID.
+        PKT_43_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 3 size pointer.
+        PKT_43_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+    //
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_5_LO_0` register.
+    pub DSI_DSI_PKT_SEQ_5_LO_0 [
+        /// For packet sequence 5, forces the D-PHY to go to LP mode after the last
+        /// packet of the sequence has been transmitted.
+        SEQ_5_FORCE_LP OFFSET(30) NUMBITS(1) [],
+
+        /// Packet 2 enable.
+        PKT_52_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 2 Packet ID.
+        PKT_52_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 2 size pointer.
+        PKT_52_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 1 enable.
+        PKT_51_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 1 Packet ID.
+        PKT_51_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 1 size pointer.
+        PKT_51_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 0 enable.
+        PKT_50_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 0 Packet ID.
+        PKT_50_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 0 size pointer.
+        PKT_50_SIZE OFFSET(0) NUMBITS(3) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PKT_SEQ_5_HI_0` register.
+    pub DSI_DSI_PKT_SEQ_5_HI_0 [
+        /// Packet 5 enable.
+        PKT_55_EN OFFSET(29) NUMBITS(1) [],
+
+        /// Packet 5 Packet ID.
+        PKT_55_ID OFFSET(23) NUMBITS(6) [],
+
+        /// Packet 5 size pointer.
+        PKT_55_SIZE OFFSET(20) NUMBITS(3) [],
+
+        /// Packet 4 enable.
+        PKT_54_EN OFFSET(19) NUMBITS(1) [],
+
+        /// Packet 4 Packet ID.
+        PKT_54_ID OFFSET(13) NUMBITS(6) [],
+
+        /// Packet 4 size pointer.
+        PKT_54_SIZE OFFSET(10) NUMBITS(3) [],
+
+        /// Packet 3 enable.
+        PKT_53_EN OFFSET(9) NUMBITS(1) [],
+
+        /// Packet 3 Packet ID.
+        PKT_53_ID OFFSET(3) NUMBITS(6) [],
+
+        /// Packet 3 size pointer.
+        PKT_53_SIZE OFFSET(0) NUMBITS(3) []
     ]
 }
 
@@ -351,8 +735,20 @@ register_structs! {
         (0x80 => pub DSI_DSI_INIT_SEQ_DATA_5_0: ReadWrite<u32>),
         (0x84 => pub DSI_DSI_INIT_SEQ_DATA_6_0: ReadWrite<u32>),
         (0x88 => pub DSI_DSI_INIT_SEQ_DATA_7_0: ReadWrite<u32>),
-        (0x8C => @END),
+        (0x8C => pub DSI_DSI_PKT_SEQ_0_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_0_LO_0::Register>),
+        (0x90 => pub DSI_DSI_PKT_SEQ_0_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_0_HI_0::Register>),
+        (0x94 => pub DSI_DSI_PKT_SEQ_1_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_1_LO_0::Register>),
+        (0x98 => pub DSI_DSI_PKT_SEQ_1_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_1_HI_0::Register>),
+        (0x9C => pub DSI_DSI_PKT_SEQ_2_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_2_LO_0::Register>),
+        (0xA0 => pub DSI_DSI_PKT_SEQ_2_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_2_HI_0::Register>),
+        (0xA4 => pub DSI_DSI_PKT_SEQ_3_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_3_LO_0::Register>),
+        (0xA8 => pub DSI_DSI_PKT_SEQ_3_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_3_HI_0::Register>),
+        (0xAC => pub DSI_DSI_PKT_SEQ_4_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_LO_0::Register>),
+        (0xB0 => pub DSI_DSI_PKT_SEQ_4_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_HI_0::Register>),
+        (0xB4 => pub DSI_DSI_PKT_SEQ_5_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_LO_0::Register>),
+        (0xB8 => pub DSI_DSI_PKT_SEQ_5_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_HI_0::Register>),
+        (0xBC => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0x8C]);
+assert_eq_size!(Registers, [u8; 0xBC]);

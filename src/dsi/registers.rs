@@ -745,6 +745,64 @@ register_bitfields! {
 
         /// Packet length 6 (in bytes).
         LENGTH_6 OFFSET(0) NUMBITS(16) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PHY_TIMING_0_0` register.
+    pub DSI_DSI_PHY_TIMING_0_0 [
+        /// Time to drive LP11 after HS.
+        DSI_THSDEXIT OFFSET(24) NUMBITS(8) [],
+
+        /// Time to drive HS flipped bit at EOT.
+        DSI_THSTRAIL OFFSET(16) NUMBITS(8) [],
+
+        /// Time to drive HS0 before SOT.
+        DSI_TDATZERO OFFSET(8) NUMBITS(8) [],
+
+        /// Time to drive LP00 before HS data.
+        DSI_THSPREPR OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PHY_TIMING_1_0` register.
+    pub DSI_DSI_PHY_TIMING_1_0 [
+        /// Time to drive HS0 before the clock goes to LP1.
+        DSI_TCLKTRAIL OFFSET(24) NUMBITS(8) [],
+
+        /// Time to drive clock after the last HS data.
+        DSI_TCLKPOST OFFSET(16) NUMBITS(8) [],
+
+        /// Time to drive LP00 before HS clock.
+        DSI_TCLKZERO OFFSET(8) NUMBITS(8) [],
+
+        /// LP period.
+        DSI_TTLPX OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_PHY_TIMING_2_0` register.
+    pub DSI_DSI_PHY_TIMING_2_0 [
+        /// Time to drive LP0 before CLK_ZERO starts off on the clock lane.
+        DSI_TCLKPREPARE OFFSET(16) NUMBITS(8) [],
+
+        /// Time to run clock before enabling data lane.
+        DSI_TCLKPRE OFFSET(8) NUMBITS(8) [],
+
+        /// LP period when exiting ULPM, in units of 512 byte clocks.
+        DSI_TWAKEUP OFFSET(0) NUMBITS(8) []
+    ],
+
+    /// Bitfields of the `DSI_DSI_BTA_TIMING_0` register.
+    pub DSI_DSI_BTA_TIMING_0 [
+        /// Programmable Time delay between end of Host packet transmission and
+        /// generation of Pkt BTA in PKT_BTA mode.
+        DSI_TPKBTA OFFSET(24) NUMBITS(8) [],
+
+        /// Time to Drive LP00 at end of BTA (5 * TTLPX).
+        DSI_TTAGET OFFSET(16) NUMBITS(8) [],
+
+        /// Time to Receive LP00 at end of BTA (2 * TTLPX).
+        DSI_TTASURE OFFSET(8) NUMBITS(8) [],
+
+        /// Time to drive LP00 at start of BTA (4 * TTLPX).
+        DSI_TTAGO OFFSET(0) NUMBITS(8) []
     ]
 }
 
@@ -752,54 +810,59 @@ register_structs! {
     /// Representation of the MIPI-DSI registers.
     #[allow(non_snake_case)]
     pub Registers {
-        (0x00 => pub DSI_INCR_SYNCPT_0: ReadWrite<u32, DSI_INCR_SYNCPT_0::Register>),
-        (0x04 => pub DSI_INCR_SYNCPT_CNTRL_0: ReadWrite<u32, DSI_INCR_SYNCPT_CNTRL_0::Register>),
-        (0x08 => pub DSI_INCR_SYNCPT_ERROR_0: ReadWrite<u32, DSI_INCR_SYNCPT_ERROR_0::Register>),
-        (0x0C => _reserved0),
-        (0x20 => pub DSI_CTXSW_0: ReadWrite<u32, DSI_CTXSW_0::Register>),
-        (0x24 => pub DSI_DSI_RD_DATA_0: ReadOnly<u32>),
-        (0x28 => pub DSI_DSI_WR_DATA_0: ReadWrite<u32>),
-        (0x2C => pub DSI_DSI_POWER_CONTROL_0: ReadWrite<u32, DSI_DSI_POWER_CONTROL_0::Register>),
-        (0x30 => pub DSI_INT_ENABLE_0: ReadWrite<u32, DSI_INT_ENABLE_0::Register>),
-        (0x34 => pub DSI_INT_STATUS_0: ReadWrite<u32, DSI_INT_STATUS_0::Register>),
-        (0x38 => pub DSI_INT_MASK_0: ReadWrite<u32, DSI_INT_MASK_0::Register>),
-        (0x3C => pub DSI_HOST_DSI_CONTROL_0: ReadWrite<u32, DSI_HOST_DSI_CONTROL_0::Register>),
-        (0x40 => pub DSI_DSI_CONTROL_0: ReadWrite<u32, DSI_DSI_CONTROL_0::Register>),
-        (0x44 => pub DSI_DSI_SOL_DELAY_0: ReadWrite<u32, DSI_DSI_SOL_DELAY_0::Register>),
-        (0x48 => pub DSI_DSI_MAX_THRESHOLD_0: ReadWrite<u32, DSI_DSI_MAX_THRESHOLD_0::Register>),
-        (0x4C => pub DSI_DSI_TRIGGER_0: ReadWrite<u32, DSI_DSI_TRIGGER_0::Register>),
-        (0x50 => pub DSI_DSI_TX_CRC_0: ReadOnly<u32>),
-        (0x54 => pub DSI_DSI_STATUS_0: ReadOnly<u32, DSI_DSI_STATUS_0::Register>),
-        (0x58 => _reserved1),
-        (0x68 => pub DSI_DSI_INIT_SEQ_CONTROL_0: ReadWrite<u32, DSI_DSI_INIT_SEQ_CONTROL_0::Register>),
-        (0x6C => pub DSI_DSI_INIT_SEQ_DATA_0_0: ReadWrite<u32>),
-        (0x70 => pub DSI_DSI_INIT_SEQ_DATA_1_0: ReadWrite<u32>),
-        (0x74 => pub DSI_DSI_INIT_SEQ_DATA_2_0: ReadWrite<u32>),
-        (0x78 => pub DSI_DSI_INIT_SEQ_DATA_3_0: ReadWrite<u32>),
-        (0x7C => pub DSI_DSI_INIT_SEQ_DATA_4_0: ReadWrite<u32>),
-        (0x80 => pub DSI_DSI_INIT_SEQ_DATA_5_0: ReadWrite<u32>),
-        (0x84 => pub DSI_DSI_INIT_SEQ_DATA_6_0: ReadWrite<u32>),
-        (0x88 => pub DSI_DSI_INIT_SEQ_DATA_7_0: ReadWrite<u32>),
-        (0x8C => pub DSI_DSI_PKT_SEQ_0_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_0_LO_0::Register>),
-        (0x90 => pub DSI_DSI_PKT_SEQ_0_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_0_HI_0::Register>),
-        (0x94 => pub DSI_DSI_PKT_SEQ_1_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_1_LO_0::Register>),
-        (0x98 => pub DSI_DSI_PKT_SEQ_1_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_1_HI_0::Register>),
-        (0x9C => pub DSI_DSI_PKT_SEQ_2_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_2_LO_0::Register>),
-        (0xA0 => pub DSI_DSI_PKT_SEQ_2_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_2_HI_0::Register>),
-        (0xA4 => pub DSI_DSI_PKT_SEQ_3_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_3_LO_0::Register>),
-        (0xA8 => pub DSI_DSI_PKT_SEQ_3_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_3_HI_0::Register>),
-        (0xAC => pub DSI_DSI_PKT_SEQ_4_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_LO_0::Register>),
-        (0xB0 => pub DSI_DSI_PKT_SEQ_4_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_HI_0::Register>),
-        (0xB4 => pub DSI_DSI_PKT_SEQ_5_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_LO_0::Register>),
-        (0xB8 => pub DSI_DSI_PKT_SEQ_5_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_HI_0::Register>),
-        (0xBC => _reserved2),
-        (0xCC => pub DSI_DSI_DCS_CMDS_0: ReadWrite<u32, DSI_DSI_DCS_CMDS_0::Register>),
-        (0xD0 => pub DSI_DSI_PKT_LEN_0_1_0: ReadWrite<u32, DSI_DSI_PKT_LEN_0_1_0::Register>),
-        (0xD4 => pub DSI_DSI_PKT_LEN_2_3_0: ReadWrite<u32, DSI_DSI_PKT_LEN_2_3_0::Register>),
-        (0xD8 => pub DSI_DSI_PKT_LEN_4_5_0: ReadWrite<u32, DSI_DSI_PKT_LEN_4_5_0::Register>),
-        (0xDC => pub DSI_DSI_PKT_LEN_6_7_0: ReadWrite<u32, DSI_DSI_PKT_LEN_6_7_0::Register>),
-        (0xE0 => @END),
+        (0x000 => pub DSI_INCR_SYNCPT_0: ReadWrite<u32, DSI_INCR_SYNCPT_0::Register>),
+        (0x004 => pub DSI_INCR_SYNCPT_CNTRL_0: ReadWrite<u32, DSI_INCR_SYNCPT_CNTRL_0::Register>),
+        (0x008 => pub DSI_INCR_SYNCPT_ERROR_0: ReadWrite<u32, DSI_INCR_SYNCPT_ERROR_0::Register>),
+        (0x00C => _reserved0),
+        (0x020 => pub DSI_CTXSW_0: ReadWrite<u32, DSI_CTXSW_0::Register>),
+        (0x024 => pub DSI_DSI_RD_DATA_0: ReadOnly<u32>),
+        (0x028 => pub DSI_DSI_WR_DATA_0: ReadWrite<u32>),
+        (0x02C => pub DSI_DSI_POWER_CONTROL_0: ReadWrite<u32, DSI_DSI_POWER_CONTROL_0::Register>),
+        (0x030 => pub DSI_INT_ENABLE_0: ReadWrite<u32, DSI_INT_ENABLE_0::Register>),
+        (0x034 => pub DSI_INT_STATUS_0: ReadWrite<u32, DSI_INT_STATUS_0::Register>),
+        (0x038 => pub DSI_INT_MASK_0: ReadWrite<u32, DSI_INT_MASK_0::Register>),
+        (0x03C => pub DSI_HOST_DSI_CONTROL_0: ReadWrite<u32, DSI_HOST_DSI_CONTROL_0::Register>),
+        (0x040 => pub DSI_DSI_CONTROL_0: ReadWrite<u32, DSI_DSI_CONTROL_0::Register>),
+        (0x044 => pub DSI_DSI_SOL_DELAY_0: ReadWrite<u32, DSI_DSI_SOL_DELAY_0::Register>),
+        (0x048 => pub DSI_DSI_MAX_THRESHOLD_0: ReadWrite<u32, DSI_DSI_MAX_THRESHOLD_0::Register>),
+        (0x04C => pub DSI_DSI_TRIGGER_0: ReadWrite<u32, DSI_DSI_TRIGGER_0::Register>),
+        (0x050 => pub DSI_DSI_TX_CRC_0: ReadOnly<u32>),
+        (0x054 => pub DSI_DSI_STATUS_0: ReadOnly<u32, DSI_DSI_STATUS_0::Register>),
+        (0x058 => _reserved1),
+        (0x068 => pub DSI_DSI_INIT_SEQ_CONTROL_0: ReadWrite<u32, DSI_DSI_INIT_SEQ_CONTROL_0::Register>),
+        (0x06C => pub DSI_DSI_INIT_SEQ_DATA_0_0: ReadWrite<u32>),
+        (0x070 => pub DSI_DSI_INIT_SEQ_DATA_1_0: ReadWrite<u32>),
+        (0x074 => pub DSI_DSI_INIT_SEQ_DATA_2_0: ReadWrite<u32>),
+        (0x078 => pub DSI_DSI_INIT_SEQ_DATA_3_0: ReadWrite<u32>),
+        (0x07C => pub DSI_DSI_INIT_SEQ_DATA_4_0: ReadWrite<u32>),
+        (0x080 => pub DSI_DSI_INIT_SEQ_DATA_5_0: ReadWrite<u32>),
+        (0x084 => pub DSI_DSI_INIT_SEQ_DATA_6_0: ReadWrite<u32>),
+        (0x088 => pub DSI_DSI_INIT_SEQ_DATA_7_0: ReadWrite<u32>),
+        (0x08C => pub DSI_DSI_PKT_SEQ_0_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_0_LO_0::Register>),
+        (0x090 => pub DSI_DSI_PKT_SEQ_0_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_0_HI_0::Register>),
+        (0x094 => pub DSI_DSI_PKT_SEQ_1_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_1_LO_0::Register>),
+        (0x098 => pub DSI_DSI_PKT_SEQ_1_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_1_HI_0::Register>),
+        (0x09C => pub DSI_DSI_PKT_SEQ_2_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_2_LO_0::Register>),
+        (0x0A0 => pub DSI_DSI_PKT_SEQ_2_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_2_HI_0::Register>),
+        (0x0A4 => pub DSI_DSI_PKT_SEQ_3_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_3_LO_0::Register>),
+        (0x0A8 => pub DSI_DSI_PKT_SEQ_3_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_3_HI_0::Register>),
+        (0x0AC => pub DSI_DSI_PKT_SEQ_4_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_LO_0::Register>),
+        (0x0B0 => pub DSI_DSI_PKT_SEQ_4_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_4_HI_0::Register>),
+        (0x0B4 => pub DSI_DSI_PKT_SEQ_5_LO_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_LO_0::Register>),
+        (0x0B8 => pub DSI_DSI_PKT_SEQ_5_HI_0: ReadWrite<u32, DSI_DSI_PKT_SEQ_5_HI_0::Register>),
+        (0x0BC => _reserved2),
+        (0x0CC => pub DSI_DSI_DCS_CMDS_0: ReadWrite<u32, DSI_DSI_DCS_CMDS_0::Register>),
+        (0x0D0 => pub DSI_DSI_PKT_LEN_0_1_0: ReadWrite<u32, DSI_DSI_PKT_LEN_0_1_0::Register>),
+        (0x0D4 => pub DSI_DSI_PKT_LEN_2_3_0: ReadWrite<u32, DSI_DSI_PKT_LEN_2_3_0::Register>),
+        (0x0D8 => pub DSI_DSI_PKT_LEN_4_5_0: ReadWrite<u32, DSI_DSI_PKT_LEN_4_5_0::Register>),
+        (0x0DC => pub DSI_DSI_PKT_LEN_6_7_0: ReadWrite<u32, DSI_DSI_PKT_LEN_6_7_0::Register>),
+        (0x0E0 => _reserved3),
+        (0x0F0 => pub DSI_DSI_PHY_TIMING_0_0: ReadWrite<u32, DSI_DSI_PHY_TIMING_0_0::Register>),
+        (0x0F4 => pub DSI_DSI_PHY_TIMING_1_0: ReadWrite<u32, DSI_DSI_PHY_TIMING_1_0::Register>),
+        (0x0F8 => pub DSI_DSI_PHY_TIMING_2_0: ReadWrite<u32, DSI_DSI_PHY_TIMING_2_0::Register>),
+        (0x0FC => pub DSI_DSI_BTA_TIMING_0: ReadWrite<u32, DSI_DSI_BTA_TIMING_0::Register>),
+        (0x100 => @END),
     }
 }
 
-assert_eq_size!(Registers, [u8; 0xE0]);
+assert_eq_size!(Registers, [u8; 0x100]);

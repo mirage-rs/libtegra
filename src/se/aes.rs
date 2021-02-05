@@ -1,9 +1,11 @@
 use byteorder::{ByteOrder, LE};
 use register::FieldValue;
 
+use crate::arm;
 use crate::se::constants::*;
 use crate::se::core::*;
 use crate::se::registers::*;
+use crate::se::utils::trigger_single_block_operation;
 
 macro_rules! init_aes {
     ($registers:ident, $encrypt:expr, $dest:ident) => {
@@ -216,14 +218,11 @@ pub fn set_encrypted_key(
             + SE_CRYPTO_KEYTABLE_DST_0::DST_WORD_QUAD::Keys03,
     );
 
-    // On AArch64, ensure cache coherency so the SE sees the correct data.
-    #[cfg(target_arch = "aarch64")]
+    // Ensure cache coherency so the SE sees the correct data.
     unsafe {
-        use crate::se::utils;
-        use cortex_a::barrier;
-
-        utils::flush_data_cache_line(key.as_ptr() as usize);
-        barrier::dsb(barrier::ISH);
+        arm::cache::flush_data_cache(key, key.len());
+        #[cfg(target_arch = "aarch64")]
+        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
     }
 
     // Prepare the linked lists and kick off the operation.
@@ -304,14 +303,11 @@ pub fn do_cmac_operation(
             *x ^= *y;
         }
 
-        // On AArch64, ensure data cache coherency to get the correct output data.
-        #[cfg(target_arch = "aarch64")]
+        // Ensure data cache coherency to get the correct output data.
         unsafe {
-            use crate::se::utils;
-            use cortex_a::barrier;
-
-            utils::flush_data_cache_line(last_block.as_ptr() as usize);
-            barrier::dsb(barrier::ISH);
+            arm::cache::flush_data_cache(&last_block[..], last_block.len());
+            #[cfg(target_arch = "aarch64")]
+            cortex_a::barrier::dsb(cortex_a::barrier::ISH);
         }
 
         // Prepare the linked lists and kick off the operation.
@@ -334,9 +330,6 @@ pub fn do_ecb_operation(
     destination: &mut [u8; aes::BLOCK_SIZE],
     mode: Mode,
 ) -> Result<(), OperationError> {
-    #[cfg(target_arch = "aarch64")]
-    use crate::se::utils::*;
-
     // Configure an AES-ECB operation to memory.
     init_aes!(registers, encrypt, Memory);
     configure_aes_ecb(registers, slot, encrypt);
@@ -344,44 +337,8 @@ pub fn do_ecb_operation(
         registers.SE_CONFIG_0.modify(mode.get_field_value());
     }
 
-    // Configure an AES operation on a single block.
-    registers.SE_CRYPTO_LAST_BLOCK_0.set(0);
-
-    // On AArch64, we need to cache-align the source buffer to ensure data cache coherency.
-    #[allow(unreachable_patterns)]
-    let source = match () {
-        #[cfg(target_arch = "aarch64")]
-        () => CachePad::from(&source[..]).into_inner(),
-        () => *source,
-    };
-
-    // On AArch64, we need to cache-align the output buffer to ensure data cache coherency.
-    #[allow(unreachable_patterns)]
-    let output = match () {
-        #[cfg(target_arch = "aarch64")]
-        () => CachePad::from(&destination[..]).into_inner(),
-        () => [0; aes::BLOCK_SIZE],
-    };
-
-    // Prepare the linked lists and kick off the operation.
-    let source_ll = LinkedList::from(&source[..]);
-    let mut destination_ll = LinkedList::from(&output[..]);
-    start_normal_operation(registers, &source_ll, &mut destination_ll)?;
-
-    // On AArch64, ensure data cache coherency to get the correct output data.
-    #[cfg(target_arch = "aarch64")]
-    unsafe {
-        use cortex_a::barrier;
-
-        barrier::dsb(barrier::ISH);
-        flush_data_cache_line(output.as_ptr() as usize);
-        barrier::dsb(barrier::ISH);
-    }
-
-    // Copy the output back into the destination buffer.
-    destination[..].copy_from_slice(&output[..]);
-
-    Ok(())
+    // Execute the operation.
+    trigger_single_block_operation(registers, &source[..], &mut destination[..])
 }
 
 pub fn do_cbc_operation(
@@ -427,15 +384,11 @@ pub fn do_ctr_operation(
     iv: &[u8; aes::BLOCK_SIZE],
     mode: Mode,
 ) -> Result<(), OperationError> {
-    #[cfg(target_arch = "aarch64")]
-    use cortex_a::barrier;
-
     // Determine the amount of blocks to generate.
     let nblocks = source.len() / aes::BLOCK_SIZE;
     let aligned_size = nblocks * aes::BLOCK_SIZE;
-    let unaligned_size = source.len() - aligned_size;
 
-    // Nintendo does it. I have no idea why this needs to happen.
+    // XXX: Nintendo does it. I have no idea why this needs to happen.
     registers.SE_SPARE_0.set(1);
 
     // Configure an AES-CTR operation to memory.
@@ -459,50 +412,14 @@ pub fn do_ctr_operation(
         // On AArch64, synchronize the data between the SE and the CPU.
         #[cfg(target_arch = "aarch64")]
         unsafe {
-            barrier::dsb(barrier::ISH);
+            cortex_a::barrier::dsb(cortex_a::barrier::ISH);
         }
     }
 
     // Process the last unaligned block, if necessary.
-    if unaligned_size > 0 {
-        #[cfg(target_arch = "aarch64")]
-        use crate::se::utils;
-
-        // On AArch64, we need to cache-align the buffers to ensure data coherency.
-        #[allow(unreachable_patterns)]
-        let block = match () {
-            #[cfg(target_arch = "aarch64")]
-            () => utils::CachePad::from(&source[aligned_size..]).into_inner(),
-            () => {
-                let mut data = [0; aes::BLOCK_SIZE];
-                data.copy_from_slice(&source[aligned_size..]);
-
-                data
-            }
-        };
-        #[allow(unreachable_patterns)]
-        let output = match () {
-            #[cfg(target_arch = "aarch64")]
-            () => utils::CachePad::from(&destination[aligned_size..]).into_inner(),
-            () => [0; aes::BLOCK_SIZE],
-        };
-
-        // Prepare the linked lists and kick off the operation.
-        let source_ll = LinkedList::from(&block[..]);
-        let mut destination_ll = LinkedList::from(&output[..]);
-        start_normal_operation(registers, &source_ll, &mut destination_ll)?;
-
-        // Ensure data cache coherency to get correct output data.
-        #[cfg(target_arch = "aarch64")]
-        unsafe {
-            barrier::dsb(barrier::ISH);
-            utils::flush_data_cache_line(output.as_ptr() as usize);
-            barrier::dsb(barrier::ISH);
-        }
-
-        // Copy the remaining bytes back into the output buffer.
-        destination[aligned_size..].copy_from_slice(&output[..unaligned_size]);
-    }
-
-    Ok(())
+    trigger_single_block_operation(
+        registers,
+        &source[aligned_size..],
+        &mut destination[aligned_size..],
+    )
 }

@@ -2,9 +2,11 @@ use core::convert::TryFrom;
 #[allow(unused)]
 use core::mem::size_of;
 
-use crate::{ahb::mem, timer};
-
-use super::{constants::*, registers::*};
+use crate::ahb::mem;
+use crate::arm;
+use crate::se::constants::*;
+use crate::se::registers::*;
+use crate::timer;
 
 /// Address information of a DMA buffer.
 ///
@@ -206,17 +208,13 @@ pub fn trigger_operation(
     // Ensure that the previous operation has fully completed.
     prepare_operation(engine)?;
 
-    #[cfg(target_arch = "aarch64")]
+    // Ensure data cache coherency so that CPU and SE see the correct data.
     unsafe {
-        use cortex_a::barrier;
+        arm::cache::flush_data_cache(source, size_of::<LinkedList>());
+        arm::cache::flush_data_cache(destination, size_of::<LinkedList>());
 
-        // Flush the data cache lines to make the Security Engine Linked Lists coherent.
-        // This is a necessary step so the engine sees our provided data correctly.
-        super::utils::flush_data_cache(source, size_of::<LinkedList>());
-        super::utils::flush_data_cache(destination, size_of::<LinkedList>());
-
-        // Construct a data synchronization barrier.
-        barrier::dsb(barrier::ISH);
+        #[cfg(target_arch = "aarch64")]
+        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
     }
 
     // Start the hardware operation.

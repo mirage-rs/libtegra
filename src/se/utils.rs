@@ -1,87 +1,54 @@
-use core::ops::{Deref, DerefMut};
+use crate::arm;
+use crate::se::constants::*;
+use crate::se::core::*;
+use crate::se::registers::*;
 
-use cortex_a::barrier;
-
-const DATA_CACHE_LINE_SIZE: usize = 64;
-
-/// A padding to align an inner value to the length of a cache line.
-#[repr(align(64))]
-pub struct CachePad<T: Default, const N: usize>([T; N]);
-
-impl<T: Copy + Default, const N: usize> CachePad<T, { N }> {
-    /// Constructs a new cache line padding that aligns the given data.
-    #[inline(always)]
-    pub fn new(data: [T; N]) -> Self {
-        CachePad(data)
+pub fn trigger_single_block_operation(
+    engine: &Registers,
+    source: &[u8],
+    destination: &mut [u8],
+) -> Result<(), OperationError> {
+    assert!(source.len() <= aes::BLOCK_SIZE);
+    assert!(destination.len() <= aes::BLOCK_SIZE);
+    if source.is_empty() && destination.is_empty() {
+        return Ok(());
     }
 
-    /// Returns the inner data.
-    pub fn into_inner(self) -> [T; N] {
-        self.0
+    // Create a cache-aligned buffer wrapping the data.
+    let pad = unsafe {
+        // Create the pad and copy in the data.
+        let pad = arm::cache::CachePad::<u8, { aes::BLOCK_SIZE }>::from(source);
+
+        // Make the data coherent so it is seen correctly by CPU and SE.
+        arm::cache::flush_data_cache(&pad[..], aes::BLOCK_SIZE);
+        #[cfg(target_arch = "aarch64")]
+        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+
+        pad.into_inner()
+    };
+
+    // Configure a hardware operation on a single block.
+    engine.SE_CRYPTO_LAST_BLOCK_0.set(0);
+
+    // Prepare the linked lists and kick off the operation.
+    let source_ll = LinkedList::from(&pad[..]);
+    let mut destination_ll = LinkedList::from(&pad[..]);
+    start_normal_operation(engine, &source_ll, &mut destination_ll)?;
+
+    // Ensure data cache coherency so that CPU sees the correct data.
+    unsafe {
+        #[cfg(target_arch = "aarch64")]
+        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+        arm::cache::flush_data_cache(&pad[..], aes::BLOCK_SIZE);
+        #[cfg(target_arch = "aarch64")]
+        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
     }
-}
 
-impl<T: Copy + Default, const N: usize> From<&[T]> for CachePad<T, { N }> {
-    #[inline(always)]
-    fn from(data: &[T]) -> Self {
-        assert!(data.len() <= N);
-
-        // Construct a new cache pad and copy the supplied data into it.
-        let mut pad = CachePad::new([T::default(); N]);
-        pad.copy_from_slice(data);
-
-        // Make the data coherent so it is seen correctly by the SE and the CPU.
-        unsafe {
-            flush_data_cache_line(&pad as *const CachePad<T, N> as usize);
-            barrier::dsb(barrier::ISH);
-        }
-
-        pad
+    // Copy back the result to the output buffer.
+    {
+        let len = destination.len();
+        destination.copy_from_slice(&pad[..len]);
     }
-}
 
-impl<T: Copy + Default, const N: usize> Deref for CachePad<T, { N }> {
-    type Target = [T; N];
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T: Copy + Default, const N: usize> DerefMut for CachePad<T, { N }> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-fn align_up(address: usize, align: usize) -> usize {
-    assert!(align.is_power_of_two(), "`align` must be a power of two");
-
-    let align_mask = align - 1;
-    if address & align_mask == 0 {
-        address // Already aligned.
-    } else {
-        (address | align_mask) + 1
-    }
-}
-
-/// Flushes the data cache line starting from the given address.
-pub unsafe fn flush_data_cache_line(line: usize) {
-    asm!("dc civac, {}", in(reg) line);
-}
-
-/// Flushes the entire data cache area that is covered by the given object.
-pub unsafe fn flush_data_cache<T>(obj: &T, size: usize)
-where
-    T: ?Sized,
-{
-    let start = &obj as *const _ as usize;
-    let end = align_up(start + size, DATA_CACHE_LINE_SIZE);
-
-    barrier::dmb(barrier::SY);
-    for line in (start..end).step_by(DATA_CACHE_LINE_SIZE) {
-        // Flush all cache lines within the given area.
-        flush_data_cache_line(line);
-    }
-    barrier::dmb(barrier::SY);
+    Ok(())
 }

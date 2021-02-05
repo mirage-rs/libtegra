@@ -4,12 +4,12 @@ use core::ops::{Deref, DerefMut};
 
 /// A helper that aligns a block of data to cache line size.
 #[cfg(not(target_arch = "aarch64"))]
-#[repr(transparent)]
+#[repr(C)]
 pub struct CachePad<T, const N: usize>([T; N]);
 
 /// A helper that aligns a block of data to cache line size.
 #[cfg(target_arch = "aarch64")]
-#[repr(align(64), transparent)]
+#[repr(C, align(64))]
 pub struct CachePad<T, const N: usize>([T; N]);
 
 impl<T, const N: usize> CachePad<T, { N }> {

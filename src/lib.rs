@@ -10,6 +10,7 @@ extern crate static_assertions;
 
 pub mod ahb;
 pub mod apb;
+pub mod arm;
 pub mod atomic;
 pub mod bpmp;
 pub mod car;

@@ -91,6 +91,18 @@
 //!
 //! - [`SecurityEngine::aes_ctr_decrypt`]
 //!
+//! ## RSA
+//!
+//! Similarly to the AES APIs, the Security Engine also features asymmetric encryptions using
+//! RSA where a user first feeds the desired exponent and modulus values for the encryption
+//! into keyslots and then triggers a modular exponentiation operation.
+//!
+//! - [`SecurityEngine::fill_rsa_keyslot`]
+//!
+//! - [`SecurityEngine::clear_rsa_keyslot`]
+//!
+//! - [`SecurityEngine::rsa_modular_exponentiate`]
+//!
 //! ## Hashing
 //!
 //! The Security Engine supports various hashing algorithms from the SHA1 and SHA2 family
@@ -123,6 +135,9 @@
 //! [`SecurityEngine::aes_cbc_decrypt`]: struct.SecurityEngine.html#method.aes_cbc_decrypt
 //! [`SecurityEngine::aes_ctr_encrypt`]: struct.SecurityEngine.html#method.aes_ctr_encrypt
 //! [`SecurityEngine::aes_ctr_decrypt`]: struct.SecurityEngine.html#method.aes_ctr_decrypt
+//! [`SecurityEngine::fill_rsa_keyslot`]: struct.SecurityEngine.html#method.fill_rsa_keyslot
+//! [`SecurityEngine::clear_rsa_keyslot`]: struct.SecurityEngine.html#method.clear_rsa_keyslot
+//! [`SecurityEngine::rsa_modular_exponentiate`]: struct.SecurityEngine.html#method.rsa_modular_exponentiate
 //! [`SecurityEngine::calculate_sha1`]: struct.SecurityEngine.html#method.calculate_sha1
 //! [`SecurityEngine::calculate_sha224`]: struct.SecurityEngine.html#method.calculate_sha224
 //! [`SecurityEngine::calculate_sha256`]: struct.SecurityEngine.html#method.calculate_sha256
@@ -142,17 +157,20 @@ mod core;
 mod hash;
 mod registers;
 mod rng;
+mod rsa;
 mod utils;
 
 use ::core::marker::Sync;
 
 pub use self::core::*;
+use crate::arm;
 pub use aes::Mode as AesMode;
 pub use registers::*;
 
 /// Representation of the Security Engine used for cryptographic operations.
 pub struct SecurityEngine {
     registers: *const Registers,
+    rsa_keyslot_cache: [rsa::KeyInfo; constants::rsa::KEY_SLOT_COUNT],
 }
 
 // Definitions of known SE instances.
@@ -161,6 +179,7 @@ impl SecurityEngine {
     /// A pointer to the first Security Engine instance.
     pub const SE1: Self = SecurityEngine {
         registers: SE1_REGISTERS,
+        rsa_keyslot_cache: [rsa::KeyInfo::new(); constants::rsa::KEY_SLOT_COUNT],
     };
 
     #[cfg(feature = "mariko")]
@@ -169,6 +188,7 @@ impl SecurityEngine {
     /// NOTE: Only available with the `mariko` feature enabled.
     pub const SE2: Self = SecurityEngine {
         registers: SE2_REGISTERS,
+        rsa_keyslot_cache: [rsa::KeyInfo::new(); constants::rsa::KEY_SLOT_COUNT],
     };
 }
 
@@ -270,8 +290,7 @@ impl SecurityEngine {
 
     /// Fills a given keyslot with the supplied AES key.
     ///
-    /// This must be done in advance and that key will be used for
-    /// AES operations until the keyslot gets cleared or overridden.
+    /// This must be done prior to any encryptions using this slot.
     pub fn fill_aes_keyslot(&self, slot: u32, key: &[u8]) {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
         assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
@@ -457,6 +476,75 @@ impl SecurityEngine {
 
         let engine = unsafe { &*self.registers };
         aes::do_ctr_operation(engine, false, slot, source, destination, iv, mode)
+    }
+
+    /// Clears all data out of a given RSA keyslot.
+    pub fn clear_rsa_keyslot(&mut self, slot: u32) {
+        assert!(slot < constants::rsa::KEY_SLOT_COUNT as u32);
+
+        // Clear the cached keyslot data.
+        self.rsa_keyslot_cache[slot as usize].reset();
+
+        let engine = unsafe { &*self.registers };
+        rsa::clear_keyslot(engine, slot)
+    }
+
+    /// Fills the RSA keyslot using the supplied modulus and exponent data.
+    ///
+    /// This must be done prior to any RSA operations using the selected slot.
+    pub fn fill_rsa_keyslot(&mut self, slot: u32, modulus: &[u8], exponent: &[u8]) {
+        assert!(slot < constants::rsa::KEY_SLOT_COUNT as u32);
+        assert!(modulus.len() <= constants::rsa::SIZE);
+        assert!(exponent.len() <= constants::rsa::SIZE);
+
+        // Cache the infos about the key slot.
+        self.rsa_keyslot_cache[slot as usize].update(modulus.len(), exponent.len());
+
+        let engine = unsafe { &*self.registers };
+        rsa::fill_keyslot(engine, slot, modulus, exponent)
+    }
+
+    /// Computes the modular exponentiation of `source ^ exponent (mod n)`.
+    ///
+    /// Exponent and modulus should have already been loaded into a keyslot prior
+    /// to calling this method.
+    pub fn rsa_modular_exponentiate(
+        &self,
+        slot: u32,
+        source: &[u8],
+        destination: &mut [u8],
+    ) -> Result<(), OperationError> {
+        assert!(slot < constants::rsa::KEY_SLOT_COUNT as u32);
+        assert!(source.len() <= constants::rsa::SIZE);
+        assert!(destination.len() <= constants::rsa::SIZE);
+        if source.is_empty() {
+            return Ok(());
+        }
+
+        // Prepare the RSA context to work with.
+        let rev_source = unsafe {
+            // Copy source data and reverse the endianness.
+            let mut data = [0; constants::rsa::SIZE];
+            for i in 0..source.len() {
+                data[source.len() - 1 - i] = source[i];
+            }
+
+            // Ensure cache coherency so the SE sees the correct data.
+            arm::cache::flush_data_cache(&data, data.len());
+            #[cfg(target_arch = "aarch64")]
+            cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+
+            data
+        };
+
+        let engine = unsafe { &*self.registers };
+        rsa::encrypt(
+            engine,
+            &self.rsa_keyslot_cache[slot as usize],
+            slot,
+            &rev_source[..source.len()],
+            destination,
+        )
     }
 
     /// Initializes the RNG (Random Numer Generator).

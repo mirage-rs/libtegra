@@ -46,6 +46,8 @@ pub mod rsa {
     pub const KEY_SLOT_PART_COUNT: usize = 2;
     pub const KEY_SLOT_COUNT: usize = 2;
 
+    pub const SIZE: usize = 0x100;
+
     pub const MAX_EXP_BIT_SIZE: usize = 2048;
     pub const MAX_EXP_SIZE_32: usize = MAX_EXP_BIT_SIZE >> 5;
     pub const MAX_MOD_BIT_SIZE: usize = 2048;

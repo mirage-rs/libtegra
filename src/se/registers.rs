@@ -331,7 +331,7 @@ register_bitfields! {
 
         KEY_SLOT OFFSET(7) NUMBITS(1) [],
 
-        ADDR_EXPMOD_SEL OFFSET(6) NUMBITS(1) [
+        EXPMOD_SEL OFFSET(6) NUMBITS(1) [
             Exponent = 0,
             Modulus = 1
         ],

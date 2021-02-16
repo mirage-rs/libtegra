@@ -22,7 +22,7 @@ pub struct Gic {
 
 impl Gic {
     /// The maximum number of allowed IRQs to be handled by this driver.
-    const MAX_IRQS: usize = 300; // Normally 1019, but reserve some space.
+    const MAX_IRQS: usize = 224; // Normally 1019, but reserve some space.
     const NUM_IRQS: usize = Self::MAX_IRQS + 1;
 
     /// Gets an instance of the GIC through the base addresses to the CPU Interface
@@ -39,6 +39,64 @@ impl Gic {
             gicd: gicd_base as *const _,
             handlers: [None; Self::MAX_IRQS],
         }
+    }
+
+    /// Initializes and enables the GIC device for interrupt delivery.
+    ///
+    /// NOTE: This method must be called once before the GIC is usable.
+    pub fn init(&self) {
+        let gicc = unsafe { &*self.gicc };
+        let gicd = unsafe { &*self.gicd };
+
+        // Ensure that the `Gic` instance points to a supported device.
+        let gic_version = (gicd.GICD_PIDR2.get() >> 0x4) & 0xF;
+        if gic_version != 2 {
+            panic!("GIC version is incompatible with GICv2");
+        }
+
+        // Enable the Distributor.
+        gicd.GICD_CTLR.write(gicd::GICD_CTLR::EnableGrp0::SET);
+
+        // Boot and configure the CPU Interface to accept IRQs of all priorities.
+        gicc.GICC_PMR.write(gicc::GICC_PMR::Priority.val(0xFF));
+        gicc.GICC_CTLR.write(gicc::GICC_CTLR::EnableGrp0::SET);
+    }
+
+    /// Gets the number of IRQs implemented in hardware.
+    pub fn get_num_irqs(&mut self) -> usize {
+        let gicd = unsafe { &*self.gicd };
+
+        let lines_num = gicd.GICD_TYPER.read(gicd::GICD_TYPER::ITLinesNumber) as usize;
+        (lines_num + 1) * 32
+    }
+
+    /// Extracts the IRQ with the highest priority from pending interrupts.
+    ///
+    /// This function should be directly called from the CPU's IRQ exception
+    /// vector. A reference to [`IrqContext`] must be passed to this method to
+    /// ensure that this is the case.
+    ///
+    /// [`IrqContext`]: struct.IrqContext.html
+    pub fn get_pending_irq<'ctx>(&'ctx self, _ic: &IrqContext<'ctx>) -> Irq {
+        let gicc = unsafe { &*self.gicc };
+
+        let num = gicc.GICC_IAR.read(gicc::GICC_IAR::InterruptID);
+        Irq::new(num as usize)
+    }
+
+    /// Completes the handling of a currently active IRQ by signaling an EOI
+    /// (End of Interrupt).
+    ///
+    /// This function should be directly called from the CPU's IRQ exception
+    /// vector. A reference to [`IrqContext`] must be passed to this method to
+    /// ensure that this is the case.
+    ///
+    /// [`IrqContext`]: struct.IrqContext.html
+    pub fn mark_irq_completed<'ctx>(&'ctx self, irq: Irq, _ic: &IrqContext<'ctx>) {
+        let gicc = unsafe { &*self.gicc };
+
+        let irq_num = irq.into_inner() as u32;
+        gicc.GICC_EOIR.write(gicc::GICC_EOIR::EOIINTID.val(irq_num));
     }
 
     /// Registers an interrupt descriptor that corresponds to the given IRQ number.
@@ -61,6 +119,8 @@ impl Gic {
     /// Any potential errors when no interrupt handler is actually registered or
     /// when the handler itself encountered an error will be consumed into the
     /// `Result` returned by this function.
+    ///
+    /// [`IrqContext`]: struct.IrqContext.html
     pub fn dispatch_irq<'ctx>(
         &'ctx self,
         irq: Irq,
@@ -75,6 +135,130 @@ impl Gic {
             Err("No handler registered for the given IRQ")
         }
     }
+
+    /// Sets the enabled state for a specific IRQ.
+    ///
+    /// By marking an interrupt as disabled, it will not be dispatched by the GIC
+    /// anymore until it is re-enabled again and vice versa. Can be used to bypass
+    /// specific IRQs either permanently or temporarily.
+    pub fn set_irq_enable(&self, irq: Irq, enable: bool) {
+        let gicd = unsafe { &*self.gicd };
+
+        // Find the index of the `ISENABLER[i]` register corresponding to the
+        // IRQ number and determine bit to set or clear in it.
+        let irq_num = irq.into_inner();
+        let enable_reg_index = irq_num >> 5;
+        let enable_bit = (enable as u32) << (irq_num % 32);
+
+        // Set the bit in the corresponding ISENABLER register.
+        let isenabler = &gicd.GICD_ISENABLER[enable_reg_index];
+        isenabler.set(isenabler.get() | enable_bit);
+    }
+
+    /// Configures the interrupt triggering mode for the given SPI.
+    pub fn set_spi_mode(&self, irq: Irq, mode: IrqMode) {
+        let gicd = unsafe { &*self.gicd };
+
+        let irq_num = irq.into_inner();
+        assert!(irq_num >= 32);
+
+        // Find the index of the `ICFGR[i]` register corresponding to the IRQ
+        // number and determine the trigger configuration value to write.
+        let icfgr_reg_index = irq_num >> 4;
+        let icfgr_value = ((mode as u32) << 1) << (irq_num % 16) * 2;
+
+        // Set the bits in the corresponding ICFGR register.
+        let icfgr = &gicd.GICD_ICFGR[icfgr_reg_index];
+        icfgr.set(icfgr.get() | icfgr_value);
+    }
+
+    /// Sets a given IRQ to a pending state in the GIC.
+    pub fn set_irq_pending(&self, irq: Irq) {
+        let gicd = unsafe { &*self.gicd };
+
+        // Find the index of the `ISPENDR[i]` register corresponding to the
+        // IRQ number and determine the bit to set in it.
+        let irq_num = irq.into_inner();
+        let ispendr_reg_index = irq_num >> 5;
+        let ispendr_bit = 1 << (irq_num % 32);
+
+        // Set the bit in the corresponding ISPENDR register.
+        let ispendr = &gicd.GICD_ISPENDR[ispendr_reg_index];
+        ispendr.set(ispendr.get() | ispendr_bit);
+    }
+
+    /// Sets the delivery priority for a given IRQ.
+    ///
+    /// The lower the value, the higher the priority. `0` is the highest
+    /// interrupt delivery priority supported by the GIC.
+    pub fn set_irq_priority(&self, irq: Irq, priority: u32) {
+        let gicd = unsafe { &*self.gicd };
+
+        // Find the index of the `IPRIORITYR[i]` register corresponding to the
+        // IRQ number to determine the priority configuration value to write.
+        let irq_num = irq.into_inner();
+        let ipriorityr_reg_index = irq_num >> 2;
+        let ipriorityr_reg_bit = (irq_num % 4) * 8;
+
+        // Calculate the mask to apply to the register value.
+        let mask = 0xFF << ipriorityr_reg_bit;
+
+        // Write the value in the corresponding IPRIORITYR register.
+        let ipriorityr = &gicd.GICD_IPRIORITYR[ipriorityr_reg_index];
+        let value = ipriorityr.get() & !mask;
+        ipriorityr.set(value | ((priority << ipriorityr_reg_bit) & mask));
+    }
+
+    /// Assigns a new group to a given IRQ.
+    ///
+    /// On boot or reset, all SPIs are in group 0, making them secure interrupt.
+    /// Putting individual SPIs into group 1 effectively makes them secure interrupts.
+    pub fn set_irq_group(&self, irq: Irq, group: u32) {
+        let gicd = unsafe { &*self.gicd };
+
+        // Find the index of the `IGROUPR[i]` register corresponding to the IRQ
+        // number to determine the group configuration value to write.
+        let irq_num = irq.into_inner();
+        let igroupr_reg_index = irq_num >> 5;
+        let igroupr_reg_bit = irq_num % 32;
+
+        // Calculate the mask to apply to the register value.
+        let mask = 1 << igroupr_reg_bit;
+
+        // Write the value in the corresponding IGROUPR register.
+        let igroupr = &gicd.GICD_IGROUPR[igroupr_reg_index];
+        let value = igroupr.get() & !mask;
+        igroupr.set(value | ((group << igroupr_reg_bit) & mask));
+    }
+
+    /// Configures the target CPU core to route the given IRQs to.
+    pub fn set_spi_target_cpu(&self, irq: Irq, cpu: u32) {
+        let gicd = unsafe { &*self.gicd };
+
+        // Find the index of the `ITARGETSR[i]` register corresponding to the
+        // IRQ number to determine the configuration value to write.
+        let irq_num = irq.into_inner();
+        let itargetsr_reg_index = irq_num >> 2;
+        let itargetsr_reg_bit = (irq_num % 4) * 8;
+
+        // Calculate the mask to apply to the register value.
+        let mask = 0xFF << itargetsr_reg_bit;
+
+        // Write the value to the corresponding ITARGETSR register.
+        let itargetsr = &gicd.GICD_ITARGETSR[itargetsr_reg_index];
+        let value = itargetsr.get() & !mask;
+        itargetsr.set(value | ((cpu << itargetsr_reg_bit) & mask));
+    }
+}
+
+/// Enum for selecting in which mode to trigger interrupts on.
+#[derive(Clone, Copy, Debug)]
+#[repr(u32)]
+pub enum IrqMode {
+    /// A level-triggered interrupt request.
+    Level = 0,
+    /// An edge-triggered interrupt request.
+    Edge = 1,
 }
 
 /// Interrupt context token.
@@ -194,6 +378,11 @@ pub mod gicc {
             InterruptID OFFSET(0) NUMBITS(10) []
         ],
 
+        /// Bitfields of the `GICC_EOIR` register.
+        pub GICC_EOIR [
+            EOIINTID OFFSET(0) NUMBITS(10) []
+        ],
+
         /// Bitfields of the `GICC_HPPIR` register.
         pub GICC_HPPIR [
             CPUID OFFSET(10) NUMBITS(3) [],
@@ -235,7 +424,7 @@ pub mod gicc {
             (0x0004 => pub GICC_PMR: ReadWrite<u32, GICC_PMR::Register>),
             (0x0008 => pub GICC_BPR: ReadWrite<u32, GICC_BPR::Register>),
             (0x000C => pub GICC_IAR: ReadOnly<u32, GICC_IAR::Register>),
-            (0x0010 => pub GICC_EOIR: WriteOnly<u32>),
+            (0x0010 => pub GICC_EOIR: WriteOnly<u32, GICC_EOIR::Register>),
             (0x0014 => pub GICC_RPR: ReadOnly<u32>),
             (0x0018 => pub GICC_HPPIR: ReadOnly<u32, GICC_HPPIR::Register>),
             (0x001C => pub GICC_ABPR: ReadWrite<u32>),
@@ -287,6 +476,17 @@ pub mod gicd {
             CPUNumber OFFSET(5) NUMBITS(3) [],
 
             ITLinesNumber OFFSET(0) NUMBITS(5) []
+        ],
+
+        /// Bitfields of the `GICD_ITARGETSR` register.
+        pub GICD_ITARGETSR [
+            Offset3 OFFSET(24) NUMBITS(8) [],
+
+            Offset2 OFFSET(16) NUMBITS(8) [],
+
+            Offset1 OFFSET(8) NUMBITS(8) [],
+
+            Offset0 OFFSET(0) NUMBITS(8) []
         ]
     }
 
@@ -298,35 +498,26 @@ pub mod gicd {
             (0x0004 => pub GICD_TYPER: ReadOnly<u32, GICD_TYPER::Register>),
             (0x0008 => pub GICD_IIDR: ReadOnly<u32>),
             (0x000C => _reserved0),
-            (0x0080 => pub GICD_IGROUP: [ReadWrite<u32>; 0xF]),
-            (0x00BC => _reserved1),
-            (0x0100 => pub GICD_ISENABLER: [ReadWrite<u32>; 0xF]),
-            (0x013C => _reserved2),
-            (0x0180 => pub GICD_ICENABLER: [ReadWrite<u32>; 0xF]),
-            (0x01BC => _reserved3),
-            (0x0200 => pub GICD_ISPENDR: [ReadWrite<u32>; 0xF]),
-            (0x023C => _reserved4),
-            (0x0280 => pub GICD_ICPENDR: [ReadWrite<u32>; 0xF]),
-            (0x02BC => _reserved5),
-            (0x0300 => pub GICD_ISACTIVER: [ReadWrite<u32>; 0xF]),
-            (0x033C => _reserved6),
-            (0x0380 => pub GICD_ICACTIVER: [ReadWrite<u32>; 0xF]),
-            (0x03BC => _reserved7),
-            (0x0400 => pub GICD_IPRIORITYR: [ReadWrite<u32>; 0x7F]),
-            (0x05FC => _reserved8),
-            (0x0800 => pub GICD_ITARGETSR: [ReadWrite<u32>; 0x7F]),
-            (0x09FC => _reserved9),
-            (0x0C00 => pub GICD_ICFGR: [ReadWrite<u32>; 0x1F]),
-            (0x0C7C => _reserved10),
+            (0x0080 => pub GICD_IGROUPR: [ReadWrite<u32>; 0x20]),
+            (0x0100 => pub GICD_ISENABLER: [ReadWrite<u32>; 0x20]),
+            (0x0180 => pub GICD_ICENABLER: [ReadWrite<u32>; 0x20]),
+            (0x0200 => pub GICD_ISPENDR: [ReadWrite<u32>; 0x20]),
+            (0x0280 => pub GICD_ICPENDR: [ReadWrite<u32>; 0x20]),
+            (0x0300 => pub GICD_ISACTIVER: [ReadWrite<u32>; 0x20]),
+            (0x0380 => pub GICD_ICACTIVER: [ReadWrite<u32>; 0x20]),
+            (0x0400 => pub GICD_IPRIORITYR: [ReadWrite<u32>; 0xFF]),
+            (0x07FC => _reserved1),
+            (0x0800 => pub GICD_ITARGETSR: [ReadWrite<u32, GICD_ITARGETSR::Register>; 0xFF]),
+            (0x0BFC => _reserved2),
+            (0x0C00 => pub GICD_ICFGR: [ReadWrite<u32>; 0x40]),
             (0x0D00 => pub GICD_PPISR: ReadOnly<u32>),
             (0x0D04 => pub GICD_SPISR: [ReadOnly<u32>; 0xE]),
-            (0x0D3C => _reserved11),
+            (0x0D3C => _reserved3),
             (0x0F00 => pub GICD_SGIR: WriteOnly<u32>),
-            (0x0F04 => _reserved12),
-            (0x0F10 => pub GICD_CPENDSGIR: [ReadWrite<u32>; 0x3]),
-            (0x0F1C => _reserved13),
-            (0x0F20 => pub GICD_SPENDSGIR: [ReadWrite<u32>; 0x3]),
-            (0x0F2C => _reserved14),
+            (0x0F04 => _reserved4),
+            (0x0F10 => pub GICD_CPENDSGIR: [ReadWrite<u32>; 0x4]),
+            (0x0F20 => pub GICD_SPENDSGIR: [ReadWrite<u32>; 0x4]),
+            (0x0F30 => _reserved5),
             (0x0FD0 => pub GICD_PIDR4: ReadOnly<u32>),
             (0x0FD4 => pub GICD_PIDR5: ReadOnly<u32>),
             (0x0FD8 => pub GICD_PIDR6: ReadOnly<u32>),

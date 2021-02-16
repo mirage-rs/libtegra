@@ -1,14 +1,30 @@
 //! Implementation of the ARM Generic Interrupt Controller v2.
 
+use core::fmt;
+use core::marker::PhantomData;
+
+/// An interrupt request for the GIC.
+pub type Irq = IrqNumber<{ Gic::NUM_IRQS }>;
+
+/// A generic callback that acts as an interrupt handler.
+pub type IrqHandler = fn(usize) -> Result<(), &'static str>;
+
 /// Representation of the Generic Interrupt Controller.
 pub struct Gic {
     // Pointer to the GIC CPU Interface registers.
     gicc: *const gicc::Registers,
     // Pointer to the GIC Distributor registers.
     gicd: *const gicd::Registers,
+
+    // A table of IRQ descriptors corresponding to their IRQ numbers.
+    handlers: [Option<IrqDescriptor>; Self::MAX_IRQS],
 }
 
 impl Gic {
+    /// The maximum number of allowed IRQs to be handled by this driver.
+    const MAX_IRQS: usize = 300; // Normally 1019, but reserve some space.
+    const NUM_IRQS: usize = Self::MAX_IRQS + 1;
+
     /// Gets an instance of the GIC through the base addresses to the CPU Interface
     /// and Distributor registers.
     ///
@@ -21,7 +37,109 @@ impl Gic {
         Gic {
             gicc: gicc_base as *const _,
             gicd: gicd_base as *const _,
+            handlers: [None; Self::MAX_IRQS],
         }
+    }
+
+    /// Registers an interrupt descriptor that corresponds to the given IRQ number.
+    ///
+    /// This overrides previously configured IRQ descriptors for the interrupt,
+    /// if any.
+    pub fn register_descriptor(&mut self, irq: Irq, descriptor: IrqDescriptor) {
+        let irq_num = irq.into_inner();
+        assert_ne!(irq_num, 0);
+
+        self.handlers[irq_num - 1] = Some(descriptor);
+    }
+
+    /// Dispatches the interrupt handler corresponding to the given IRQ.
+    ///
+    /// This function should be directly called from the CPU's IRQ exception
+    /// vector. A reference to [`IrqContext`] must be passed to this method to
+    /// ensure that this is the case.
+    ///
+    /// Any potential errors when no interrupt handler is actually registered or
+    /// when the handler itself encountered an error will be consumed into the
+    /// `Result` returned by this function.
+    pub fn dispatch_irq<'ctx>(
+        &'ctx self,
+        irq: Irq,
+        _ic: &IrqContext<'ctx>,
+    ) -> Result<(), &'static str> {
+        let irq_num = irq.into_inner();
+        assert_ne!(irq_num, 0);
+
+        if let Some(descriptor) = self.handlers[irq_num - 1] {
+            (descriptor.handler)(irq_num)
+        } else {
+            Err("No handler registered for the given IRQ")
+        }
+    }
+}
+
+/// Interrupt context token.
+///
+/// An instance of this type indicates that the current core is executing in IRQ
+/// context. This means that execution is currently inside an interrupt vector or
+/// a subroutine call of it.
+// Stolen from https://github.com/rust-embedded/bare-metal/blob/master/src/lib.rs#L16
+#[derive(Clone, Copy, Debug)]
+pub struct IrqContext<'ctx> {
+    _0: PhantomData<&'ctx ()>,
+}
+
+impl<'ctx> IrqContext<'ctx> {
+    /// Creates a new IRQ context token.
+    ///
+    /// # Safety
+    ///
+    /// This must only be called when the current core is in IRQ context and must not
+    /// live beyond the end of it. Further, the lifetime `'ctx` of the returned instance
+    /// is unconstrained. User code must not be able to influence the lifetime picked
+    /// for this type, since that might cause it to be inferred to `'static`.
+    #[inline(always)]
+    pub unsafe fn new() -> Self {
+        IrqContext { _0: PhantomData }
+    }
+}
+
+/// Describes an IRQ with a corresponding handler function.
+#[derive(Clone, Copy, Debug)]
+pub struct IrqDescriptor {
+    /// A descriptive name for the interrupt in question.
+    pub name: &'static str,
+    /// A callback that should be invoked for handling this interrupt accordingly.
+    pub handler: IrqHandler,
+}
+
+/// A wrapper for IRQ numbers that enforces the number to be in a valid range.
+#[derive(Clone, Copy, Debug)]
+pub struct IrqNumber<const MAX: usize>(usize);
+
+impl<const MAX: usize> IrqNumber<{ MAX }> {
+    /// Creates a new IRQ from a given number and validates the number.
+    ///
+    /// # Panics
+    ///
+    /// This method panics if the given IRQ number is higher than allowed by
+    /// the driver.
+    pub const fn new(irq: usize) -> Self {
+        if irq >= MAX {
+            panic!("IRQ number greater than allowed");
+        }
+
+        IrqNumber(irq)
+    }
+
+    /// Returns the wrapped IRQ number.
+    pub fn into_inner(self) -> usize {
+        self.0
+    }
+}
+
+impl<const MAX: usize> fmt::Display for IrqNumber<{ MAX }> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -143,8 +261,8 @@ pub mod gicc {
 /// Representation of the Distributor registers for the GIC.
 ///
 /// The GICD is used to configure and route IRQs to one or more CPU cores subsequently.
-/// Unlike for the GICC, access to these registers is not banked and all CPU cores see
-/// the same instance of the Distributor.
+/// Unlike for the GICC, access to these registers is only banked for a few registers
+/// and other than that, all CPU cores see the same instance of the Distributor.
 pub mod gicd {
     use register::{mmio::*, register_bitfields, register_structs};
 

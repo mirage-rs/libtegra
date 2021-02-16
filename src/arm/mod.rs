@@ -4,6 +4,7 @@
 //! forming the main CPU Complex (CCPLEX).
 
 pub mod cache;
+pub mod gic;
 mod utils;
 
 pub use utils::*;

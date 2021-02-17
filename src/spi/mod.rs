@@ -15,14 +15,14 @@ use crate::timer::usleep;
 /// NOTE: Instances of this structure should never be created manually.
 /// Refer to the public constants this structure holds, which represent
 /// the controllers 1 through 4.
+// TODO: SPI device clocks?
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Spi {
-    // TODO: SPI device clocks?
+    // A pointer to the SPI device registers in memory.
     registers: *const Registers,
 }
 
 // Definitions of known SPIs.
-
 impl Spi {
     /// Representation of the SPI 1 controller.
     pub const SPI_1: Self = Spi {

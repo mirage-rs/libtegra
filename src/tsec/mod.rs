@@ -213,9 +213,11 @@ pub enum FalconError {
 /// Representation of the Tegra Security Co-Processor.
 #[derive(Debug)]
 pub struct Tsec {
+    // A pointer to the TSEC register block in memory.
     registers: *const Registers,
 }
 
+// Definitions of known TSEC instances.
 impl Tsec {
     /// Representation of the TSEC-A instance.
     pub const A: Self = Tsec {

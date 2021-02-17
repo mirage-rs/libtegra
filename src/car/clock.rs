@@ -254,20 +254,21 @@ pub const CLK_Y_PLLP_OUT_CPU: u8 = 31;
 /// Representation of a device clock.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Clock {
-    /// The reset register offset for the clock device.
+    // The reset register offset for the clock device.
     reset: u32,
-    /// The enable register offset for the clock device.
+    // The enable register offset for the clock device.
     enable: u32,
-    /// The source register offset for the clock device.
+    // The source register offset for the clock device.
     source: u32,
-    /// The clock device index.
+    // The clock device index.
     index: u8,
-    /// The clock source value.
+    // The clock source value.
     clock_source: u32,
-    /// The clock divisor value.
+    // The clock divisor value.
     clock_divisor: u32,
 }
 
+// Definitions of known clocks.
 impl Clock {
     /// Representation of the Atomics clock.
     pub const ATOMICS: Self = Clock {

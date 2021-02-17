@@ -169,12 +169,12 @@ pub use registers::*;
 
 /// Representation of the Security Engine used for cryptographic operations.
 pub struct SecurityEngine {
+    // A pointer to the Security Engine device registers in memory.
     registers: *const Registers,
     rsa_keyslot_cache: [rsa::KeyInfo; constants::rsa::KEY_SLOT_COUNT],
 }
 
 // Definitions of known SE instances.
-
 impl SecurityEngine {
     /// A pointer to the first Security Engine instance.
     pub const SE1: Self = SecurityEngine {

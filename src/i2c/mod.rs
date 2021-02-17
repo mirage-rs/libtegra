@@ -7,11 +7,9 @@
 //! The I²C controller (I2C) provides a specification-compliant I²C 3.0 driver that
 //! supports multiple controllers and devices.
 //!
-//! # I2C controllers
-//!
-//! There are six instances of the I2C controller within Tegra X1 devices, all
-//! of them providing the same functionality. These six instances are represented
-//! as publicly exposed constants of the [`I2c`] structure.
+//! There are six instances of the I2C controller within Tegra X1 devices, all of
+//! them providing the same functionality. These six instances are represented as
+//! publicly exposed constants of the [`I2c`] structure.
 //!
 //! # Transmission speed
 //!

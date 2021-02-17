@@ -53,12 +53,13 @@ pub enum Error {
 /// [`I2c::receive_normal`]: #fn.receive_normal.html
 #[derive(Debug)]
 pub struct I2c {
+    // The device clock instance for the corresponding I2C peripheral.
     clock: &'static Clock,
+    // A pointer to the I2C register block in memory.
     registers: *const Registers,
 }
 
 // Definitions of known I2C controllers.
-
 impl I2c {
     /// Representation of the I2C1 controller.
     pub const C1: Self = I2c {

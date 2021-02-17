@@ -17,6 +17,7 @@ mod core;
 /// [`Channel`]: struct.Channel.html
 #[derive(Debug)]
 pub struct Controller {
+    // Internal cache of all supported DMA channels and their state.
     channels: [Channel; 32],
 }
 
@@ -161,12 +162,13 @@ impl Controller {
 /// [`Controller`]: struct.Controller.html
 #[derive(Debug)]
 pub struct Channel {
+    // A pointer to the DMA channel register block in memory.
     registers: *const ChannelRegisters,
+    // Whether the channel is claimed by another device.
     claimed: bool,
 }
 
 // Definitions of known Channels.
-
 impl Channel {
     /// Representation of the DMA Channel 0.
     pub const CH0: Self = Channel {

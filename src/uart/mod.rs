@@ -91,13 +91,15 @@ pub const BAUD_115200: u32 = 115_200;
 /// the UARTs A through E.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Uart {
+    // The baud rate the UART is configured with.
     baud: u32,
+    // The device clock instance for the corresponding UART peripheral.
     clock: &'static Clock,
+    // A pointer to the UART register block in memory.
     registers: *const Registers,
 }
 
 // Definitions of known UARTs.
-
 impl Uart {
     /// Representation of UART A.
     pub const A: Self = Uart {

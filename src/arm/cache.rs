@@ -53,6 +53,7 @@ impl<T, const N: usize> DerefMut for CachePad<T, { N }> {
 
 /// Flushes the data cache line starting from the given address.
 #[cfg(not(target_arch = "aarch64"))]
+#[allow(unused)]
 pub unsafe fn flush_data_cache_line(_: usize) {
     // Purposefully do nothing...
 }

@@ -23,11 +23,11 @@ pub use crate::pwm::registers::*;
 /// [`Clock`]: ../car/struct.Clock.html
 #[derive(Debug)]
 pub struct PwmChannel {
+    // A pointer to the PWM device registers in memory.
     registers: *const Registers,
 }
 
 // Definitions of known PWM channels.
-
 impl PwmChannel {
     /// Representation of the PWM 0 channel.
     pub const PWM_0: Self = PwmChannel {

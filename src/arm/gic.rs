@@ -31,7 +31,7 @@ impl Gic {
     /// # Safety
     ///
     /// The caller is responsible for providing correct physical addresses pointing
-    /// to the GICC and GICD devices. Otherwise MMIO access hits uncontrolled addresses
+    /// to the GICC and GICD devices. Otherwise, MMIO access hits uncontrolled addresses
     /// and undefined behavior will be the result.
     pub const unsafe fn get(gicc_base: usize, gicd_base: usize) -> Self {
         Gic {

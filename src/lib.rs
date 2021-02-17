@@ -8,6 +8,7 @@ extern crate enum_primitive;
 #[macro_use]
 extern crate static_assertions;
 
+pub mod actmon;
 pub mod ahb;
 pub mod apb;
 pub mod arm;

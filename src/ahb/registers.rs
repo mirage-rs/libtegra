@@ -41,4 +41,6 @@ pub mod mem {
             (0x12C => @END),
         }
     }
+
+    assert_eq_size!(Registers, [u8; 0x12C]);
 }

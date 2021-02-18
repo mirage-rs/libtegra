@@ -169,7 +169,8 @@ enum_from_primitive! {
         /// cannot decode.
         InvalidOpcode = 8,
         /// A so-called Secure Fault was indicated by jumping to a secure page,
-        /// but the MAC verification for that page failed, which halted the MCU.
+        /// but the MAC verification for the code region failed, resulting in
+        /// this exception being raised.
         AuthenticationEntry = 9,
         /// A page fault occurred because the TLB failed to provide mappings for
         /// a virtual address on lookup.
@@ -251,10 +252,41 @@ impl Tsec {
         kfuse::wait_until_ready().unwrap();
 
         // Configure the Falcon processor.
-        tsec.FALCON_DMACTL.set(0);
-        tsec.FALCON_IRQMSET.set(0xFFF2);
-        tsec.FALCON_IRQDEST.set(0xFFF0);
-        tsec.FALCON_ITFEN.set(3);
+        tsec.TSEC_FALCON_DMACTL.set(0);
+        tsec.TSEC_FALCON_IRQMSET.write(
+            TSEC_FALCON_IRQS::DMA::CLEAR
+                + TSEC_FALCON_IRQS::EXT.val(0xFF)
+                + TSEC_FALCON_IRQS::SWGEN1::SET
+                + TSEC_FALCON_IRQS::SWGEN0::SET
+                + TSEC_FALCON_IRQS::EXTERR::SET
+                + TSEC_FALCON_IRQS::HALT::SET
+                + TSEC_FALCON_IRQS::CTXSW::CLEAR
+                + TSEC_FALCON_IRQS::MTHD::CLEAR
+                + TSEC_FALCON_IRQS::WDTMR::SET
+                + TSEC_FALCON_IRQS::GPTMR::CLEAR,
+        );
+        tsec.TSEC_FALCON_IRQDEST.write(
+            TSEC_FALCON_IRQDEST::TARGET_EXT.val(0)
+                + TSEC_FALCON_IRQDEST::TARGET_SWGEN1::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_SWGEN0::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_EXTERR::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_HALT::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_CTXSW::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_MTHD::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_WDTMR::CLEAR
+                + TSEC_FALCON_IRQDEST::TARGET_GPTMR::CLEAR
+                + TSEC_FALCON_IRQDEST::HOST_EXT.val(0xFF)
+                + TSEC_FALCON_IRQDEST::HOST_SWGEN1::SET
+                + TSEC_FALCON_IRQDEST::HOST_SWGEN0::SET
+                + TSEC_FALCON_IRQDEST::HOST_EXTERR::SET
+                + TSEC_FALCON_IRQDEST::HOST_HALT::SET
+                + TSEC_FALCON_IRQDEST::HOST_CTXSW::CLEAR
+                + TSEC_FALCON_IRQDEST::HOST_MTHD::CLEAR
+                + TSEC_FALCON_IRQDEST::HOST_WDTMR::CLEAR
+                + TSEC_FALCON_IRQDEST::HOST_GPTMR::CLEAR,
+        );
+        tsec.TSEC_FALCON_ITFEN
+            .write(TSEC_FALCON_ITFEN::MTHDEN::SET + TSEC_FALCON_ITFEN::CTXEN::SET);
     }
 
     /// Shuts the TSEC down and makes it inaccessible.
@@ -273,8 +305,10 @@ impl Tsec {
         let tsec = unsafe { &*self.registers };
 
         let timeout = get_milliseconds() + 10_000;
-
-        while (tsec.FALCON_DMATRFCMD.get() & (1 << 1)) == 0 {
+        while !tsec
+            .TSEC_FALCON_DMATRFCMD
+            .is_set(TSEC_FALCON_DMATRFCMD::IDLE)
+        {
             if get_milliseconds() > timeout {
                 return Err(FalconError::DmaTimeout);
             }
@@ -307,7 +341,7 @@ impl Tsec {
         self.dma_wait_idle()?;
 
         // Load in the memory base address of the firmware buffer.
-        tsec.FALCON_DMATRFBASE
+        tsec.TSEC_FALCON_DMATRFBASE
             .set((firmware_address >> FIRMWARE_ALIGN_BITS) as u32);
 
         // Configure the DMA engine to transfer the firmware buffer into the Falcon IMEM.
@@ -315,9 +349,11 @@ impl Tsec {
             let base = (index * FIRMWARE_ALIGNMENT) as u32;
             let offset = base;
 
-            tsec.FALCON_DMATRFMOFFS.set(offset);
-            tsec.FALCON_DMATRFFBOFFS.set(base);
-            tsec.FALCON_DMATRFCMD.set(1 << 4);
+            tsec.TSEC_FALCON_DMATRFMOFFS
+                .write(TSEC_FALCON_DMATRFMOFFS::OFFS.val(offset));
+            tsec.TSEC_FALCON_DMATRFFBOFFS.set(base);
+            tsec.TSEC_FALCON_DMATRFCMD
+                .write(TSEC_FALCON_DMATRFCMD::IMEM::SET);
 
             self.dma_wait_idle()?;
         }
@@ -354,19 +390,20 @@ impl Tsec {
         let mut res;
 
         // Configure Falcon and start the CPU.
-        tsec.FALCON_MAILBOX0.set(*mailbox0);
-        tsec.FALCON_MAILBOX1.set(*mailbox1);
-        tsec.FALCON_BOOTVEC.set(boot_vector);
-        tsec.FALCON_CPUCTL.set(1 << 1);
+        tsec.TSEC_FALCON_MAILBOX0.set(*mailbox0);
+        tsec.TSEC_FALCON_MAILBOX1.set(*mailbox1);
+        tsec.TSEC_FALCON_BOOTVEC.set(boot_vector);
+        tsec.TSEC_FALCON_CPUCTL
+            .write(TSEC_FALCON_CPUCTL::STARTCPU::SET);
 
         // Wait for the DMA engine to enter idle state.
         res = self.dma_wait_idle();
         if res.is_ok() {
             // Wait for the CPU to be halted.
-            while tsec.FALCON_CPUCTL.get() != (1 << 4) {}
+            while !tsec.TSEC_FALCON_CPUCTL.is_set(TSEC_FALCON_CPUCTL::HALTED) {}
 
             // Check if the CPU has crashed.
-            let exception_info = tsec.FALCON_EXCI.get();
+            let exception_info = tsec.TSEC_FALCON_EXCI.get();
             if exception_info != 0 {
                 // Gather exception details.
                 let pc = exception_info & 0xFFFFF;
@@ -376,8 +413,8 @@ impl Tsec {
             }
         }
 
-        *mailbox0 = tsec.FALCON_MAILBOX0.get();
-        *mailbox1 = tsec.FALCON_MAILBOX1.get();
+        *mailbox0 = tsec.TSEC_FALCON_MAILBOX0.get();
+        *mailbox1 = tsec.TSEC_FALCON_MAILBOX1.get();
 
         res
     }
@@ -396,11 +433,12 @@ impl Tsec {
         let tsec = unsafe { &*self.registers };
 
         // Configure a full dump of DMEM with auto-incrementing addresses.
-        tsec.FALCON_DMEMC0.set((0 << 2) | (1 << 25));
+        tsec.TSEC_FALCON_DMEMC0
+            .write(TSEC_FALCON_DMEMC::AINCR::SET + TSEC_FALCON_DMEMC::OFFS.val(0));
 
         // Read all words of the DMEM into the output buffer.
         for i in output.iter_mut() {
-            *i = tsec.FALCON_DMEMD0.get();
+            *i = tsec.TSEC_FALCON_DMEMD0.get();
         }
     }
 }

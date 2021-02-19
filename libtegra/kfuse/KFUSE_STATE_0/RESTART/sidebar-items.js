@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Set this bit to restart decoding, similar to deassertion of reset."]]});

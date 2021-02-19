@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Reset slave state machine on timeout."]]});

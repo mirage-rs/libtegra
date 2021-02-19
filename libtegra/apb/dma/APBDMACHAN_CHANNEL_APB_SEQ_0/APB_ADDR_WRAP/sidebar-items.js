@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["NoWrap",""],["SET",""],["WrapOn16Words",""],["WrapOn1Words",""],["WrapOn2Words",""],["WrapOn32Words",""],["WrapOn4Words",""],["WrapOn64Words",""],["WrapOn8Words",""]],"enum":[["Value","APB Address Wrap-around Window."]]});

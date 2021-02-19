@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Holds this Processor until DMA block transfer completes."]]});

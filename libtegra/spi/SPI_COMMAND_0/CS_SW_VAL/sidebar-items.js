@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["High",""],["Low",""],["SET",""]],"enum":[["Value","CS signal value in Master Mode."]]});

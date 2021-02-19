@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_GANGED_MODE_EN",""],["DUMMY_PIX_LEFT_RIGHT_SIDE",""]],"mod":[["DSI_GANGED_MODE_EN","Whether ganged mode transactions should be enabled."],["DUMMY_PIX_LEFT_RIGHT_SIDE","Enables dummy pixels on one side of the active pixel stream."]],"struct":[["Register",""]]});

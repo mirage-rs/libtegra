@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["REGISTERS","A pointer to the PMC Secure Boot register block that can be accessed by dereferencing it."]],"struct":[["Registers","Representation of the PMC Secure Boot registers."]]});

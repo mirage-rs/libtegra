@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["APB_MISC_PP_CONFIG_CTL_0","Bitfields of the `APB_MISC_PP_CONFIG_CTL_0` register."],["APB_MISC_PP_PINMUX_GLOBAL_0_0","Bitfields of the `APB_MISC_PP_PINMUX_GLOBAL_0_0` register."],["APB_MISC_PP_STRAPPING_OPT_A_0","Bitfields of the `APB_MISC_PP_STRAPPING_OPT_A_0` register."]],"struct":[["MiscPP","Representation of the APB Control Registers."]]});

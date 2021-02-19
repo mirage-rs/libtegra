@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_FRAME_INIT_BYTE_COUNT",""],["DSI_SEND_INIT_SEQUENCE",""]],"mod":[["DSI_FRAME_INIT_BYTE_COUNT","Frame Initialization Sequence Byte Count. This specifies the number of frame initialization sequence cycles to send."],["DSI_SEND_INIT_SEQUENCE","Send Initialization Sequence."]],"struct":[["Register",""]]});

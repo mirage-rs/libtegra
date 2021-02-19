@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Whether pulse should be enabled with modulator."]]});

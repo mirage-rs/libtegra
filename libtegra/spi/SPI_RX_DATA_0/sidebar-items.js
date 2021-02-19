@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["SPI_RX_DATA",""]],"mod":[["SPI_RX_DATA","Holds the last data that was received by the SPI controller."]],"struct":[["Register",""]]});

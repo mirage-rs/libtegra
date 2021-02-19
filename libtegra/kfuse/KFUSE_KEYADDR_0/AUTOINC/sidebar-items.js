@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","When set, `ADDR` is incremented by 1 after each read of `KEYS`."]]});

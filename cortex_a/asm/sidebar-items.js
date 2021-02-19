@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["eret","Exception return"],["nop","The classic no-op"],["ret","Function return"],["sev","Send EVent."],["sevl","Send EVent.Locally"],["wfe","Wait For Event"],["wfi","Wait For Interrupt"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BusWidth128",""],["BusWidth16",""],["BusWidth32",""],["BusWidth64",""],["BusWidth8",""],["CLEAR",""],["SET",""]],"enum":[["Value","APB bus width."]]});

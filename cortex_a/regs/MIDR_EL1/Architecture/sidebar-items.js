@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Individual",""],["SET",""]],"enum":[["Value","The permitted values of this field are:"]]});

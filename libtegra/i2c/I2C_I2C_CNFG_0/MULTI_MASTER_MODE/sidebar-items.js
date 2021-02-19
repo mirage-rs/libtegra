@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["MultiMaster","Multi master mode."],["SET",""],["SingleMaster","Single master mode."]],"enum":[["Value","Used to select single or multi master mode."]]});

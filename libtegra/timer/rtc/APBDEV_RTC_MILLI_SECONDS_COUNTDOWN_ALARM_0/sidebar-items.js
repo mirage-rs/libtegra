@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ENABLE",""],["REPEAT",""],["VALUE",""]],"mod":[["ENABLE","Enable bit for the countdown operation."],["REPEAT","Repeat bit for the countdown operation."],["VALUE","Number of seconds to countdown."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Inner",""],["None",""],["Outer",""],["SET",""]],"enum":[["Value","Shareability attribute for memory associated with translation table walks using TTBR0_EL1."]]});

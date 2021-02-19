@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Set this bit to start CPU execution while in a halted state. If a start request is still pending, clearing this bit will cancel the start request. Writing any value has no effect while the CPU is running."]]});

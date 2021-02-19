@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["AhbBusy",""],["AhbDataXfer",""],["AhbIdle",""],["AhbMasterActive",""],["AhbMasterSlaveActive",""],["CLEAR",""],["Disable",""],["MasterIdle",""],["SET",""]],"enum":[["Value","Selection criteria on parent module for type of pulse signal."]]});

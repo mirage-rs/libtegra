@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["GEN",""]],"mod":[["GEN","Enables Global APB-DMA."]],"struct":[["Register",""]]});

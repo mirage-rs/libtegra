@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable",""],["Enable",""],["SET",""]],"enum":[["Value","Enable interrupt for number of consecutive lower watermark breaches that need to occur to raise an interrupt."]]});

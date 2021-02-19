@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["ReloadFor1XBlocks",""],["ReloadFor2XBlocks",""],["SET",""]],"enum":[["Value","2X Double Buffering Mode (for Run-Multiple Mode with No Wrap Operations)."]]});

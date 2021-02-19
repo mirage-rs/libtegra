@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["REGISTERS","A pointer to the AMBA Peripheral Bus register block that can be accessed by dereferencing it."]],"mod":[["misc_gp",""],["misc_pp",""]],"struct":[["AmbaPeripheralBus","Representation of the APB Misc Registers."]]});

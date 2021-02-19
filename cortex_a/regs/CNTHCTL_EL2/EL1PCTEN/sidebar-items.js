@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Traps Non-secure EL0 and EL1 accesses to the physical counter register to EL2."]]});

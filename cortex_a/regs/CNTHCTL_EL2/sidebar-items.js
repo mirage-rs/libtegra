@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["EL1PCEN",""],["EL1PCTEN",""]],"mod":[["EL1PCEN","Traps Non-secure EL0 and EL1 accesses to the physical timer registers to EL2."],["EL1PCTEN","Traps Non-secure EL0 and EL1 accesses to the physical counter register to EL2."]],"struct":[["Register",""]]});

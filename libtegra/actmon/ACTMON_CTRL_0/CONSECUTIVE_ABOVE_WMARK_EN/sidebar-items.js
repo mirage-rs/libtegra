@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable",""],["Enable",""],["SET",""]],"enum":[["Value","Enable interrupt when consecutive `CONSECUTIVE_UPPER_NUM` upper watermark breaches are detected."]]});

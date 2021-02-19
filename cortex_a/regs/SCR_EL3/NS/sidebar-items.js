@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["NonSecure",""],["SET",""],["Secure",""]],"enum":[["Value","Non-secure bit. 0 Indicates that EL0 and EL1 are in Secure state."]]});

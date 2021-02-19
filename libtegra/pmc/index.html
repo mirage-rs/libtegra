@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `pmc` mod in crate `libtegra`."><meta name="keywords" content="rust, rustlang, rust-lang, pmc"><title>libtegra::pmc - Rust</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings"></script><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../libtegra/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a><p class="location">Module pmc</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li><li><a href="#functions">Functions</a></li></ul></div><p class="location"><a href="../index.html">libtegra</a></p><div id="sidebar-vars" data-name="pmc" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../index.html">libtegra</a>::<wbr><a class="mod" href="">pmc</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../src/libtegra/pmc/mod.rs.html#1-128" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Driver for the Tegra X1 Power Management Controller.</p>
+<p>See Chapter 12 in the Tegra X1 Technical Reference Manual for details.</p>
+<h1 id="description" class="section-header"><a href="#description">Description</a></h1>
+<p>The Power Management Controller (PMC) block interacts with an external Power Management
+Integrated Circuit (PMIC) through sideband signals. The PMC controls the entry and exit
+of the system from different sleep modes. It provides power-gating controllers for SoC
+and CPU power partitions, except for the Maxwell GPU power partition. The PMC also
+provides deep power down (DPD) mode control for pads, and scratch storage to save some
+of the context during sleep modes (when the CPU and/or SoC power rails are off).</p>
+<p>Sleep (LP1) and Deep Sleep (LP0) require specific logic to maintain some states and control
+the power domains, including signaling to the external PMIC to provide power to the main
+logic in Tegra X1 devices. All this logic is centralized in the PMC block.</p>
+<h1 id="power-gatingungating" class="section-header"><a href="#power-gatingungating">Power Gating/Ungating</a></h1>
+<p>This module exposes an implementation of the power-gating logic for
+certain <a href="enum.Partition.html"><code>Partition</code></a>s through the <a href="fn.powergate_partition.html"><code>powergate_partition</code></a> function:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">libtegra</span>::{<span class="ident">car</span>::<span class="ident">Clock</span>, <span class="ident">pmc</span>};
+
+<span class="doccomment">/// Attempts to bring up all the Serial Output Resources.</span>
+<span class="kw">fn</span> <span class="ident">bring_up_sors</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+    <span class="comment">// Power-ungate SOR.</span>
+    <span class="ident">pmc</span>::<span class="ident">powergate_partition</span>(<span class="ident">pmc</span>::<span class="ident">Partition</span>::<span class="ident">SOR</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Bring up clocks.</span>
+    <span class="ident">Clock</span>::<span class="ident">SOR_SAFE</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">SOR0</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">SOR1</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">DPAUX</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">DPAUX1</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">MIPI_CAL</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">CSI</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">DSI</span>.<span class="ident">enable</span>();
+    <span class="ident">Clock</span>::<span class="ident">DSIB</span>.<span class="ident">enable</span>();
+
+    <span class="comment">// Power-gate SOR.</span>
+    <span class="ident">pmc</span>::<span class="ident">powergate_partition</span>(<span class="ident">pmc</span>::<span class="ident">Partition</span>::<span class="ident">SOR</span>, <span class="bool-val">true</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}</pre></div>
+</div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="counter0/index.html" title="libtegra::pmc::counter0 mod">counter0</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="mod" href="sb/index.html" title="libtegra::pmc::sb mod">sb</a></td><td class="docblock-short"></td></tr></table><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.Registers.html" title="libtegra::pmc::Registers struct">Registers</a></td><td class="docblock-short"><p>Representation of the PMC registers.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.Partition.html" title="libtegra::pmc::Partition enum">Partition</a></td><td class="docblock-short"><p>Enumeration over power-gated PMC partitions.</p>
+</td></tr></table><h2 id="constants" class="section-header"><a href="#constants">Constants</a></h2>
+<table><tr class="module-item"><td><a class="constant" href="constant.REGISTERS.html" title="libtegra::pmc::REGISTERS constant">REGISTERS</a></td><td class="docblock-short"><p>A pointer to the PMC register block that can be accessed by dereferencing it.</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.powergate_partition.html" title="libtegra::pmc::powergate_partition fn">powergate_partition</a></td><td class="docblock-short"><p>Toggles power gating for a given partition.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libtegra"></div>
+    <script src="../../main.js"></script><script defer src="../../search-index.js"></script></body></html>

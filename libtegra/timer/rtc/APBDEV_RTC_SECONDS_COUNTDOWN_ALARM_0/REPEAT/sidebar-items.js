@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable","Disable repetition of countdown operations."],["Enable","Enable repetition of countdown operations."],["SET",""]],"enum":[["Value","Repeat bit for the countdown operation."]]});

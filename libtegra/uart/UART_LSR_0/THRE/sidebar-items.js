@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Denotes that the Transmit Holding Register is empty, if set to 1."]]});

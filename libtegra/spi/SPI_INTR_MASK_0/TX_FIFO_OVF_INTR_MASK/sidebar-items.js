@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Interrupt enable mask bit for `TX_FIFO_OVF`."]]});

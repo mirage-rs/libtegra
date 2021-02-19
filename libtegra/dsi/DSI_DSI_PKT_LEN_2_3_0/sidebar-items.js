@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["LENGTH_2",""],["LENGTH_3",""]],"mod":[["LENGTH_2","Packet length 2 (in bytes)."],["LENGTH_3","Packet length 3 (in bytes)."]],"struct":[["Register",""]]});

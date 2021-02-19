@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["PingIntrSta",""],["PongIntrSta",""],["SET",""]],"enum":[["Value","Whether Ping or Pong buffer transfer has completed."]]});

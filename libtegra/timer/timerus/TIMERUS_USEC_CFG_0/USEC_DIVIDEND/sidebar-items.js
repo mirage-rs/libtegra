@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["ClkMFreq12","12 MHz clk_m frequency - 0x00 / 0x0B."],["ClkMFreq384","38.4 Mhz clk_m frequency - 0x04 / 0xBF."],["SET",""]],"enum":[["Value","Microsecond dividend. (n+1)"]]});

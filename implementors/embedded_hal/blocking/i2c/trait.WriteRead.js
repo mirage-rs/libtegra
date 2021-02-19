@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["libtegra"] = [{"text":"impl <a class=\"trait\" href=\"embedded_hal/blocking/i2c/trait.WriteRead.html\" title=\"trait embedded_hal::blocking::i2c::WriteRead\">WriteRead</a> for <a class=\"struct\" href=\"libtegra/i2c/struct.I2c.html\" title=\"struct libtegra::i2c::I2c\">I2c</a>","synthetic":false,"types":["libtegra::i2c::controller::I2c"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

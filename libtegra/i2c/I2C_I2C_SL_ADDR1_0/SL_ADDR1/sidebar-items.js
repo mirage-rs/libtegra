@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","For a 10-bit slave address, this field is the least significant 8 bits."]]});

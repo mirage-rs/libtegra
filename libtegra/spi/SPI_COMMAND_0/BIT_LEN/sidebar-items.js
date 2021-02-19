@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Represents the number of bits transferred in either Packed or Unpacked Mode."]]});

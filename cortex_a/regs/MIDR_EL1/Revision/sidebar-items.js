@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","An IMPLEMENTATION DEFINED revision number for the device."]]});

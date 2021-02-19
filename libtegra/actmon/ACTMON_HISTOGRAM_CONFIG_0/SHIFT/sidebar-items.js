@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Scaling factor for the idle counter before the value is used to update histogram bucket."]]});

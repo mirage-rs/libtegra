@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["OneWord","Asserted when at least one word is empty in the FIFO."],["SET",""],["TwoWords","Asserted when at least 2 words are empty in the FIFO."]],"enum":[["Value","Slave Transmit FIFO trigger level."]]});

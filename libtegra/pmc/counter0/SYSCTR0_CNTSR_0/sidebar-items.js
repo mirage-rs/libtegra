@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["FCREQ",""],["HDBG",""],["RESERVED",""]],"mod":[["FCREQ","Frequency change acknowledge."],["HDBG","Whether or not the counter is halted due to the Halt-on-Debug signal being asserted."],["RESERVED","Reserved."]],"struct":[["Register",""]]});

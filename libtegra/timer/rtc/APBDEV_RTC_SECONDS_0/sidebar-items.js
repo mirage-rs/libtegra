@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["SECONDS",""]],"mod":[["SECONDS","The seconds counter which is incremented every 1000 milliseconds."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["NotSupported",""],["SET",""],["Supported",""]],"enum":[["Value","Support for 16KiB memory translation granule size. Defined values are:"]]});

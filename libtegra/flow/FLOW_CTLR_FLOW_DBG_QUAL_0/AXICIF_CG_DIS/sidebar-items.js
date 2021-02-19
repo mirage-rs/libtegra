@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","CCPLEX AXICIF/MCCIF clock gating disable."]]});

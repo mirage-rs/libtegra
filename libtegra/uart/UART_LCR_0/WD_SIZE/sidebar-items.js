@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""],["WordLength5","Word length of 5."],["WordLength6","Word length of 6."],["WordLength7","Word length of 7."],["WordLength8","Word length of 8."]],"enum":[["Value","The Word Length size."]]});

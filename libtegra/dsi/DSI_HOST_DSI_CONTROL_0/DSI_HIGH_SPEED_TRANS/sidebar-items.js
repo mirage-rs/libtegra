@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["High","High speed."],["Low","Low speed - Unlikely to ever be used."],["SET",""]],"enum":[["Value","DSI high speed transmission of packets."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable","Disables writes."],["Enable","Enables writes."],["SET",""]],"enum":[["Value","When set, writes to the SECONDS counter are disabled. Can only be cleared by resetting the RTC module."]]});

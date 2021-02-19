@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ENB",""],["PFM",""],["PWM_0",""]],"mod":[["ENB","Whether pulse should be enabled with modulator."],["PFM","Frequency divider that needs to be programmed."],["PWM_0","Pulse width that needs to be programmed."]],"struct":[["Register",""]]});

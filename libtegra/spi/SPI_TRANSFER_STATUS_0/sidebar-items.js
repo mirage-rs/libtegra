@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BLOCK_COUNT",""],["RDY",""],["RESERVED0",""],["RESERVED1",""],["SLV_IDLE_COUNT",""]],"mod":[["BLOCK_COUNT","Counts the number of packets in a transaction in DMA/PIO Mode."],["RDY","Ready bit."],["RESERVED0","Reserved for future use."],["RESERVED1","Reserved for future use."],["SLV_IDLE_COUNT","Slave Continuous Mode."]],"struct":[["Register",""]]});

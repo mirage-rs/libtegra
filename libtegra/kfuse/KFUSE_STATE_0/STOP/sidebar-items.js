@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Set this bit to abort decoding in progress, then wait for STATE=IDLE."]]});

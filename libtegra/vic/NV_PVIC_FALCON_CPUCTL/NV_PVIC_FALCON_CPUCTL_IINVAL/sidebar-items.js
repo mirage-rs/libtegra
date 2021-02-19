@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Set this bit to mark all blocks in IMEM except block 0 as INVALID. This bit will auto-clear."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Left",""],["Right",""],["SET",""]],"enum":[["Value","Enables dummy pixels on one side of the active pixel stream."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["HCE",""],["NS",""],["RW",""],["SMD",""]],"mod":[["HCE","Hypervisor Call Enable"],["NS","Non-secure bit. 0 Indicates that EL0 and EL1 are in Secure state."],["RW","Execution state control for lower Exception levels:"],["SMD","Secure Monitor call Disable"]],"struct":[["Register",""]]});

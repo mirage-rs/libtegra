@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Time to Receive LP00 at end of BTA (2 * TTLPX)."]]});

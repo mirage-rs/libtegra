@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["F",""],["PA",""]],"mod":[["F","Indicates whether the instruction performed a successful address translation."],["PA","Output address. The output address (OA) corresponding to the supplied input address. This field returns address bits[47:12]."]],"struct":[["Register",""]]});

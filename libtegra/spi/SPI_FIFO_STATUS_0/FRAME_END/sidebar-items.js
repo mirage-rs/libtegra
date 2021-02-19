@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Status bit that is set during Slave Continuos Mode, in case of an Sclk mismatch."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["COND_STATUS",""]],"mod":[["COND_STATUS","Set if FIFO hits COND overflows with stalling disabled. This bit is sticky."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Number of dummy pixels padded to the left of the active pixel stream."]]});

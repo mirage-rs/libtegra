@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Software step. Shows the value of PSTATE.SS immediately before the exception was taken."]]});

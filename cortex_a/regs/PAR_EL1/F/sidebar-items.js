@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""],["TranslationAborted",""],["TranslationSuccessfull",""]],"enum":[["Value","Indicates whether the instruction performed a successful address translation."]]});

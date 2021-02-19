@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ENABLE",""],["STATUS",""],["THRESHOLD",""]],"mod":[["ENABLE","Enables L2FLUSH TIMEOUT counter."],["STATUS","Set in case of L2FLUSHREQUEST timeout."],["THRESHOLD","L2FLUSH asserts timeout once the counter reaches this value."]],"struct":[["Register",""]]});

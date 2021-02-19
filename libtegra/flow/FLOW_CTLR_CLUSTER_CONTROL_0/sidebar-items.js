@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ACTIVE",""],["POST_SWITCH_DELAY",""],["PRE_SWITCH_DELAY",""]],"mod":[["ACTIVE","Whether Cluster Control is active."],["POST_SWITCH_DELAY","The post-switch delay."],["PRE_SWITCH_DELAY","The pre-switch delay."]],"struct":[["Register",""]]});

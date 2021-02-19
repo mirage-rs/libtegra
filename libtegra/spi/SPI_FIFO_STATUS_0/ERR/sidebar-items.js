@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Error",""],["Ok",""],["SET",""]],"enum":[["Value","Will be set to 1 when errors occur."]]});

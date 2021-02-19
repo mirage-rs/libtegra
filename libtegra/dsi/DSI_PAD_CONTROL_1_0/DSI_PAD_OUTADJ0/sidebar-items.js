@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Input delay trimmer for data bit 0. Each tap delays 40 ps."]]});

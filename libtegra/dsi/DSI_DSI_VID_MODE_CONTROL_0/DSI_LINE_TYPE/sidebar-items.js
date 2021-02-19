@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Vertical blank. LINE TYPE on which the host command packet is to be transmitted."]]});

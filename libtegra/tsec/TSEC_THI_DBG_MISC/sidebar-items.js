@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLIENT_IDLE_STATUS",""],["THI_IDLE_EN",""],["THI_IDLE_STATUS",""],["THI_SYNCPT_PENDING_STATUS",""]],"mod":[["CLIENT_IDLE_STATUS",""],["THI_IDLE_EN",""],["THI_IDLE_STATUS",""],["THI_SYNCPT_PENDING_STATUS",""]],"struct":[["Register",""]]});

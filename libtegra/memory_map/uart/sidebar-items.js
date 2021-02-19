@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BASE","Base address of the UART registers."],["UART_A","Start address of the UART A register block."],["UART_B","Start address of the UART B register block."],["UART_C","Start address of the UART C register block."],["UART_D","Start address of the UART D register block."],["UART_E","Start address of the UART E register block."]]});

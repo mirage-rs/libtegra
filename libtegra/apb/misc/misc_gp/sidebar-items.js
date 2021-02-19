@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MiscGP","Representation of the APB Pad Control Registers."]]});

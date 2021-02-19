@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ApbIdle",""],["CLEAR",""],["Disable",""],["PEnablePSelActive",""],["PReadyActive",""],["PSelActive",""],["SET",""]],"enum":[["Value","Selection criteria on parent module for type of pulse signal."]]});

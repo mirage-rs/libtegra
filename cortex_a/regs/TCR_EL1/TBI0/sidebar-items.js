@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Ignored",""],["SET",""],["Used",""]],"enum":[["Value","Top Byte ignored - indicates whether the top byte of an address is used for address match for the TTBR0_EL1 region, or ignored and used for tagged addresses. Defined values are:"]]});

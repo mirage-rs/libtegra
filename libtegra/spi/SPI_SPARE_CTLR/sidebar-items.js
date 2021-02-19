@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["RESERVED0",""],["RESERVED1",""],["SPI_SPARE_CONTROL_REGISTER_BYTE2",""]],"mod":[["RESERVED0","Reserved for future use."],["RESERVED1","Reserved for future use."],["SPI_SPARE_CONTROL_REGISTER_BYTE2","Can be used to adjust internal clock delay in Master Mode."]],"struct":[["Register",""]]});

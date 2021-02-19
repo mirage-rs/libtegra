@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["PartitionOff",""],["PartitionOn",""],["PgInProgress",""],["PuInProgress",""],["SET",""]],"enum":[["Value","The current status of the C0NC partition."]]});

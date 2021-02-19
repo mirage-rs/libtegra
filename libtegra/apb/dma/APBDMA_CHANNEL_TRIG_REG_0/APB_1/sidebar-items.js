@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","EOC-1 Initiated DMA Request after Transfer Completion."]]});

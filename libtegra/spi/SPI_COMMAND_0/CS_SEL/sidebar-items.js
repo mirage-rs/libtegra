@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Cs0","Selects CS0."],["Cs1","Selects CS1."],["Cs2","Selects CS2."],["Cs3","Selects CS3."],["SET",""]],"enum":[["Value","In Master Mode, these bits are used to select a slave in the multi-slave environment."]]});

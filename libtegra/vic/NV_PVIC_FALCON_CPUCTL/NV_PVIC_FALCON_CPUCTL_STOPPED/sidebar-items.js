@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates whether the CPU is currently in the stopped state. Falcon exits this state if a `1` is written to the `STARTCPU` bit or if an interrupt arrives at one of its 2 inputs and the corresponding IE bit in CSW is set."]]});

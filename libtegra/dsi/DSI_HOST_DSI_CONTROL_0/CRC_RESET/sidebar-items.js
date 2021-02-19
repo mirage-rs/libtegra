@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Whether the Verification CRC should be reset to `0xFFFF_FFFF`."]]});

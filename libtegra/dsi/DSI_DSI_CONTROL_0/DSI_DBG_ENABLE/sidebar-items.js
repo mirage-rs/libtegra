@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Control signal to turn off clock monitoring when enabled for debug, on every DSI byte clock debug signal toggle."]]});

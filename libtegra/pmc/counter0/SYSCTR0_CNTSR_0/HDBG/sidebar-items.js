@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Whether or not the counter is halted due to the Halt-on-Debug signal being asserted."]]});

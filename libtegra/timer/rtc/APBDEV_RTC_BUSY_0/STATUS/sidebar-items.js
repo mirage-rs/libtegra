@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Busy","BUSY state."],["CLEAR",""],["Idle","IDLE state."],["SET",""]],"enum":[["Value","This bit is set when a write is initiated on the APB side."]]});

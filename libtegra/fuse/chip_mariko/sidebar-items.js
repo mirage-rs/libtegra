@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["MarikoExt","Additional fuse chip registers which are only available on Mariko."],["Registers","Representation of the FUSE chip registers for Mariko."]]});

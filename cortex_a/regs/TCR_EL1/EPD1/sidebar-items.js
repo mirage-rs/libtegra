@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["DisableTTBR1Walks",""],["EnableTTBR1Walks",""],["SET",""]],"enum":[["Value","Translation table walk disable for translations using TTBR1_EL1. This bit controls whether a translation table walk is performed on a TLB miss, for an address that is translated using TTBR1_EL1. The encoding of this bit is:"]]});

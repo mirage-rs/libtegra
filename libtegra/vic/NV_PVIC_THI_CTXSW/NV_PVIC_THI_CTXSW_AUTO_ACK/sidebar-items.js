@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Tells the module to automatically acknowledge any incoming context switch requests without triggering an interrupt."]]});

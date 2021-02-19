@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","All cores indicated in bitmap must be in `STANDBY_WFI` before CPU power-gating."]]});

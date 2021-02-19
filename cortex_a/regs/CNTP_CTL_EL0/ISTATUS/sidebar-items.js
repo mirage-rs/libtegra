@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","The status of the timer. This bit indicates whether the timer condition is met:"]]});

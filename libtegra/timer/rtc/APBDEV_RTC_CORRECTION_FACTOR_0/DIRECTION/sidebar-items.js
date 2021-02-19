@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Decrement",""],["Increment",""],["SET",""]],"enum":[["Value","Decrement must be used when the 32 kHz clock is above its nominal frequency."]]});

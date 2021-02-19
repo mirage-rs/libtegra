@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CFG_R_FENCE",""],["CFG_W_FENCE",""],["DMA_ACTIVE",""],["FENCE_ACTIVE",""],["RCOUNT",""],["WCOUNT",""]],"mod":[["CFG_R_FENCE",""],["CFG_W_FENCE",""],["DMA_ACTIVE",""],["FENCE_ACTIVE",""],["RCOUNT",""],["WCOUNT",""]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Drive1X",""],["Drive2X",""],["Drive3X",""],["Drive4X",""],["SET",""]],"enum":[["Value","Enables different options of impedance code mapping for the pads."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Milliseconds counter which is incremented using the Bresenham algorithm."]]});

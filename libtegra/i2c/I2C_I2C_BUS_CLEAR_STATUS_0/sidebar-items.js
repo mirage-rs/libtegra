@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BC_STATUS",""]],"mod":[["BC_STATUS","Whether SDA is released by the slave."]],"struct":[["Register",""]]});

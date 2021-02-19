@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Shows bits `[7:0]` of the count of clock edges between two successive clock edges."]]});

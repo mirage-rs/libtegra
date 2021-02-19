@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""],["SevenBitAddrMode","7-bit addressing."],["TenBitAddrMode","10-bit addressing."]],"enum":[["Value",""]]});

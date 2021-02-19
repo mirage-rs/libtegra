@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates the sync point index value, THI will return this index value back to Host1x when the context save/restore operation is done."]]});

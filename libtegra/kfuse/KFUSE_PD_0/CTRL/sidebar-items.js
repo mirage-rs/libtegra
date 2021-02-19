@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Powerdown",""],["Powerup",""],["SET",""]],"enum":[["Value","Asserts kfusecell_pd pin to kfusecell macro and puts it in low leakage mode."]]});

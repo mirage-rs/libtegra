@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable",""],["Enable",""],["SET",""]],"enum":[["Value","MMU enable for EL1 and EL0 stage 1 address translation. Possible values of this bit are:"]]});

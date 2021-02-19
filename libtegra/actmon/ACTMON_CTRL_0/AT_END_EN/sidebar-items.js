@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable",""],["Enable",""],["SET",""]],"enum":[["Value","Enable interrupt at the end of sample period."]]});

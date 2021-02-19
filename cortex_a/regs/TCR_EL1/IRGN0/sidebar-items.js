@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["NonCacheable",""],["SET",""],["WriteBack_ReadAlloc_NoWriteAlloc_Cacheable",""],["WriteBack_ReadAlloc_WriteAlloc_Cacheable",""],["WriteThrough_ReadAlloc_NoWriteAlloc_Cacheable",""]],"enum":[["Value","Inner cacheability attribute for memory associated with translation table walks using TTBR0_EL1."]]});

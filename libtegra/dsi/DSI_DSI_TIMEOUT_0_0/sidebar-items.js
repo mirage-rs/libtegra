@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["HTX_TO",""],["LRXH_TO",""]],"mod":[["HTX_TO","High Speed Transmit Time Out terminal count."],["LRXH_TO","Low Power Receive (Host) Time Out terminal count."]],"struct":[["Register",""]]});

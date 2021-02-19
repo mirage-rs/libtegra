@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Count of how many data words are left in the Host Read Data Return FIFO."]]});

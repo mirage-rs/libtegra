@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Size of data blocks to be transferred in PIO/DMA Mode."]]});

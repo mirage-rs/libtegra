@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","If set, the master will put a `STOP` condition on the bus."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Active",""],["CLEAR",""],["SET",""],["Wait",""]],"enum":[["Value","Indicates whether DMA Channel Status is active."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Virtual channel ID. Sent as part of the packet header and used to distinguish multiple displays."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Continuos","HS clock is on all the time."],["SET",""],["TxOnly","HS clock is only active during HS transmissions."]],"enum":[["Value","Control for the HS clock lane."]]});

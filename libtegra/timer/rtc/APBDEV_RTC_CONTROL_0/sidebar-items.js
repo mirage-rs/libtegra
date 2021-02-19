@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["WR_SEC_CNT",""]],"mod":[["WR_SEC_CNT","When set, writes to the SECONDS counter are disabled. Can only be cleared by resetting the RTC module."]],"struct":[["Register",""]]});

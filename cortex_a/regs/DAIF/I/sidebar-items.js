@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Masked",""],["SET",""],["Unmasked",""]],"enum":[["Value","IRQ mask bit. The possible values of this bit are:"]]});

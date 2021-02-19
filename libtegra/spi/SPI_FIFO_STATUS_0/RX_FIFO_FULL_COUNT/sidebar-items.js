@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates the number of slots in the receive FIFO remaining before the FIFO is full."]]});

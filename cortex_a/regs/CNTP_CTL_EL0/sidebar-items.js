@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ENABLE",""],["IMASK",""],["ISTATUS",""]],"mod":[["ENABLE","Enables the timer. Permitted values are:"],["IMASK","Timer interrupt mask bit. Permitted values are:"],["ISTATUS","The status of the timer. This bit indicates whether the timer condition is met:"]],"struct":[["Register",""]]});

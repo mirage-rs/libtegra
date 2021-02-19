@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["NV_PVIC_THI_CTXSW_INCR_SYNCPT_INDX",""]],"mod":[["NV_PVIC_THI_CTXSW_INCR_SYNCPT_INDX","Indicates the sync point index value, THI will return this index value back to Host1x when the context save/restore operation is done."]],"struct":[["Register",""]]});

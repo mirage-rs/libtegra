@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable",""],["Enable",""],["SET",""]],"enum":[["Value","Non-aligned access. This bit controls generation of Alignment faults at EL1 and EL0 under certain conditions."]]});

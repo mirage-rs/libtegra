@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates whether the CPU is currently in the halted state. Falcon can only exit this state when a `1` is written to the `STARTCPU` bit."]]});

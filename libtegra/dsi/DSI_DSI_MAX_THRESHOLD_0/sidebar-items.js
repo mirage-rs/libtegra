@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["MAX_THRESHOLD",""]],"mod":[["MAX_THRESHOLD","Start draining FIFO once this threshold is met. This register can be used for DBI mode when line packet data exceeds the size of the data FIFO."]],"struct":[["Register",""]]});

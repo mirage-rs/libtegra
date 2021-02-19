@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLAMP_INPUTS_WHEN_TRISTATED",""]],"mod":[["CLAMP_INPUTS_WHEN_TRISTATED","Whether inputs should be clamped when tristated."]],"struct":[["Register",""]]});

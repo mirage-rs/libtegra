@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Generate BTA immediately, e.g. for Tearing Effect reporting."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ASID",""],["BADDR",""],["CnP",""]],"mod":[["ASID","An ASID for the translation table base address. The TCR_EL1.A1 field selects either TTBR0_EL1.ASID or TTBR1_EL1.ASID."],["BADDR","Translation table base address"],["CnP","Common not Private"]],"struct":[["Register",""]]});

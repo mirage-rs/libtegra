@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Power down for data bit, drivers, receivers, and contention detectors."]]});

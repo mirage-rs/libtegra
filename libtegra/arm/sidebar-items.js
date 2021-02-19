@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["align_down","Aligns `address` down to the boundary denoted by `align`."],["align_up","Aligns `address` up to the boundary denoted by `align`."]],"mod":[["gic","Implementation of the ARM Generic Interrupt Controller v2."]]});

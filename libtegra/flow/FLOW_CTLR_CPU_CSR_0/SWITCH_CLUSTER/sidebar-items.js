@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Switches the active cluster when all indicated CPUs reach `STANDBY_WFI`."]]});

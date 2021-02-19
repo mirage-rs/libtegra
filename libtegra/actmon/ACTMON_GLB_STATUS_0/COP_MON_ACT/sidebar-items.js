@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Active",""],["CLEAR",""],["Inactive",""],["SET",""]],"enum":[["Value","COP monitor active status."]]});

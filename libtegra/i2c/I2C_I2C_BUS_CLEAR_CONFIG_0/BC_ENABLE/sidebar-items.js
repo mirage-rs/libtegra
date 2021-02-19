@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Starts bus clear operation. This bit gets cleared upon bus clear transaction completion."]]});

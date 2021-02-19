@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["RET_RES_TIME_THRESHOLD",""]],"mod":[["RET_RES_TIME_THRESHOLD","The programmable threshold required to enter Retention in units or microseconds."]],"struct":[["Register",""]]});

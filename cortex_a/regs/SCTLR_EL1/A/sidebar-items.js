@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable",""],["Enable",""],["SET",""]],"enum":[["Value","Alignment check enable. This is the enable bit for Alignment fault checking at EL1 and EL0."]]});

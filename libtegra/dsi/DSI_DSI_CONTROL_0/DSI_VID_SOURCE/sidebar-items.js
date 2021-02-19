@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Display0","Pixels come from Display A."],["Display1","Pixels come from Display B."],["SET",""]],"enum":[["Value","Source of video pixels."]]});

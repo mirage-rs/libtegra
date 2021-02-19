@@ -60,7 +60,6 @@ pub fn wait_until_ready() -> Result<(), ()> {
 /// Reads the encrypted HDCP keys from the KFUSE into a buffer.
 ///
 /// [`Clock`]: ../car/struct.Clock.html
-#[optimize(size)]
 pub fn read(buffer: &mut [u32; KFUSE_KEY_BUFFER_SIZE]) -> Result<(), ()> {
     let kfuse = unsafe { &*REGISTERS };
     let mut result = Err(());

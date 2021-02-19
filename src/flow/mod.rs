@@ -10,11 +10,9 @@
 
 use register::mmio::ReadWrite;
 
-use crate::{
-    car,
-    memory_map::{CAR, EXCEPTION_VECTORS},
-    timer::usleep
-};
+use crate::car;
+use crate::memory_map::EXCEPTION_VECTORS;
+use crate::timer::usleep;
 
 pub use registers::*;
 
@@ -27,9 +25,8 @@ pub fn power_cpu(cpu: u32) {
     match cpu {
         0 => {
             // Enable CSR for CPU0.
-            flow.FLOW_CTLR_CPU0_CSR_0.modify(
-                FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-            );
+            flow.FLOW_CTLR_CPU0_CSR_0
+                .modify(FLOW_CTLR_CPU_CSR_0::ENABLE::SET);
 
             // Dummy read.
             flow.FLOW_CTLR_CPU0_CSR_0.get();
@@ -37,7 +34,7 @@ pub fn power_cpu(cpu: u32) {
             // Put CPU0 in WaitEvent state and resume on SYSCLK cycle ticks.
             flow.FLOW_CTLR_HALT_CPU0_EVENTS_0.modify(
                 FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-                + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET
+                    + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET,
             );
 
             // Dummy read.
@@ -45,9 +42,8 @@ pub fn power_cpu(cpu: u32) {
         }
         1 => {
             // Enable CSR for CPU1.
-            flow.FLOW_CTLR_CPU1_CSR_0.modify(
-                FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-            );
+            flow.FLOW_CTLR_CPU1_CSR_0
+                .modify(FLOW_CTLR_CPU_CSR_0::ENABLE::SET);
 
             // Dummy read.
             flow.FLOW_CTLR_CPU1_CSR_0.get();
@@ -55,7 +51,7 @@ pub fn power_cpu(cpu: u32) {
             // Put CPU1 in WaitEvent state and resume on SYSCLK cycle ticks.
             flow.FLOW_CTLR_HALT_CPU1_EVENTS_0.modify(
                 FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-                + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET
+                    + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET,
             );
 
             // Dummy read.
@@ -63,9 +59,8 @@ pub fn power_cpu(cpu: u32) {
         }
         2 => {
             // Enable CSR for CPU2.
-            flow.FLOW_CTLR_CPU2_CSR_0.modify(
-                FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-            );
+            flow.FLOW_CTLR_CPU2_CSR_0
+                .modify(FLOW_CTLR_CPU_CSR_0::ENABLE::SET);
 
             // Dummy read.
             flow.FLOW_CTLR_CPU2_CSR_0.get();
@@ -73,7 +68,7 @@ pub fn power_cpu(cpu: u32) {
             // Put CPU2 in WaitEvent state and resume on SYSCLK cycle ticks.
             flow.FLOW_CTLR_HALT_CPU2_EVENTS_0.modify(
                 FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-                + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET
+                    + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET,
             );
 
             // Dummy read.
@@ -81,9 +76,8 @@ pub fn power_cpu(cpu: u32) {
         }
         3 => {
             // Enable CSR for CPU3.
-            flow.FLOW_CTLR_CPU3_CSR_0.modify(
-                FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-            );
+            flow.FLOW_CTLR_CPU3_CSR_0
+                .modify(FLOW_CTLR_CPU_CSR_0::ENABLE::SET);
 
             // Dummy read.
             flow.FLOW_CTLR_CPU3_CSR_0.get();
@@ -91,7 +85,7 @@ pub fn power_cpu(cpu: u32) {
             // Put CPU3 in WaitEvent state and resume on SYSCLK cycle ticks.
             flow.FLOW_CTLR_HALT_CPU3_EVENTS_0.modify(
                 FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-                + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET
+                    + FLOW_CTLR_HALT_CPU_EVENTS_0::SCLK::SET,
             );
 
             // Dummy read.
@@ -110,18 +104,17 @@ pub fn deplete_cpu(cpu: u32) {
             // Make CPU0 wait for interrupts before being powered on again.
             flow.FLOW_CTLR_CPU0_CSR_0.modify(
                 FLOW_CTLR_CPU_CSR_0::INTR_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-                + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu)
+                    + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
+                    + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
+                    + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu),
             );
 
             // Dummy read.
             flow.FLOW_CTLR_CPU0_CSR_0.get();
 
             // Put CPU0 in WaitEvent state.
-            flow.FLOW_CTLR_HALT_CPU0_EVENTS_0.modify(
-                FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-            );
+            flow.FLOW_CTLR_HALT_CPU0_EVENTS_0
+                .modify(FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent);
 
             // Dummy read.
             flow.FLOW_CTLR_HALT_CPU0_EVENTS_0.get();
@@ -136,18 +129,17 @@ pub fn deplete_cpu(cpu: u32) {
             // Make CPU1 wait for interrupts before being powered on again.
             flow.FLOW_CTLR_CPU1_CSR_0.modify(
                 FLOW_CTLR_CPU_CSR_0::INTR_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-                + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu)
+                    + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
+                    + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
+                    + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu),
             );
 
             // Dummy read.
             flow.FLOW_CTLR_CPU1_CSR_0.get();
 
             // Put CPU1 in WaitEvent state.
-            flow.FLOW_CTLR_HALT_CPU1_EVENTS_0.modify(
-                FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-            );
+            flow.FLOW_CTLR_HALT_CPU1_EVENTS_0
+                .modify(FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent);
 
             // Dummy read.
             flow.FLOW_CTLR_HALT_CPU1_EVENTS_0.get();
@@ -162,18 +154,17 @@ pub fn deplete_cpu(cpu: u32) {
             // Make CPU2 wait for interrupts before being powered on again.
             flow.FLOW_CTLR_CPU2_CSR_0.modify(
                 FLOW_CTLR_CPU_CSR_0::INTR_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-                + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu)
+                    + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
+                    + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
+                    + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu),
             );
 
             // Dummy read.
             flow.FLOW_CTLR_CPU2_CSR_0.get();
 
             // Put CPU2 in WaitEvent state.
-            flow.FLOW_CTLR_HALT_CPU2_EVENTS_0.modify(
-                FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-            );
+            flow.FLOW_CTLR_HALT_CPU2_EVENTS_0
+                .modify(FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent);
 
             // Dummy read.
             flow.FLOW_CTLR_HALT_CPU2_EVENTS_0.get();
@@ -188,18 +179,17 @@ pub fn deplete_cpu(cpu: u32) {
             // Make CPU3 wait for interrupts before being powered on again.
             flow.FLOW_CTLR_CPU3_CSR_0.modify(
                 FLOW_CTLR_CPU_CSR_0::INTR_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
-                + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
-                + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu)
+                    + FLOW_CTLR_CPU_CSR_0::EVENT_FLAG::SET
+                    + FLOW_CTLR_CPU_CSR_0::ENABLE::SET
+                    + FLOW_CTLR_CPU_CSR_0::WAIT_WFI_BITMAP.val(cpu),
             );
 
             // Dummy read.
             flow.FLOW_CTLR_CPU3_CSR_0.get();
 
             // Put CPU3 in WaitEvent state.
-            flow.FLOW_CTLR_HALT_CPU3_EVENTS_0.modify(
-                FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent
-            );
+            flow.FLOW_CTLR_HALT_CPU3_EVENTS_0
+                .modify(FLOW_CTLR_HALT_CPU_EVENTS_0::MODE::FlowModeWaitevent);
 
             // Dummy read.
             flow.FLOW_CTLR_HALT_CPU3_EVENTS_0.get();
@@ -219,9 +209,8 @@ pub fn lock_active_cluster() {
     let flow = unsafe { &*REGISTERS };
 
     // Lock the active cluster.
-    flow.FLOW_CTLR_BPMP_CLUSTER_CONTROL_0.modify(
-        FLOW_CTLR_BPMP_CLUSTER_CONTROL_0::ACTIVE_CLUSTER_LOCK::SET
-    );
+    flow.FLOW_CTLR_BPMP_CLUSTER_CONTROL_0
+        .modify(FLOW_CTLR_BPMP_CLUSTER_CONTROL_0::ACTIVE_CLUSTER_LOCK::SET);
 
     // Dummy read.
     flow.FLOW_CTLR_BPMP_CLUSTER_CONTROL_0.get();
@@ -233,20 +222,15 @@ pub fn power_bpmp(entrypoint: u32) {
     let flow = unsafe { &*REGISTERS };
 
     // Halt the BPMP.
-    flow.FLOW_CTLR_HALT_COP_EVENTS_0.modify(
-        FLOW_CTLR_HALT_COP_EVENTS_0::MODE::FlowModeWaitevent
-    );
+    flow.FLOW_CTLR_HALT_COP_EVENTS_0
+        .modify(FLOW_CTLR_HALT_COP_EVENTS_0::MODE::FlowModeWaitevent);
 
     // Assert BPMP reset.
-    // TODO: Use the CAR register block, when implemented.
-    unsafe {
-        (*((CAR + 0x300) as *const ReadWrite<u32>)).set(1 << 1);
-    }
+    car.CLK_RST_CONTROLLER_RST_DEV_L_SET_0.set(1 << 1);
 
     // Set reset address (stored in PMC_SCRATCH39).
-    let bpmp_exception_reset_vector = unsafe {
-        &*((EXCEPTION_VECTORS + 0x200) as *const ReadWrite<u32>)
-    };
+    let bpmp_exception_reset_vector =
+        unsafe { &*((EXCEPTION_VECTORS + 0x200) as *const ReadWrite<u32>) };
     bpmp_exception_reset_vector.set(entrypoint);
 
     while bpmp_exception_reset_vector.get() != entrypoint {
@@ -269,17 +253,15 @@ pub fn deplete_bpmp() {
     let flow = unsafe { &*REGISTERS };
 
     // Halt the BPMP.
-    flow.FLOW_CTLR_HALT_COP_EVENTS_0.modify(
-        FLOW_CTLR_HALT_COP_EVENTS_0::MODE::FlowModeWaitevent
-    );
+    flow.FLOW_CTLR_HALT_COP_EVENTS_0
+        .modify(FLOW_CTLR_HALT_COP_EVENTS_0::MODE::FlowModeWaitevent);
 
     // Assert BPMP reset.
     car.CLK_RST_CONTROLLER_RST_DEV_L_SET_0.set(1 << 1);
 
     // Clear reset address.
-    let bpmp_exception_reset_vector = unsafe {
-        &*((EXCEPTION_VECTORS + 0x200) as *const ReadWrite<u32>)
-    };
+    let bpmp_exception_reset_vector =
+        unsafe { &*((EXCEPTION_VECTORS + 0x200) as *const ReadWrite<u32>) };
     bpmp_exception_reset_vector.set(0);
 
     while bpmp_exception_reset_vector.get() != 0 {
@@ -292,9 +274,8 @@ pub fn enable_fiq_to_ccplex_routing() {
     let flow = unsafe { &*REGISTERS };
 
     // Enable passing FIQs to the GICD.
-    flow.FLOW_CTLR_FLOW_DBG_QUAL_0.modify(
-        FLOW_CTLR_FLOW_DBG_QUAL_0::FIQ2CCPLEX_ENABLE::SET
-    );
+    flow.FLOW_CTLR_FLOW_DBG_QUAL_0
+        .modify(FLOW_CTLR_FLOW_DBG_QUAL_0::FIQ2CCPLEX_ENABLE::SET);
 }
 
 /// Disable routing legacy FIQ to the GICD.
@@ -302,7 +283,6 @@ pub fn disable_fiq_to_ccplex_routing() {
     let flow = unsafe { &*REGISTERS };
 
     // Disable passing FIQs to the GICD.
-    flow.FLOW_CTLR_FLOW_DBG_QUAL_0.modify(
-        FLOW_CTLR_FLOW_DBG_QUAL_0::FIQ2CCPLEX_ENABLE::CLEAR
-    );
+    flow.FLOW_CTLR_FLOW_DBG_QUAL_0
+        .modify(FLOW_CTLR_FLOW_DBG_QUAL_0::FIQ2CCPLEX_ENABLE::CLEAR);
 }

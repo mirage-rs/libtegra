@@ -34,3 +34,4 @@ pub mod system;
 pub mod timer;
 pub mod tsec;
 pub mod uart;
+pub mod vic;

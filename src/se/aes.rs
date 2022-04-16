@@ -222,7 +222,7 @@ pub fn set_encrypted_key(
     unsafe {
         arm::cache::flush_data_cache(key, key.len());
         #[cfg(target_arch = "aarch64")]
-        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+        cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
     }
 
     // Prepare the linked lists and kick off the operation.
@@ -307,7 +307,7 @@ pub fn do_cmac_operation(
         unsafe {
             arm::cache::flush_data_cache(&last_block[..], last_block.len());
             #[cfg(target_arch = "aarch64")]
-            cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+            cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
         }
 
         // Prepare the linked lists and kick off the operation.
@@ -412,7 +412,7 @@ pub fn do_ctr_operation(
         // On AArch64, synchronize the data between the SE and the CPU.
         #[cfg(target_arch = "aarch64")]
         unsafe {
-            cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+            cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
         }
     }
 

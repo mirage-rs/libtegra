@@ -22,7 +22,7 @@ pub fn trigger_single_block_operation(
         // Make the data coherent so it is seen correctly by CPU and SE.
         arm::cache::flush_data_cache(&pad[..], aes::BLOCK_SIZE);
         #[cfg(target_arch = "aarch64")]
-        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+        cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
 
         pad.into_inner()
     };
@@ -38,10 +38,10 @@ pub fn trigger_single_block_operation(
     // Ensure data cache coherency so that CPU sees the correct data.
     unsafe {
         #[cfg(target_arch = "aarch64")]
-        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+        cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
         arm::cache::flush_data_cache(&pad[..], aes::BLOCK_SIZE);
         #[cfg(target_arch = "aarch64")]
-        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+        cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
     }
 
     // Copy back the result to the output buffer.

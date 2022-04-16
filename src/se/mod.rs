@@ -532,7 +532,7 @@ impl SecurityEngine {
             // Ensure cache coherency so the SE sees the correct data.
             arm::cache::flush_data_cache(&data, data.len());
             #[cfg(target_arch = "aarch64")]
-            cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+            cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
 
             data
         };

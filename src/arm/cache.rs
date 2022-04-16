@@ -1,5 +1,6 @@
 //! Utilities for working with data cache lines.
 
+use core::arch::asm;
 use core::ops::{Deref, DerefMut};
 
 /// A helper that aligns a block of data to cache line size.
@@ -76,11 +77,11 @@ where
         let start = &_obj as *const _ as usize;
         let end = super::align_up(start + _size, DATA_CACHE_LINE_SIZE);
 
-        cortex_a::barrier::dmb(cortex_a::barrier::SY);
+        cortex_a::asm::barrier::dmb(cortex_a::asm::barrier::SY);
         for line in (start..end).step_by(DATA_CACHE_LINE_SIZE) {
             // Flush all data cache lines within the given area.
             flush_data_cache_line(line);
         }
-        cortex_a::barrier::dmb(cortex_a::barrier::SY);
+        cortex_a::asm::barrier::dmb(cortex_a::asm::barrier::SY);
     }
 }

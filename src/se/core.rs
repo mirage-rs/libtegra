@@ -1,5 +1,6 @@
 use core::convert::TryFrom;
 #[allow(unused)]
+use core::arch::asm;
 use core::mem::size_of;
 
 use crate::ahb::mem;
@@ -214,7 +215,7 @@ pub fn trigger_operation(
         arm::cache::flush_data_cache(destination, size_of::<LinkedList>());
 
         #[cfg(target_arch = "aarch64")]
-        cortex_a::barrier::dsb(cortex_a::barrier::ISH);
+        cortex_a::asm::barrier::dsb(cortex_a::asm::barrier::ISH);
     }
 
     // Start the hardware operation.

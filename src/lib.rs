@@ -1,6 +1,5 @@
 #![no_std]
 #![recursion_limit = "1024"]
-#![feature(asm, const_panic)]
 
 #[macro_use]
 extern crate enum_primitive;

@@ -3,7 +3,7 @@
 //! See Chapter 18.11 in the Tegra X1 Technical Reference Manual
 //! for details.
 
-use register::{mmio::*, register_structs};
+use tock_registers::{register_structs, registers::*};
 
 use crate::memory_map::MC;
 

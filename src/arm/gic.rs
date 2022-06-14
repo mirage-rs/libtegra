@@ -3,6 +3,8 @@
 use core::fmt;
 use core::marker::PhantomData;
 
+use tock_registers::interfaces::*;
+
 /// An interrupt request for the GIC.
 pub type Irq = IrqNumber<{ Gic::NUM_IRQS }>;
 
@@ -165,7 +167,7 @@ impl Gic {
         // Find the index of the `ICFGR[i]` register corresponding to the IRQ
         // number and determine the trigger configuration value to write.
         let icfgr_reg_index = irq_num >> 4;
-        let icfgr_value = ((mode as u32) << 1) << (irq_num % 16) * 2;
+        let icfgr_value = ((mode as u32) << 1) << ((irq_num % 16) * 2);
 
         // Set the bits in the corresponding ICFGR register.
         let icfgr = &gicd.GICD_ICFGR[icfgr_reg_index];
@@ -333,7 +335,7 @@ impl<const MAX: usize> fmt::Display for IrqNumber<{ MAX }> {
 /// of the GICC when accessing the same registers. It is used to acknowledge and handle
 /// pending IRQs.
 pub mod gicc {
-    use register::{mmio::*, register_bitfields, register_structs};
+    use tock_registers::{register_bitfields, register_structs, registers::*};
 
     register_bitfields! {
         u32,
@@ -453,7 +455,7 @@ pub mod gicc {
 /// Unlike for the GICC, access to these registers is only banked for a few registers
 /// and other than that, all CPU cores see the same instance of the Distributor.
 pub mod gicd {
-    use register::{mmio::*, register_bitfields, register_structs};
+    use tock_registers::{register_bitfields, register_structs, registers::*};
 
     // TODO: Add missing bitfields.
 

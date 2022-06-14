@@ -78,6 +78,8 @@ use core::{
     marker::Sync,
 };
 
+use tock_registers::interfaces::*;
+
 pub use crate::uart::registers::*;
 use crate::{car::Clock, timer::usleep};
 

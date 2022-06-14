@@ -1,4 +1,4 @@
-use register::{mmio::*, register_structs};
+use tock_registers::{register_structs, registers::*};
 
 use crate::memory_map::CAR;
 

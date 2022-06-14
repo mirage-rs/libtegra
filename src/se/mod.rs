@@ -162,6 +162,8 @@ mod utils;
 
 use ::core::marker::Sync;
 
+use tock_registers::interfaces::*;
+
 pub use self::core::*;
 use crate::arm;
 pub use aes::Mode as AesMode;
@@ -293,7 +295,7 @@ impl SecurityEngine {
     /// This must be done prior to any encryptions using this slot.
     pub fn fill_aes_keyslot(&self, slot: u32, key: &[u8]) {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
-        assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
+        assert_eq!((key.len() % constants::aes::BLOCK_SIZE) >> 2, 0);
         assert!(key.len() <= constants::aes::MAX_KEY_SIZE);
 
         let engine = unsafe { &*self.registers };
@@ -303,7 +305,7 @@ impl SecurityEngine {
     /// Copies a previously loaded AES key out of a given keyslot.
     pub fn get_aes_key(&self, slot: u32, key: &mut [u8]) {
         assert!(slot < constants::aes::KEY_SLOT_COUNT as u32);
-        assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
+        assert_eq!((key.len() % constants::aes::BLOCK_SIZE) >> 2, 0);
         assert!(key.len() <= constants::aes::MAX_KEY_SIZE);
 
         let engine = unsafe { &*self.registers };
@@ -342,7 +344,7 @@ impl SecurityEngine {
     ) -> Result<(), OperationError> {
         assert!(dest_slot < constants::aes::KEY_SLOT_COUNT as u32);
         assert!(kek_slot < constants::aes::KEY_SLOT_COUNT as u32);
-        assert_eq!(key.len() % constants::aes::BLOCK_SIZE >> 2, 0);
+        assert_eq!((key.len() % constants::aes::BLOCK_SIZE) >> 2, 0);
         assert!(key.len() <= constants::aes::MAX_KEY_SIZE);
 
         let engine = unsafe { &*self.registers };

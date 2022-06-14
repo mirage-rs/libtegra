@@ -3,6 +3,8 @@ use crate::se::constants::*;
 use crate::se::core::*;
 use crate::se::registers::*;
 
+use tock_registers::interfaces::*;
+
 pub fn trigger_single_block_operation(
     engine: &Registers,
     source: &[u8],

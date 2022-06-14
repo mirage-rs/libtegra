@@ -10,6 +10,8 @@ use core::{convert::TryInto, marker::Sync};
 pub use crate::spi::registers::*;
 use crate::timer::usleep;
 
+use tock_registers::interfaces::*;
+
 /// Representation of an SPI.
 ///
 /// NOTE: Instances of this structure should never be created manually.

@@ -1,4 +1,4 @@
-use register::mmio::*;
+use tock_registers::registers::*;
 
 use crate::memory_map::PMC;
 
@@ -609,7 +609,7 @@ pub struct Registers {
 assert_eq_size!(Registers, [u8; 0xB38]);
 
 pub mod counter0 {
-    use register::{mmio::*, register_bitfields, register_structs};
+    use tock_registers::{register_bitfields, register_structs, registers::*};
 
     use crate::memory_map::SYSCTR0;
 
@@ -694,7 +694,7 @@ pub mod counter0 {
 }
 
 pub mod sb {
-    use register::{mmio::ReadWrite, register_structs};
+    use tock_registers::{register_structs, registers::ReadWrite};
 
     use crate::memory_map::SB;
 

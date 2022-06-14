@@ -1,6 +1,6 @@
-use core::convert::TryFrom;
 #[allow(unused)]
 use core::arch::asm;
+use core::convert::TryFrom;
 use core::mem::size_of;
 
 use crate::ahb::mem;
@@ -8,6 +8,8 @@ use crate::arm;
 use crate::se::constants::*;
 use crate::se::registers::*;
 use crate::timer;
+
+use tock_registers::interfaces::*;
 
 /// Address information of a DMA buffer.
 ///

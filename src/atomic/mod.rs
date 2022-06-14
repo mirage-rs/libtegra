@@ -4,6 +4,8 @@
 
 #![allow(unused)]
 
+use tock_registers::interfaces::*;
+
 mod registers;
 pub use registers::*;
 
@@ -244,8 +246,8 @@ impl AtomicU64 {
 
         // if the comparison succeeded, the previous value will be in the result register,
         // but we don't return it because it may be undefined
-        register!(RESULT_0)[self.target_register as usize].get() as u64;
-        register!(RESULT_0)[self.target_register as usize + 1].get() as u64;
+        register!(RESULT_0)[self.target_register as usize].get();
+        register!(RESULT_0)[self.target_register as usize + 1].get();
     }
 
     /// Increment the value of this atomic by `x`.

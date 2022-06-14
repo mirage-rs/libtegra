@@ -1,4 +1,4 @@
-use register::{mmio::*, register_bitfields, register_structs};
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 use crate::memory_map::{TSEC, TSEC2};
 
@@ -131,7 +131,7 @@ register_bitfields! {
             HdcpEncryptPairingInfo = 0x518,
             HdcpDecryptPairingInfo = 0x51C,
             HdcpUpdateSession = 0x520,
-            HdcpGenerateLcInit = 0524,
+            HdcpGenerateLcInit = 0x524,
             HdcpVerifyLprime = 0x528,
             HdcpGenerateSkeInit = 0x52C,
             HdcpVerifyVprime = 0x530,

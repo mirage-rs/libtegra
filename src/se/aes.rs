@@ -1,5 +1,5 @@
 use byteorder::{ByteOrder, LE};
-use register::FieldValue;
+use tock_registers::{fields::FieldValue, interfaces::*};
 
 use crate::arm;
 use crate::se::constants::*;
@@ -152,7 +152,7 @@ pub fn clear_key_iv(registers: &Registers, slot: u32) {
 }
 
 fn set_iv(registers: &Registers, slot: u32, iv: &[u8]) {
-    assert_eq!(iv.len() % aes::BLOCK_SIZE >> 2, 0);
+    assert_eq!((iv.len() % aes::BLOCK_SIZE) >> 2, 0);
 
     for (i, c) in iv.chunks(aes::BLOCK_SIZE >> 2).enumerate() {
         // Select the next original IV word in the keyslot.
@@ -226,7 +226,7 @@ pub fn set_encrypted_key(
     }
 
     // Prepare the linked lists and kick off the operation.
-    let source_ll = LinkedList::from(&key[..]);
+    let source_ll = LinkedList::from(key);
     let mut destination_ll = LinkedList::default();
     start_normal_operation(registers, &source_ll, &mut destination_ll)
 }
@@ -371,7 +371,7 @@ pub fn do_cbc_operation(
 
     // Prepare the linked lists and kick off the operation.
     let source_ll = LinkedList::from(&source[..aligned_size]);
-    let mut destination_ll = LinkedList::from(&destination[..]);
+    let mut destination_ll = LinkedList::from(destination as &[u8]);
     start_normal_operation(registers, &source_ll, &mut destination_ll)
 }
 

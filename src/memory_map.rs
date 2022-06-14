@@ -1,3 +1,4 @@
+#![allow(clippy::identity_op)]
 //! Unified Tegra X1 Memory Address Map constants.
 //!
 //! See Chapter 2 in the Tegra X1 Technical Reference Manual for details.

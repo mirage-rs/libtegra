@@ -1,5 +1,5 @@
 use byteorder::{ByteOrder, BE};
-use register::FieldValue;
+use tock_registers::{fields::FieldValue, interfaces::*};
 
 use crate::se::constants::*;
 use crate::se::core::*;

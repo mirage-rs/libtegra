@@ -3,7 +3,7 @@
 /// See Chapter 19.4.2 in the Tegra X1 Technical Reference
 /// Manual for details.
 pub mod mem {
-    use register::{mmio::*, register_structs};
+    use tock_registers::{register_structs, registers::*};
 
     use crate::memory_map::SYSREG;
 

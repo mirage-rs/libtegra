@@ -3,6 +3,8 @@ use core::convert::TryInto;
 use crate::i2c::registers::*;
 use crate::{car::Clock, timer};
 
+use tock_registers::interfaces::*;
+
 fn bytes_to_word(buf: &[u8]) -> u32 {
     if buf.len() == 4 {
         u32::from_le_bytes(buf.try_into().unwrap())
@@ -143,7 +145,7 @@ impl I2c {
 
         // Set device for 7-bit write mode.
         i2c.I2C_I2C_CMD_ADDR0_0
-            .write(I2C_I2C_CMD_ADDR0_0::ADDR0.val((device << 1) | 0));
+            .write(I2C_I2C_CMD_ADDR0_0::ADDR0.val(device << 1));
 
         // Load in data to transmit.
         let (data1_value, data2_value) = bytes_to_double_word(buffer);

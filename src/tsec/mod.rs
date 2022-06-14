@@ -102,6 +102,7 @@ mod registers;
 use core::ops::{Deref, DerefMut};
 
 use enum_primitive::FromPrimitive;
+use tock_registers::interfaces::*;
 
 use crate::car::Clock;
 use crate::kfuse;

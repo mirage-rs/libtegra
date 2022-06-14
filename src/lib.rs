@@ -1,5 +1,6 @@
 #![no_std]
 #![recursion_limit = "1024"]
+#![allow(clippy::result_unit_err)]
 
 #[macro_use]
 extern crate enum_primitive;

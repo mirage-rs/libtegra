@@ -1,4 +1,4 @@
-use register::{mmio::ReadWrite, register_structs};
+use tock_registers::{register_structs, registers::ReadWrite};
 
 use crate::memory_map::gpio::BASE;
 

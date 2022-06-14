@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["EN",""],["FCREQ",""],["HDBG",""]],"mod":[["EN","Enables the counter."],["FCREQ","Requested frequency modes table entry."],["HDBG","Whether a Halt-on-Debug signal should halt the counter."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Denotes a Receiver Overrun Error, if set to 1."]]});

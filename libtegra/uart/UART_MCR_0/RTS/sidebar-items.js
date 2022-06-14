@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Whether RTS should be forced to high if RTS hardware flow control wasn’t enabled."]]});

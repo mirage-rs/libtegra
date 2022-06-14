@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Disable","Bucket width increases exponentially with a power of two."],["Enable","Bucket width is the same for all buckets."],["SET",""]],"enum":[["Value","Whether linear mode should be used to expand buckets."]]});

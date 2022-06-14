@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Loads the master configuration from the `pclk` domain to the `i2c_clk` domain."]]});

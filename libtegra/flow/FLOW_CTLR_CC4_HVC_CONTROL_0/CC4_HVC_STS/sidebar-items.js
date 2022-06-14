@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Cc4HvcEntered",""],["Cc4HvcEntryInProgress",""],["Cc4HvcExitInProgress",""],["Cc4HvcNotEntered",""],["SET",""]],"enum":[["Value","Indicates whether HVC entry/exit sequence has started/completed."]]});

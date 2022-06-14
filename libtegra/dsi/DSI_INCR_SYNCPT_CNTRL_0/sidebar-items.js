@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["INCR_SYNCPT_NO_STALL",""],["INCR_SYNCPT_SOFT_RESET",""]],"mod":[["INCR_SYNCPT_NO_STALL","Prevent stalling the client host interface when FIFOs are full and instead drop the INCR_SYNCPT methods."],["INCR_SYNCPT_SOFT_RESET","Resets all internal states of the client syncpt."]],"struct":[["Register",""]]});

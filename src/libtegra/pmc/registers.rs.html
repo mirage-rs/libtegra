@@ -1,0 +1,1468 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/pmc/registers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>registers.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../libtegra/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">tock_registers::registers</span>::<span class="kw-2">*</span>;
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::memory_map::PMC</span>;
+
+<span class="doccomment">/// A pointer to the PMC register block that can be accessed by dereferencing it.</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">REGISTERS</span>: <span class="kw-2">*const</span> <span class="ident">Registers</span> <span class="op">=</span> <span class="ident">PMC</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">Registers</span>;
+
+<span class="comment">// TODO: Bitfields.</span>
+
+<span class="comment">// TODO: Convert this struct to register_structs! format.</span>
+
+<span class="doccomment">/// Representation of the PMC registers.</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Registers</span> {
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CNTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PMC_SWRST_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE_LVL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SW_WAKE_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DPD_PADS_ORIDE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DPD_SAMPLE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DPD_ENABLE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_OFF_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CLAMP_STATUS_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TOGGLE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_REMOVE_CLAMPING_CMD_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_STATUS_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGOOD_TIMER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BLINK_TIMER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_NO_IOPOWER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWR_DET_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWR_DET_LATCH_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH5_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH6_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH7_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH8_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH9_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH10_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH11_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH12_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH13_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH14_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH15_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH16_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH17_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH18_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH19_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH20_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH21_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH22_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH23_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH5_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CPUPWRGOOD_TIMER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CPUPWROFF_TIMER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AUTO_WAKE_LVL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AUTO_WAKE_LVL_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE_DELAY_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWR_DET_VAL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DDR_PWR_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_USB_DEBOUNCE_DEL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_USB_AO_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CRYPTO_OP_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PLLP_WB0_OVERRIDE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH24_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH25_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH26_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH27_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH28_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH29_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH30_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH31_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH32_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH33_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH34_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH35_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH36_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH37_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH38_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH39_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH40_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH41_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH42_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BONDOUT_MIRROR0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BONDOUT_MIRROR1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BONDOUT_MIRROR2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SYS_33V_EN_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BONDOUT_MIRROR_ACCESS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_GATE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE2_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE2_LVL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE2_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SW_WAKE2_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AUTO_WAKE2_LVL_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_CE1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_CE2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_CE3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_5_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_CE_6_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PCX_EDPD_CNTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_OSC_EDPD_OVER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CLK_OUT_CNTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SATA_PWRGT_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SENSOR_CTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_RST_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD_REQ_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD2_REQ_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD2_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEL_DPD_TIM_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_VDDP_SEL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DDR_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved0</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x8</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PLLM_WB0_OVERRIDE_FREQ_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved1</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x4</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PWRGATE_TIMER_MULT_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DSI_SEL_DPD_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_TRIGGERS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_SAVED_STATE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved2</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x4</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_TERM_PAD_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_SLEEP_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_SLEEPWALK_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_SLEEPWALK_P0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_SLEEPWALK_P1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_SLEEPWALK_P2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UHSIC_SLEEPWALK_P0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_STATUS_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_FAKE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BONDOUT_MIRROR3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_BONDOUT_MIRROR4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH6_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH7_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH43_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH44_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH45_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH46_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH47_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH48_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH49_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH50_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH51_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH52_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH53_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH54_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH55_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH0_ECO_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_POR_DPD_CTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH2_ECO_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_LINE_WAKEUP_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_BIAS_MASTER_CNTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_MASTER_CONFIG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TD_PWRGATE_INTER_PART_TIMER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_TRIGGERS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_SAVED_STATE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_SLEEP_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_SLEEPWALK_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UHSIC2_SLEEPWALK_P1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_STATUS_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_FAKE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC2_LINE_WAKEUP_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_MASTER2_CONFIG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_RPD_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_CE0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PLLM_WB0_OVERRIDE2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSC_MULT_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CPU_VSENSE_OVERRIDE_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_GLB_AMAP_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_STICKY_BITS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WEAK_BIAS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_REG_SHORT_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_ANDOR_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_GPU_RG_CNTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_5_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_PG_MASK_6_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved3</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x1C</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH8_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH9_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH10_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH11_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH12_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH13_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH14_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH15_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH16_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH17_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH18_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH19_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH20_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH21_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH22_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH23_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH24_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH25_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH26_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH27_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH28_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH29_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH30_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH31_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH32_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH33_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH34_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH35_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH36_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH37_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH38_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH39_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH40_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH41_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH42_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH43_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH44_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH45_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH46_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH47_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH48_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH49_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH50_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH51_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH52_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH53_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH54_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH55_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH56_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH57_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH58_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH59_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH60_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH61_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH62_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH63_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH64_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH65_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH66_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH67_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH68_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH69_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH70_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH71_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH72_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH73_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH74_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH75_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH76_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH77_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH78_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH79_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved4</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x20</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CNTRL2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD_OFF_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD2_OFF_MASK_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_EVENT_COUNTER_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_FUSE_CONTROL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH1_ECO_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved5</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x4</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD3_REQ_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD3_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD4_REQ_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_IO_DPD4_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved6</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x8</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DIRECT_THERMTRIP_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSOSC_DELAY_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SET_SW_CLAMP_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DEBUG_AUTHENTICATION_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_THRESH1_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_THRESH2_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_THRESH3_CFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_STATUS_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_SECURITY_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_CONFIG0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_CONFIG1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_CONFIG2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_STATUS0_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_STATUS1_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_STATUS2_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_TSENSOR_PDIV_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_INTR_EN_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_AOTAG_INTR_DIS_0</span>: <span class="ident">WriteOnly</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_PAD_CFG0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_PAD_CFG1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_PAD_CFG2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_PAD_CFG3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_UHSIC_SLEEP_CFG1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_CC4_HVC_CONTROL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_WAKE_DEBOUNCE_EN_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_RAMDUMP_CTL_STATUS_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_UTMIP_SLEEPWALK_P3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_DDR_CNTRL_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved7</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0xC8</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE5_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE6_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE7_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SEC_DISABLE8_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved8</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x3C</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH56_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH57_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH58_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH59_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH60_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH61_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH62_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH63_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH64_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH65_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH66_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH67_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH68_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH69_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH70_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH71_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH72_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH73_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH74_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH75_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH76_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH77_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH78_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH79_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH80_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH81_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH82_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH83_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH84_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH85_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH86_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH87_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH88_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH89_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH90_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH91_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH92_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH93_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH94_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH95_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH96_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH97_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH98_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH99_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH100_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH101_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH102_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH103_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH104_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH105_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH106_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH107_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH108_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH109_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH110_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH111_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH112_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH113_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH114_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH115_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH116_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH117_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH118_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH119_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH120_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH121_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH122_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH123_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH124_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH125_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH126_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH127_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH128_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH129_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH130_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH131_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH132_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH133_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH134_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH135_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH136_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH137_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH138_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH139_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH140_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH141_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH142_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH143_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH144_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH145_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH146_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH147_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH148_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH149_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH150_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH151_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH152_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH153_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH154_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH155_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH156_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH157_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH158_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH159_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH160_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH161_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH162_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH163_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH164_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH165_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH166_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH167_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH168_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH169_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH170_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH171_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH172_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH173_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH174_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH175_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH176_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH177_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH178_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH179_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH180_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH181_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH182_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH183_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH184_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH185_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH186_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH187_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH188_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH189_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH190_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH191_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH192_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH193_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH194_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH195_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH196_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH197_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH198_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH199_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH200_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH201_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH202_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH203_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH204_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH205_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH206_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH207_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH208_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH209_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH210_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH211_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH212_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH213_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH214_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH215_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH216_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH217_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH218_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH219_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH220_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH221_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH222_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH223_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH224_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH225_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH226_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH227_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH228_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH229_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH230_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH231_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH232_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH233_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH234_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH235_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH236_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH237_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH238_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH239_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH240_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH241_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH242_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH243_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH244_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH245_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH246_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH247_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH248_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH249_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH250_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH251_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH252_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH253_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH254_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH255_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH256_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH257_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH258_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH259_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH260_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH261_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH262_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH263_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH264_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH265_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH266_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH267_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH268_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH269_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH270_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH271_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH272_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH273_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH274_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH275_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH276_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH277_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH278_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH279_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH280_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH281_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH282_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH283_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH284_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH285_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH286_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH287_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH288_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH289_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH290_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH291_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH292_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH293_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH294_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH295_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH296_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH297_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH298_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SCRATCH299_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">_reserved9</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0xC8</span>],
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH80_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH81_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH82_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH83_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH84_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH85_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH86_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH87_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH88_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH89_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH90_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH91_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH92_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH93_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH94_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH95_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH96_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH97_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH98_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH99_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH100_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH101_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH102_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH103_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH104_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH105_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH106_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH107_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH108_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH109_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH110_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH111_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH112_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH113_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH114_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH115_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH116_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH117_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH118_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">APBDEV_PMC_SECURE_SCRATCH119_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+}
+
+<span class="macro">assert_eq_size!</span>(<span class="ident">Registers</span>, [<span class="ident">u8</span>; <span class="number">0xB38</span>]);
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">counter0</span> {
+    <span class="kw">use</span> <span class="ident">tock_registers</span>::{<span class="ident">register_bitfields</span>, <span class="ident">register_structs</span>, <span class="ident">registers</span>::<span class="kw-2">*</span>};
+
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::memory_map::SYSCTR0</span>;
+
+    <span class="doccomment">/// A pointer to the PMC SYSCTR0 register block that can be accessed by dereferencing it.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">REGISTERS</span>: <span class="kw-2">*const</span> <span class="ident">Registers</span> <span class="op">=</span> <span class="ident">SYSCTR0</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">Registers</span>;
+
+    <span class="macro">register_bitfields!</span> {
+        <span class="ident">u32</span>,
+
+        <span class="doccomment">/// Bitfields of the `SYSCTR0_CNTCR_0` register.</span>
+        <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTCR_0</span> [
+            <span class="doccomment">/// Requested frequency modes table entry.</span>
+            <span class="ident">FCREQ</span> <span class="ident">OFFSET</span>(<span class="number">8</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+
+            <span class="doccomment">/// Whether a Halt-on-Debug signal should halt the counter.</span>
+            <span class="ident">HDBG</span> <span class="ident">OFFSET</span>(<span class="number">1</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+
+            <span class="doccomment">/// Enables the counter.</span>
+            <span class="ident">EN</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) []
+        ],
+
+        <span class="doccomment">/// Bitfields of the `SYSCTR0_CNTSR_0` register.</span>
+        <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTSR_0</span> [
+            <span class="doccomment">/// Frequency change acknowledge.</span>
+            <span class="ident">FCREQ</span> <span class="ident">OFFSET</span>(<span class="number">8</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+
+            <span class="doccomment">/// Whether or not the counter is halted due to the Halt-on-Debug signal being asserted.</span>
+            <span class="ident">HDBG</span> <span class="ident">OFFSET</span>(<span class="number">1</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+
+            <span class="doccomment">/// Reserved.</span>
+            <span class="ident">RESERVED</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) []
+        ],
+
+        <span class="doccomment">/// Bitfields of the `SYSCTR0_CNTCV_&lt;x&gt;_0` registers.</span>
+        <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTCV_0</span> [
+            <span class="doccomment">/// Counter value.</span>
+            <span class="ident">CV</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">32</span>) []
+        ],
+
+        <span class="doccomment">/// Bitfields of the `SYSCTR0_CNTFID_&lt;x&gt;_0` registers.</span>
+        <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTFID_0</span> [
+            <span class="doccomment">/// Counter frequency value.</span>
+            <span class="ident">FV</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">32</span>) []
+        ],
+
+        <span class="doccomment">/// Bitfields of the `SYSCTR0_COUNTERID_&lt;x&gt;_0` registers.</span>
+        <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID_0</span> [
+            <span class="doccomment">/// Component ID value.</span>
+            <span class="ident">VALUE</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">8</span>) []
+        ]
+    }
+
+    <span class="macro">register_structs!</span> {
+        <span class="doccomment">/// Representation of the PMC SYSCTR0 registers.</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
+        <span class="kw">pub</span> <span class="ident">Registers</span> {
+            (<span class="number">0x0000</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTCR_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_CNTCR_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0004</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTSR_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_CNTSR_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0008</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTCV0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_CNTCV_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x000C</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTCV1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_CNTCV_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0010</span> =&gt; <span class="ident">_reserved0</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x10</span>]),
+            (<span class="number">0x0020</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTFID0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_CNTFID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0024</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_CNTFID1_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_CNTFID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0028</span> =&gt; <span class="ident">_reserved1</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0xFA8</span>]),
+            (<span class="number">0x0FD0</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FD4</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID5_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FD8</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID6_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FDC</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID7_0</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FE0</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FE4</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FE8</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FEC</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FF0</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID8_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FF4</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID9_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FF8</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID10_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x0FFC</span> =&gt; <span class="kw">pub</span> <span class="ident">SYSCTR0_COUNTERID11_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">SYSCTR0_COUNTERID_0::Register</span><span class="op">&gt;</span>),
+            (<span class="number">0x1000</span> =&gt; @<span class="ident">END</span>),
+        }
+    }
+
+    <span class="macro">assert_eq_size!</span>(<span class="ident">Registers</span>, [<span class="ident">u8</span>; <span class="number">0x1000</span>]);
+}
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sb</span> {
+    <span class="kw">use</span> <span class="ident">tock_registers</span>::{<span class="ident">register_structs</span>, <span class="ident">registers::ReadWrite</span>};
+
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::memory_map::SB</span>;
+
+    <span class="doccomment">/// A pointer to the PMC Secure Boot register block that can be accessed by dereferencing it.</span>
+    <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">REGISTERS</span>: <span class="kw-2">*const</span> <span class="ident">Registers</span> <span class="op">=</span> <span class="ident">SB</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">Registers</span>;
+
+    <span class="comment">// TODO: Bitfields.</span>
+
+    <span class="macro">register_structs!</span> {
+        <span class="doccomment">/// Representation of the PMC Secure Boot registers.</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
+        <span class="kw">pub</span> <span class="ident">Registers</span> {
+            (<span class="number">0x00</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_CSR_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x04</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_PIROM_START_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x08</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_PFCFG_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x0C</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_0_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x10</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_1_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x14</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_2_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x18</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_3_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x1C</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_4_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x20</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_5_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x24</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_6_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x28</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_SECURE_SPAREREG_7_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x2C</span> =&gt; <span class="ident">_reserved</span>: [<span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>; <span class="number">0x4</span>]),
+            (<span class="number">0x30</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_AA64_RESET_LOW_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x34</span> =&gt; <span class="kw">pub</span> <span class="ident">SB_AA64_RESET_HIGH_0</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>),
+            (<span class="number">0x38</span> =&gt; @<span class="ident">END</span>),
+        }
+    }
+
+    <span class="macro">assert_eq_size!</span>(<span class="ident">Registers</span>, [<span class="ident">u8</span>; <span class="number">0x38</span>]);
+}
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="libtegra" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

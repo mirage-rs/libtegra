@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["PrivPostwrFalse",""],["PrivPostwrTrue",""],["SET",""]],"enum":[["Value","Indicates whether to use a post write on the main priv interface. By default, all writes to the Control and Status Bus (CSB) from the main priv interface are non-posted to support error reporting."]]});

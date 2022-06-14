@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ERR_1",""],["ERR_2",""],["ERR_3",""],["ERR_FATAL",""]],"mod":[["ERR_1","Number of correctable 1-bit errors."],["ERR_2","Number of correctable 2-bit errors."],["ERR_3","Number of correctable 3-bit errors."],["ERR_FATAL","Number of uncorrectable errors."]],"struct":[["Register",""]]});

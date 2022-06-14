@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["RailOff",""],["RailOn",""],["RgInProgress",""],["RuInProgress",""],["SET",""]],"enum":[["Value","The current status of the CPU rail."]]});

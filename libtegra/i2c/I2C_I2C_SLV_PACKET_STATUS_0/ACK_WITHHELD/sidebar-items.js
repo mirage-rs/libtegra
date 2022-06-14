@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates that an ACK is withheld for the last byte and the slave is waiting for the host to explicitly command the slave to acknowledge the last byte."]]});

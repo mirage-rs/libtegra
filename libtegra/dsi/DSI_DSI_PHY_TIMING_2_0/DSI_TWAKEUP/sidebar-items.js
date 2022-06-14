@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","LP period when exiting ULPM, in units of 512 byte clocks."]]});

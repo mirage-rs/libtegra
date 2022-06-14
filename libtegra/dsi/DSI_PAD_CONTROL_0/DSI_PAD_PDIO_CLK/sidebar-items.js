@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Power down for clock bit, drivers, receivers and contention detectors."]]});

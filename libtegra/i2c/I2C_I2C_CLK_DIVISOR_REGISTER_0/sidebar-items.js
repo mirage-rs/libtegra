@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["I2C_CLK_DIVISOR_HSMODE",""],["I2C_CLK_DIVISOR_STD_FAST_MODE",""]],"mod":[["I2C_CLK_DIVISOR_HSMODE",""],["I2C_CLK_DIVISOR_STD_FAST_MODE",""]],"struct":[["Register",""]]});

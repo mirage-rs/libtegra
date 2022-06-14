@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","A snapshot of the SECONDS counter is taken, whenever there is a read to MILLI_SECONDS register."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_TDATZERO",""],["DSI_THSDEXIT",""],["DSI_THSPREPR",""],["DSI_THSTRAIL",""]],"mod":[["DSI_TDATZERO","Time to drive HS0 before SOT."],["DSI_THSDEXIT","Time to drive LP11 after HS."],["DSI_THSPREPR","Time to drive LP00 before HS data."],["DSI_THSTRAIL","Time to drive HS flipped bit at EOT."]],"struct":[["Register",""]]});

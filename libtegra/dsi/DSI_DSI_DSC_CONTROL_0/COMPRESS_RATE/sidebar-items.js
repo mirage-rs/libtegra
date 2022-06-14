@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Bpp12",""],["Bpp16",""],["Bpp8",""],["CLEAR",""],["SET",""]],"enum":[["Value","Compression bit rate. Only 8/12/16 bpp compression rates are supported."]]});

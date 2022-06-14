@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["SL_ADDR0",""],["SL_ADDR1",""]],"mod":[["SL_ADDR0","For a 10-bit slave address, this field is the most significant 8 bits."],["SL_ADDR1","For a 10-bit slave address, this field is the least significant 8 bits."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Host raw data mode. In this mode, all data is sent exactly as written without any attempt to decode packet headers."]]});

@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Tock Register Interface"><meta name="keywords" content="rust, rustlang, rust-lang, tock_registers"><title>tock_registers - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><script defer src="../main.js"></script>
+    <noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../tock_registers/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../tock_registers/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Crate tock_registers</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.7.0</li><li><a id="all-types" href="all.html">All Items</a></li></ul></div><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div></section><div id="sidebar-vars" data-name="tock_registers" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../tock_registers/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">tock_registers</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/tock_registers/lib.rs.html#1-129">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Tock Register Interface</p>
+<p>Provides efficient mechanisms to express and use type-checked
+memory mapped registers and bitfields.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>
+<span class="kw">use</span> <span class="ident">tock_registers::registers</span>::{<span class="ident">ReadOnly</span>, <span class="ident">ReadWrite</span>};
+<span class="kw">use</span> <span class="ident">tock_registers::register_bitfields</span>;
+
+<span class="comment">// Register maps are specified like this:</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="kw">struct</span> <span class="ident">Registers</span> {
+    <span class="comment">// Control register: read-write</span>
+    <span class="ident">cr</span>: <span class="ident">ReadWrite</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Control::Register</span><span class="op">&gt;</span>,
+    <span class="comment">// Status register: read-only</span>
+    <span class="ident">s</span>: <span class="ident">ReadOnly</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Status::Register</span><span class="op">&gt;</span>,
+}
+
+<span class="comment">// Register fields and definitions look like this:</span>
+<span class="macro">register_bitfields!</span>[<span class="ident">u32</span>,
+    <span class="comment">// Simpler bitfields are expressed concisely:</span>
+    <span class="ident">Control</span> [
+        <span class="doccomment">/// Stop the Current Transfer</span>
+        <span class="ident">STOP</span> <span class="number">8</span>,
+        <span class="doccomment">/// Software Reset</span>
+        <span class="ident">SWRST</span> <span class="number">7</span>,
+        <span class="doccomment">/// Master Disable</span>
+        <span class="ident">MDIS</span> <span class="number">1</span>,
+        <span class="doccomment">/// Master Enable</span>
+        <span class="ident">MEN</span> <span class="number">0</span>
+    ],
+
+    <span class="comment">// More complex registers can express subtypes:</span>
+    <span class="ident">Status</span> [
+        <span class="ident">TXCOMPLETE</span>  <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+        <span class="ident">TXINTERRUPT</span> <span class="ident">OFFSET</span>(<span class="number">1</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+        <span class="ident">RXCOMPLETE</span>  <span class="ident">OFFSET</span>(<span class="number">2</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+        <span class="ident">RXINTERRUPT</span> <span class="ident">OFFSET</span>(<span class="number">3</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>) [],
+        <span class="ident">MODE</span>        <span class="ident">OFFSET</span>(<span class="number">4</span>) <span class="ident">NUMBITS</span>(<span class="number">3</span>) [
+            <span class="ident">FullDuplex</span> <span class="op">=</span> <span class="number">0</span>,
+            <span class="ident">HalfDuplex</span> <span class="op">=</span> <span class="number">1</span>,
+            <span class="ident">Loopback</span> <span class="op">=</span> <span class="number">2</span>,
+            <span class="ident">Disabled</span> <span class="op">=</span> <span class="number">3</span>
+        ],
+        <span class="ident">ERRORCOUNT</span> <span class="ident">OFFSET</span>(<span class="number">6</span>) <span class="ident">NUMBITS</span>(<span class="number">3</span>) []
+    ]
+];</code></pre></div>
+<h3 id="author"><a href="#author">Author</a></h3>
+<ul>
+<li>Shane Leonard <a href="mailto:shanel@stanford.edu">shanel@stanford.edu</a></li>
+</ul>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="fields/index.html" title="tock_registers::fields mod">fields</a></div><div class="item-right docblock-short"><p>Register bitfield types and macros</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="interfaces/index.html" title="tock_registers::interfaces mod">interfaces</a></div><div class="item-right docblock-short"><p>Interfaces (traits) to register types</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="macros/index.html" title="tock_registers::macros mod">macros</a></div><div class="item-right docblock-short"><p>Macros for cleanly defining peripheral registers.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="registers/index.html" title="tock_registers::registers mod">registers</a></div><div class="item-right docblock-short"><p>Implementation of included register types.</p>
+</div></div></div><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.bitmask.html" title="tock_registers::bitmask macro">bitmask</a></div><div class="item-right docblock-short"><p>Helper macro for computing bitmask of variable number of bits</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.register_bitfields.html" title="tock_registers::register_bitfields macro">register_bitfields</a></div><div class="item-right docblock-short"><p>Define register types and fields.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.register_bitmasks.html" title="tock_registers::register_bitmasks macro">register_bitmasks</a></div><div class="item-right docblock-short"><p>Helper macro for defining register fields.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.register_fields.html" title="tock_registers::register_fields macro">register_fields</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.register_structs.html" title="tock_registers::register_structs macro">register_structs</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.test_fields.html" title="tock_registers::test_fields macro">test_fields</a></div><div class="item-right docblock-short"></div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.LocalRegisterCopy.html" title="tock_registers::LocalRegisterCopy struct">LocalRegisterCopy</a></div><div class="item-right docblock-short"><p>A read-write copy of register contents.</p>
+</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.RegisterLongName.html" title="tock_registers::RegisterLongName trait">RegisterLongName</a></div><div class="item-right docblock-short"><p>Descriptive name for each register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.UIntLike.html" title="tock_registers::UIntLike trait">UIntLike</a></div><div class="item-right docblock-short"><p>Trait representing the base type of registers.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="tock_registers" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

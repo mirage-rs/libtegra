@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Aliased","Read-only and write-only registers aliased to the same address."],["InMemoryRegister","In memory volatile register."],["ReadOnly","Read-only registers."],["ReadWrite","Read/Write registers."],["WriteOnly","Write-only registers."]]});

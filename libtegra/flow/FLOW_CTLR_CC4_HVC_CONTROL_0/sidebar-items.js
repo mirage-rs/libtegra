@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CC4_HVC_ENABLE",""],["CC4_HVC_STS",""],["HVC_RES_TIME_THRESHOLD",""]],"mod":[["CC4_HVC_ENABLE","Enables HVC."],["CC4_HVC_STS","Indicates whether HVC entry/exit sequence has started/completed."],["HVC_RES_TIME_THRESHOLD","The programmable time threshold required to enter HVC."]],"struct":[["Register",""]]});

@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Driver for the Tegra X1 Security Engine."><meta name="keywords" content="rust, rustlang, rust-lang, se"><title>libtegra::se - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module se</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li><li><a href="#functions">Functions</a></li></ul></div></section><div id="sidebar-vars" data-name="se" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../libtegra/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">libtegra</a>::<wbr><a class="mod" href="#">se</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/libtegra/se/mod.rs.html#1-596">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Driver for the Tegra X1 Security Engine.</p>
+<h2 id="description"><a href="#description">Description</a></h2>
+<p>The Security Engine is responsible for performing cryptographic operations in
+a hardware-based environment. Communication with hardware is done over a variety
+of supported interfaces, including memory and hash registers. It supports most
+modern cryptographic algorithms and is suited for secure operation as the engine
+has the ability to restrict access to it from ARM TrustZone clients.</p>
+<h2 id="hardware-operations"><a href="#hardware-operations">Hardware Operations</a></h2>
+<p>As mentioned previously, the Security Engine performs hardware-based operations
+to process DMA buffers of data. These operations can be performed through the
+<a href="fn.trigger_operation.html"><code>trigger_operation</code></a> function.</p>
+<p>As this is a low-level interface that should only be used if no other possibility
+exists, there are higher-level wrappers around commonly used operations available:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// TODO</span></code></pre></div>
+<h2 id="cryptographic-apis"><a href="#cryptographic-apis">Cryptographic APIs</a></h2>
+<p>The following cryptographic APIs are exposed by the Security Engine and can be used
+from TrustZone clients with no regrets:</p>
+<h3 id="access-management"><a href="#access-management">Access Management</a></h3>
+<p>In secure systems, it is undesirable to have untrusted pieces of code access the Security
+Engine to perform arbitrary cryptographic operations. For that reason, the SE offers
+various features for locking its functionality down to Secure World clients which run in
+the ARM TrustZone. Great flexibility is given in how this is achieved: Full lockdown,
+lockdown per key, TZRAM lockdown, restriction of context save operations, full Security
+Engine shutdown. While not directly cryptographic, still an important aspect of retaining
+cryptographic security in applications.</p>
+<ul>
+<li>
+<p><a href="struct.SecurityEngine.html#method.lock"><code>SecurityEngine::lock</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.unlock"><code>SecurityEngine::unlock</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.lock_per_key"><code>SecurityEngine::lock_per_key</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.lock_tzram"><code>SecurityEngine::lock_tzram</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.lock_context_save"><code>SecurityEngine::lock_context_save</code></a></p>
+</li>
+</ul>
+<h3 id="rng"><a href="#rng">RNG</a></h3>
+<p>The Security Engine implements a Random Number Generator which can be used to implement
+secure random data generation with a high entropy for applications.</p>
+<ul>
+<li>
+<p><a href="struct.SecurityEngine.html#method.initialize_rng"><code>SecurityEngine::initialize_rng</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.generate_random"><code>SecurityEngine::generate_random</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.set_random_key"><code>SecurityEngine::set_random_key</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.generate_srk"><code>SecurityEngine::generate_srk</code></a></p>
+</li>
+</ul>
+<h3 id="aes"><a href="#aes">AES</a></h3>
+<p>The AES APIs of the Security Engine expose the primitives to do cryptographic operations
+with various block and cipher modes. These operations source their keys from a secure
+hardware key table cache, whose contents can be individually manipulated. Further, access
+can be restricted under a specific set of circumstances to provide a secure operating
+environment without leaking keys to the outside.</p>
+<ul>
+<li>
+<p><a href="struct.SecurityEngine.html#method.fill_aes_keyslot"><code>SecurityEngine::fill_aes_keyslot</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.get_aes_key"><code>SecurityEngine::get_aes_key</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.clear_aes_keyslot"><code>SecurityEngine::clear_aes_keyslot</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.clear_aes_key_iv"><code>SecurityEngine::clear_aes_key_iv</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.set_encrypted_aes_key"><code>SecurityEngine::set_encrypted_aes_key</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_cmac"><code>SecurityEngine::aes_cmac</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_ecb_encrypt"><code>SecurityEngine::aes_ecb_encrypt</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_ecb_decrypt"><code>SecurityEngine::aes_ecb_decrypt</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_cbc_encrypt"><code>SecurityEngine::aes_cbc_encrypt</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_cbc_decrypt"><code>SecurityEngine::aes_cbc_decrypt</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_ctr_encrypt"><code>SecurityEngine::aes_ctr_encrypt</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.aes_ctr_decrypt"><code>SecurityEngine::aes_ctr_decrypt</code></a></p>
+</li>
+</ul>
+<h3 id="rsa"><a href="#rsa">RSA</a></h3>
+<p>Similarly to the AES APIs, the Security Engine also features asymmetric encryptions using
+RSA where a user first feeds the desired exponent and modulus values for the encryption
+into keyslots and then triggers a modular exponentiation operation.</p>
+<ul>
+<li>
+<p><a href="struct.SecurityEngine.html#method.fill_rsa_keyslot"><code>SecurityEngine::fill_rsa_keyslot</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.clear_rsa_keyslot"><code>SecurityEngine::clear_rsa_keyslot</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.rsa_modular_exponentiate"><code>SecurityEngine::rsa_modular_exponentiate</code></a></p>
+</li>
+</ul>
+<h3 id="hashing"><a href="#hashing">Hashing</a></h3>
+<p>The Security Engine supports various hashing algorithms from the SHA1 and SHA2 family
+to calculate a fixed-size digest over a given buffer of data using the following methods.</p>
+<ul>
+<li>
+<p><a href="struct.SecurityEngine.html#method.calculate_sha1"><code>SecurityEngine::calculate_sha1</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.calculate_sha224"><code>SecurityEngine::calculate_sha224</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.calculate_sha256"><code>SecurityEngine::calculate_sha256</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.calculate_sha384"><code>SecurityEngine::calculate_sha384</code></a></p>
+</li>
+<li>
+<p><a href="struct.SecurityEngine.html#method.calculate_sha512"><code>SecurityEngine::calculate_sha512</code></a></p>
+</li>
+</ul>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_CONFIG_0/index.html" title="libtegra::se::SE_CONFIG_0 mod">SE_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_CRYPTO_CONFIG_0/index.html" title="libtegra::se::SE_CRYPTO_CONFIG_0 mod">SE_CRYPTO_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_CRYPTO_KEYTABLE_ADDR_0/index.html" title="libtegra::se::SE_CRYPTO_KEYTABLE_ADDR_0 mod">SE_CRYPTO_KEYTABLE_ADDR_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_CRYPTO_KEYTABLE_DST_0/index.html" title="libtegra::se::SE_CRYPTO_KEYTABLE_DST_0 mod">SE_CRYPTO_KEYTABLE_DST_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_CTX_SAVE_AUTO_0/index.html" title="libtegra::se::SE_CTX_SAVE_AUTO_0 mod">SE_CTX_SAVE_AUTO_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_CTX_SAVE_CONFIG_0/index.html" title="libtegra::se::SE_CTX_SAVE_CONFIG_0 mod">SE_CTX_SAVE_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_INT_ENABLE_0/index.html" title="libtegra::se::SE_INT_ENABLE_0 mod">SE_INT_ENABLE_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_INT_STATUS_0/index.html" title="libtegra::se::SE_INT_STATUS_0 mod">SE_INT_STATUS_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_OPERATION_0/index.html" title="libtegra::se::SE_OPERATION_0 mod">SE_OPERATION_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_RNG_CONFIG_0/index.html" title="libtegra::se::SE_RNG_CONFIG_0 mod">SE_RNG_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_RNG_SRC_CONFIG_0/index.html" title="libtegra::se::SE_RNG_SRC_CONFIG_0 mod">SE_RNG_SRC_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_RSA_CONFIG_0/index.html" title="libtegra::se::SE_RSA_CONFIG_0 mod">SE_RSA_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_RSA_KEYTABLE_ACCESS_0/index.html" title="libtegra::se::SE_RSA_KEYTABLE_ACCESS_0 mod">SE_RSA_KEYTABLE_ACCESS_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_RSA_KEYTABLE_ADDR_0/index.html" title="libtegra::se::SE_RSA_KEYTABLE_ADDR_0 mod">SE_RSA_KEYTABLE_ADDR_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_SE_SECURITY_0/index.html" title="libtegra::se::SE_SE_SECURITY_0 mod">SE_SE_SECURITY_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_SHA_CONFIG_0/index.html" title="libtegra::se::SE_SHA_CONFIG_0 mod">SE_SHA_CONFIG_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_STATUS_0/index.html" title="libtegra::se::SE_STATUS_0 mod">SE_STATUS_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_TZRAM_OPERATION_0/index.html" title="libtegra::se::SE_TZRAM_OPERATION_0 mod">SE_TZRAM_OPERATION_0</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="SE_TZRAM_SECURITY_0/index.html" title="libtegra::se::SE_TZRAM_SECURITY_0 mod">SE_TZRAM_SECURITY_0</a></div><div class="item-right docblock-short"></div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.AddressInfo.html" title="libtegra::se::AddressInfo struct">AddressInfo</a></div><div class="item-right docblock-short"><p>Address information of a DMA buffer.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.LinkedList.html" title="libtegra::se::LinkedList struct">LinkedList</a></div><div class="item-right docblock-short"><p>Representation of a Security Engine Linked List.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Registers.html" title="libtegra::se::Registers struct">Registers</a></div><div class="item-right docblock-short"><p>Representation of the Security Engine registers.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.SecurityEngine.html" title="libtegra::se::SecurityEngine struct">SecurityEngine</a></div><div class="item-right docblock-short"><p>Representation of the Security Engine used for cryptographic operations.</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.AesMode.html" title="libtegra::se::AesMode enum">AesMode</a></div><div class="item-right docblock-short"><p>Representation of the different modes of operation for the AES algorithm
+for use in Security Engine operations.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.OperationError.html" title="libtegra::se::OperationError enum">OperationError</a></div><div class="item-right docblock-short"><p>Enumeration of potential Security Engine errors that
+may occur during internal operations on it.</p>
+</div></div></div><h2 id="constants" class="small-section-header"><a href="#constants">Constants</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.SE1_REGISTERS.html" title="libtegra::se::SE1_REGISTERS constant">SE1_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the SE1 register block that can be accessed by dereferencing it.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.SE2_REGISTERS.html" title="libtegra::se::SE2_REGISTERS constant">SE2_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the SE2 register block that can be accessed by dereferencing it.</p>
+</div></div></div><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.start_context_save_operation.html" title="libtegra::se::start_context_save_operation fn">start_context_save_operation</a></div><div class="item-right docblock-short"><p>Triggers a Security Engine operation that saves the SE context afterwards.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.start_normal_operation.html" title="libtegra::se::start_normal_operation fn">start_normal_operation</a></div><div class="item-right docblock-short"><p>Triggers a regular Security Engine operation.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.trigger_operation.html" title="libtegra::se::trigger_operation fn">trigger_operation</a></div><div class="item-right docblock-short"><p>Launches a cryptographic Security Engine operation, given two <a href="struct.LinkedList.html"><code>LinkedList</code></a>s for I/O.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libtegra" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

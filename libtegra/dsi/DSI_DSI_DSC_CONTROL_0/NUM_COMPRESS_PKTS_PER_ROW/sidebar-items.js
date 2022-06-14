@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Number of compressed image packets per row between two sync events. Multiple packets option is for Video mode only. Always program ONE packet for Command mode."]]});

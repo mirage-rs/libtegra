@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","This bit is set to 1 when a read is issued to an empty FIFO and gets cleared on register read (sticky bit until read)."]]});

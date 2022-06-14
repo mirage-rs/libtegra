@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["FifoFull","The FIFO is full."],["OneSlotEmpty","One FIFO slot is empty."],["SET",""],["TwoSlotsEmpty","Two FIFO slots are empty."]],"enum":[["Value","The number of slots that can be written to the TX FIFO."]]});

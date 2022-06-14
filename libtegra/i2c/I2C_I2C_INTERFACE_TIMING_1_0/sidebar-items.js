@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["TBUF",""],["THD_STA",""],["TSU_STA",""],["TSU_STO",""]],"mod":[["TBUF","Bus free time between STOP and START conditions."],["THD_STA","Hold time for a (Repeated) START condition."],["TSU_STA","Setup time for a Repeated START condition."],["TSU_STO","Setup time for STOP condition."]],"struct":[["Register",""]]});

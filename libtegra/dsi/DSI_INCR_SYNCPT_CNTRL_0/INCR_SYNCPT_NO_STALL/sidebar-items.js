@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Prevent stalling the client host interface when FIFOs are full and instead drop the INCR_SYNCPT methods."]]});

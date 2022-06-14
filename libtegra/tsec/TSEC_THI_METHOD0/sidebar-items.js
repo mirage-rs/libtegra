@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["METHOD",""]],"mod":[["METHOD","Encodes a method’s ID that is sent to the TSEC over Host1X."]],"struct":[["Register",""]]});

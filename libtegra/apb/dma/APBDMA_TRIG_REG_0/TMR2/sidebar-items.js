@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Active",""],["CLEAR",""],["Inactive",""],["SET",""]],"enum":[["Value","Trigger select from Timer (Hardware initialized DMA request)."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Busy",""],["CLEAR",""],["Idle",""],["SET",""]],"enum":[["Value","Indicates whether the current DMA channel is transferring data."]]});

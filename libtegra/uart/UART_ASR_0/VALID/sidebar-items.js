@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","This bit is set when the controller finishes counting the clocks between two successive clock edges after there is a write to ASR with don’t care data."]]});

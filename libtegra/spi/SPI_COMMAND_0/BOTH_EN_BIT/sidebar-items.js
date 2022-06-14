@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Both MISO and MOSI can also be used to transfer at the same time when this bit is set."]]});

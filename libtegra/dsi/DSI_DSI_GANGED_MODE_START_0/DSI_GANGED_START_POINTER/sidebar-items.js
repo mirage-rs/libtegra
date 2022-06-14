@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Start pointer for indicating the start of partial active valid pixel data to be latched from the valid pixels of the display controller in Left-Right/Even-Odd ganged mode."]]});

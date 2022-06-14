@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","If set, generates an interrupt to LIC after HVC state has been entered."]]});

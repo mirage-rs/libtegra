@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["MSec","Sampling period time base in milliseconds."],["SET",""],["USec","Sampling period time base in microseconds."]],"enum":[["Value","The sampling period time of the source provider."]]});

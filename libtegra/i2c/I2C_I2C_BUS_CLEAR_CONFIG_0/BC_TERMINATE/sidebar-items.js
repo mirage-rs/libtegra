@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Immediate","Terminate the bus clear operation immediately when SDA is released or threshold count is reached, whichever is earlier."],["SET",""],["Threshold","Irrespective of SDA release status during bus clear, terminate the bus clear only after the threshold is reached."]],"enum":[["Value",""]]});

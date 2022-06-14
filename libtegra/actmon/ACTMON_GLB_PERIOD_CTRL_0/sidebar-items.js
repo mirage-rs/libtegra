@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["SAMPLE_PERIOD",""],["SOURCE",""]],"mod":[["SAMPLE_PERIOD","Sampling period in milliseconds/microseconds."],["SOURCE","The sampling period time of the source provider."]],"struct":[["Register",""]]});

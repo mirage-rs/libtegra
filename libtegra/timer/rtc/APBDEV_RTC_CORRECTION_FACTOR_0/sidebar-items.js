@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DIRECTION",""],["PPM",""]],"mod":[["DIRECTION","Decrement must be used when the 32 kHz clock is above its nominal frequency."],["PPM",""]],"struct":[["Register",""]]});

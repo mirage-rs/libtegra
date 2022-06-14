@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Denotes a Transmit Shift Register empty status, if set to 1."]]});

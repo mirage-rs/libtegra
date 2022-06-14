@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CORE_IDLE_COUNTER",""]],"mod":[["CORE_IDLE_COUNTER","Captures the current value of the core’s idle countdown counter."]],"struct":[["Register",""]]});

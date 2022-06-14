@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/i2c/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../libtegra/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Driver for the Tegra X1 Inter-Integrated Circuit Controller and its Devices.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! See Chapter 35 in the Tegra X1 Technical Reference Manual for details.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Description</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The I²C controller (I2C) provides a specification-compliant I²C 3.0 driver that</span>
+<span class="doccomment">//! supports multiple controllers and devices.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! There are six instances of the I2C controller within Tegra X1 devices, all of</span>
+<span class="doccomment">//! them providing the same functionality. These six instances are represented as</span>
+<span class="doccomment">//! publicly exposed constants of the [`I2c`] structure.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Transmission speed</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! By default, the I2C controller instances which are exposed by this module have</span>
+<span class="doccomment">//! pre-defined clocks, which are configured for 100KHz data transfer rate over the</span>
+<span class="doccomment">//! I²C protocol.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! If customized clocks are needed, one must create a custom instance of an I2C</span>
+<span class="doccomment">//! controller with the desired [`Clock`] settings.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Implementation details</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The implementation of the I2c controller provides lower-level and higher-level</span>
+<span class="doccomment">//! methods for driving the host MMIO driver in Normal Mode with 7-bit addressing</span>
+<span class="doccomment">//! transactions. That being said, if one wishes to use Packet Mode (which may be</span>
+<span class="doccomment">//! added in the future) or 10-bit addressing transactions, one would have to</span>
+<span class="doccomment">//! implement the functionality themselves.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [`I2c`]: struct.I2c.html\</span>
+<span class="doccomment">//! [`Clock`]: ../car/struct.Clock.html</span>
+
+<span class="kw">mod</span> <span class="ident">controller</span>;
+<span class="kw">mod</span> <span class="ident">registers</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hal&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">hal</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">controller</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">registers</span>::<span class="kw-2">*</span>;
+
+<span class="comment">// TODO: I2C Device implementation.</span>
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="libtegra" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

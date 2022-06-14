@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Intr",""],["NoIntr",""],["SET",""]],"enum":[["Value","Assert at the end of sampling period, if AVG count value crosses lower AVG watermark value."]]});

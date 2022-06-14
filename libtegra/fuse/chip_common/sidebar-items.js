@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Registers","Representation of the FUSE chip registers shared between Erista and Mariko."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Sync Point Counter Index: Specifies the index of the sync point counter that are returned to host when continuous sync point is enabled and whenever a FRAME_DONE happens."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Div1",""],["Div2",""],["SET",""]],"enum":[["Value","Physical clock divider value for byte clock."]]});

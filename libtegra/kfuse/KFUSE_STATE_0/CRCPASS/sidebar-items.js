@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","After DONE, this bit indicates CRC pass/fail."]]});

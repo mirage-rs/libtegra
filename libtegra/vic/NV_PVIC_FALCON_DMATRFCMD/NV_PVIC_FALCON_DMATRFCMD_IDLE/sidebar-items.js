@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates that the DMA engine is still busy with a transfer or has more transfers pending in the queue."]]});

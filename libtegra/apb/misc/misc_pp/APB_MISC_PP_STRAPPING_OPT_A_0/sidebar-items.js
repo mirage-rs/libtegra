@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BOOT_FAST_UART",""],["BOOT_SELECT",""],["MIO_WIDTH",""],["NOR_WIDTH",""],["NVPROD_UART",""],["RAM_CODE",""],["RCM_STRAPS",""]],"mod":[["BOOT_FAST_UART",""],["BOOT_SELECT",""],["MIO_WIDTH",""],["NOR_WIDTH",""],["NVPROD_UART",""],["RAM_CODE",""],["RCM_STRAPS",""]],"struct":[["Register",""]]});

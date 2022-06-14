@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DATA5",""],["DATA6",""],["DATA7",""],["DATA8",""]],"mod":[["DATA5","Fifth data byte to send/receive."],["DATA6","Sixth data byte to send/receive."],["DATA7","Seventh data byte to send/receive."],["DATA8","Eighth data byte to send/receive."]],"struct":[["Register",""]]});

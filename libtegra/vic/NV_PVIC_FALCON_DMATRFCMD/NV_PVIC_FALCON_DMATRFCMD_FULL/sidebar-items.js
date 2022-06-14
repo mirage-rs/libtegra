@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Indicates that the DMA request queue is full and a valid request is still needed to move into the queue."]]});

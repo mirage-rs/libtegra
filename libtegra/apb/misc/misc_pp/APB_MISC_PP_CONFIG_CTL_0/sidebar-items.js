@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CPU_XBAR_SO_ENABLE",""],["TBE",""],["XBAR_SO_DEFAULT",""]],"mod":[["CPU_XBAR_SO_ENABLE","NOTE: Do not set this bit!"],["TBE","Whether RTCK Daisy chaining should be enabled."],["XBAR_SO_DEFAULT","NOTE: Do not set this bit!"]],"struct":[["Register",""]]});

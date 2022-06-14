@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["halt","Halts the BPMP processor."],["msleep","Sleeps for the given amount of milliseconds."],["usleep","Sleeps for the given amount of microseconds."]]});

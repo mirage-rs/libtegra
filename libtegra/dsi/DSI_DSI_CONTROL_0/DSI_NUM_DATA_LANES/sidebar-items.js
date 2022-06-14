@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Four","4 data lanes."],["One","1 data lane."],["SET",""],["Three","3 data lanes."],["Two","2 data lanes."]],"enum":[["Value","Number of D-PHY data lanes used by Display for HS transmission."]]});

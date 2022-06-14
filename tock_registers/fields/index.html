@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Register bitfield types and macros"><meta name="keywords" content="rust, rustlang, rust-lang, fields"><title>tock_registers::fields - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../tock_registers/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../tock_registers/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module fields</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div></section><div id="sidebar-vars" data-name="fields" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../tock_registers/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">tock_registers</a>::<wbr><a class="mod" href="#">fields</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/tock_registers/fields.rs.html#1-719">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Register bitfield types and macros</p>
+<p>To conveniently access and manipulate fields of a register, this
+library provides types and macros to describe and access bitfields
+of a register. This can be especially useful in conjuction with
+the APIs defined in <a href="../interfaces/index.html"><code>interfaces</code></a>, which make
+use of these types and hence allow to access and manipulate
+bitfields of proper registers directly.</p>
+<p>A specific section (bitfield) in a register is described by the
+<a href="struct.Field.html" title="Field"><code>Field</code></a> type, consisting of an unshifted bitmask over the base
+register <a href="../trait.UIntLike.html"><code>UIntLike</code></a> type, and a shift
+parameter. It is further associated with a specific
+<a href="../trait.RegisterLongName.html" title="RegisterLongName"><code>RegisterLongName</code></a>, which can prevent its use with incompatible
+registers.</p>
+<p>A value of a section of a register is described by the
+<a href="struct.FieldValue.html" title="FieldValue"><code>FieldValue</code></a> type. It stores the information of the respective
+section in the register, as well as the associated value. A
+<a href="struct.FieldValue.html" title="FieldValue"><code>FieldValue</code></a> can be created from a <a href="struct.Field.html" title="Field"><code>Field</code></a> through the
+<a href="struct.Field.html#method.val"><code>val</code></a> method.</p>
+<h3 id="register_bitfields-macro"><a href="#register_bitfields-macro"><code>register_bitfields</code> macro</a></h3>
+<p>For defining register layouts with an associated
+<a href="../trait.RegisterLongName.html"><code>RegisterLongName</code></a>, along with
+<a href="struct.Field.html" title="Field"><code>Field</code></a>s and matching <a href="struct.FieldValue.html" title="FieldValue"><code>FieldValue</code></a>s, a convenient macro-based
+interface can be used.</p>
+<p>The following example demonstrates how two registers can be
+defined, over a <code>u32</code> base type:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">register_bitfields!</span>[<span class="ident">u32</span>,
+    <span class="ident">Uart</span> [
+        <span class="ident">ENABLE</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">4</span>) [
+            <span class="ident">ON</span> <span class="op">=</span> <span class="number">8</span>,
+            <span class="ident">OFF</span> <span class="op">=</span> <span class="number">0</span>
+        ]
+    ],
+    <span class="ident">Psel</span> [
+        <span class="ident">PIN</span> <span class="ident">OFFSET</span>(<span class="number">0</span>) <span class="ident">NUMBITS</span>(<span class="number">6</span>),
+        <span class="ident">CONNECT</span> <span class="ident">OFFSET</span>(<span class="number">31</span>) <span class="ident">NUMBITS</span>(<span class="number">1</span>)
+    ],
+];
+
+<span class="comment">// In this scope, `Uart` is a module, representing the register and</span>
+<span class="comment">// its fields. `Uart::Register` is a `RegisterLongName` type</span>
+<span class="comment">// identifying this register. `Uart::ENABLE` is a field covering the</span>
+<span class="comment">// first 4 bits of this register. `Uart::ENABLE::ON` is a</span>
+<span class="comment">// `FieldValue` over that field, with the associated value 8.</span>
+<span class="comment">// We can now use the types like so:</span>
+<span class="kw">let</span> <span class="ident">reg</span>: <span class="ident">InMemoryRegister</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Uart::Register</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">InMemoryRegister::new</span>(<span class="number">0</span>);
+<span class="macro">assert!</span>(<span class="ident">reg</span>.<span class="ident">read</span>(<span class="ident">Uart::ENABLE</span>) <span class="op">==</span> <span class="number">0x00000000</span>);
+<span class="ident">reg</span>.<span class="ident">modify</span>(<span class="ident">Uart::ENABLE::ON</span>);
+<span class="macro">assert!</span>(<span class="ident">reg</span>.<span class="ident">get</span>() <span class="op">==</span> <span class="number">0x00000008</span>);</code></pre></div>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Field.html" title="tock_registers::fields::Field struct">Field</a></div><div class="item-right docblock-short"><p>Specific section of a register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.FieldValue.html" title="tock_registers::fields::FieldValue struct">FieldValue</a></div><div class="item-right docblock-short"><p>Values for the specific register fields.</p>
+</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.TryFromValue.html" title="tock_registers::fields::TryFromValue trait">TryFromValue</a></div><div class="item-right docblock-short"><p>Conversion of raw register value into enumerated values member.
+Implemented inside register_bitfields! macro for each bit field.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="tock_registers" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

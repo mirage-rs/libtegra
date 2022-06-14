@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["IDLE_CG_DLY_CNT",""],["IDLE_CG_EN",""],["WAKEUP_DLY_CNT",""],["WAKEUP_DLY_EN",""]],"mod":[["IDLE_CG_DLY_CNT",""],["IDLE_CG_EN",""],["WAKEUP_DLY_CNT",""],["WAKEUP_DLY_EN",""]],"struct":[["Register",""]]});

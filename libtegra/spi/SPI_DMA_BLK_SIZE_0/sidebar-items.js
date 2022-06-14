@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BLOCK_SIZE",""]],"mod":[["BLOCK_SIZE","Size of data blocks to be transferred in PIO/DMA Mode."]],"struct":[["Register",""]]});

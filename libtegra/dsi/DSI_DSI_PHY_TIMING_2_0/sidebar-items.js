@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_TCLKPRE",""],["DSI_TCLKPREPARE",""],["DSI_TWAKEUP",""]],"mod":[["DSI_TCLKPRE","Time to run clock before enabling data lane."],["DSI_TCLKPREPARE","Time to drive LP0 before CLK_ZERO starts off on the clock lane."],["DSI_TWAKEUP","LP period when exiting ULPM, in units of 512 byte clocks."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BaudPulse314","3/16th Baud Pulse."],["BaudPulse414","4/16th Baud Pulse."],["CLEAR",""],["SET",""]],"enum":[["Value","Controls the Baud Pulse."]]});

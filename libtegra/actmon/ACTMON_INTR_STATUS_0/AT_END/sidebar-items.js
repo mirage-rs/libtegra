@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Intr",""],["NoIntr",""],["SET",""]],"enum":[["Value","Assert at the end of sampling period, if interrupt at the end of sample period is enabled."]]});

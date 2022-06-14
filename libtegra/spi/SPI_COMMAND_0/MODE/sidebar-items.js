@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Mode0",""],["Mode1",""],["Mode2",""],["Mode3",""],["SET",""]],"enum":[["Value","The SPI interface clock mode according to the device with which it is communicating."]]});

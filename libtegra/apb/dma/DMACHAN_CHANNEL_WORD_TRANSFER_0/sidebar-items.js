@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["COUNT",""]],"mod":[["COUNT","APB-Current 32-bit Word Cycles."]],"struct":[["Register",""]]});

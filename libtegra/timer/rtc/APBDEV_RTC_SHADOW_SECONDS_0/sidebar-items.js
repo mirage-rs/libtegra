@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["SHADOW_SECONDS",""]],"mod":[["SHADOW_SECONDS","A snapshot of the SECONDS counter is taken, whenever there is a read to MILLI_SECONDS register."]],"struct":[["Register",""]]});

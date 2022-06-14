@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","The seconds counter which is incremented every 1000 milliseconds."]]});

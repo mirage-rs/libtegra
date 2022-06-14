@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Intr",""],["NoIntr",""],["SET",""]],"enum":[["Value","CPU Frequency Interrupt status."]]});

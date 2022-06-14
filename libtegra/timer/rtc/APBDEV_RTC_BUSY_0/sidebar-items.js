@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["STATUS",""]],"mod":[["STATUS","This bit is set when a write is initiated on the APB side."]],"struct":[["Register",""]]});

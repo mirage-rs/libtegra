@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_HOST_TRIGGER",""],["DSI_VID_TRIGGER",""]],"mod":[["DSI_HOST_TRIGGER","Triggers host transmission in hardware immediately."],["DSI_VID_TRIGGER","Triggers video transmission in hardware immediately."]],"struct":[["Register",""]]});

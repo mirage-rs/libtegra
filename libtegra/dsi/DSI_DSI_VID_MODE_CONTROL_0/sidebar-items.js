@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_CMD_PKT_VID_ENABLE",""],["DSI_LINE_TYPE",""]],"mod":[["DSI_CMD_PKT_VID_ENABLE","Whether host command packet during video mode should be enabled."],["DSI_LINE_TYPE","Vertical blank. LINE TYPE on which the host command packet is to be transmitted."]],"struct":[["Register",""]]});

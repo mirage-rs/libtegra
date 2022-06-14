@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Programmable Time delay between end of Host packet transmission and generation of Pkt BTA in PKT_BTA mode."]]});

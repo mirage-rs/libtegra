@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Abstractions over the Boot and Power Management Processor."><meta name="keywords" content="rust, rustlang, rust-lang, bpmp"><title>libtegra::bpmp - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module bpmp</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#functions">Functions</a></li></ul></div></section><div id="sidebar-vars" data-name="bpmp" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../libtegra/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">libtegra</a>::<wbr><a class="mod" href="#">bpmp</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/libtegra/bpmp.rs.html#1-138">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Abstractions over the Boot and Power Management Processor.</p>
+<p>See Chapter 41 in the Tegra X1 Technical Reference Manual
+for details.</p>
+<h2 id="description"><a href="#description">Description</a></h2>
+<p>The Tegra X1 Boot and Power Management Processor  is referred
+to as BPMP-Lite or BPMP, as it represents a first architectural
+step towards a dedicated boot and power management processor.</p>
+<p>The BPMP is an ARM7-based microcontroller used for power
+management and boot purposes. Outside of boot, the BPMP runs the
+“BPMP Firmware” (BPMP-FW), which provides various services related
+to runtime power management.</p>
+<p>In cold boot, the BPMP-Lite processor runs the boot ROM code as well
+as a portion of the Boot Loader. As part of cold boot, the BPMP-FW
+is loaded into DRAM and the CPU triggers the BPMP-Lite processor to
+begin executing that firmware.</p>
+<h3 id="delaying-execution"><a href="#delaying-execution">Delaying Execution</a></h3>
+<p>Through the <a href="../flow">Flow Controller</a>, code execution on the BPMP can be halted
+for a given delay in milliseconds or microseconds. Though the RTC is
+more accurate, the main advantage of <a href="fn.msleep.html"><code>msleep</code></a> and <a href="fn.usleep.html"><code>usleep</code></a> over the
+<a href="../timer">RTC</a> is resource-efficiency. These functions are meant to reduce power
+consumption while sleeping.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libtegra::bpmp</span>;
+
+<span class="comment">// Halt the BPMP for 32 milliseconds.</span>
+<span class="ident">bpmp::msleep</span>(<span class="number">32</span>);
+
+<span class="comment">// Halt the BPMP for 32.000 microseconds, or 32 milliseconds.</span>
+<span class="ident">bpmp::usleep</span>(<span class="number">32_000</span>);</code></pre></div>
+<h3 id="manual-halting"><a href="#manual-halting">Manual Halting</a></h3>
+<p>For many hardware sequences, such as rebooting or powering off, there may be the
+need for halting the BPMP manually. Said functionality is provided through the
+<a href="fn.halt.html"><code>halt</code></a> function:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libtegra</span>::{<span class="ident">bpmp</span>, <span class="ident">pmc</span>};
+<span class="kw">use</span> <span class="ident">tock_registers::interfaces</span>::<span class="kw-2">*</span>;
+
+<span class="doccomment">/// Forcefully reboots the SoC into Recovery Mode.</span>
+<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">reboot_to_rcm</span>() -&gt; <span class="op">!</span> {
+    <span class="kw">let</span> <span class="ident">pmc</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">pmc::REGISTERS</span>;
+
+    <span class="comment">// Additional resource cleanup here...</span>
+    <span class="comment">// (BPMP MMU disable, SD unmount, display finalization, ...)</span>
+
+    <span class="comment">// Reboot into RCM.</span>
+    <span class="ident">pmc</span>.<span class="ident">APBDEV_PMC_SCRATCH0_0</span>.<span class="ident">set</span>(<span class="number">2</span>);
+    <span class="ident">pmc</span>.<span class="ident">APBDEV_PMC_CNTRL_0</span>.<span class="ident">set</span>(<span class="ident">pmc</span>.<span class="ident">APBDEV_PMC_CNTRL_0</span>.<span class="ident">get</span>() <span class="op">|</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>));
+
+    <span class="comment">// Halt the BPMP.</span>
+    <span class="kw">loop</span> {
+        <span class="ident">bpmp::halt</span>();
+    }
+}
+
+<span class="kw">unsafe</span> {
+    <span class="ident">reboot_to_rcm</span>();
+}</code></pre></div>
+</div></details><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.halt.html" title="libtegra::bpmp::halt fn">halt</a></div><div class="item-right docblock-short"><p>Halts the BPMP processor.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.msleep.html" title="libtegra::bpmp::msleep fn">msleep</a></div><div class="item-right docblock-short"><p>Sleeps for the given amount of milliseconds.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.usleep.html" title="libtegra::bpmp::usleep fn">usleep</a></div><div class="item-right docblock-short"><p>Sleeps for the given amount of microseconds.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libtegra" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

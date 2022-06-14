@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Busy","The path is busy."],["CLEAR",""],["Idle","The path is in idle."],["SET",""]],"enum":[["Value","This bit is set to 1 when the RX path is IDLE."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DMA_COUNT",""]],"mod":[["DMA_COUNT","Indicates the actual DMA Data Transfer Count in bytes."]],"struct":[["Register",""]]});

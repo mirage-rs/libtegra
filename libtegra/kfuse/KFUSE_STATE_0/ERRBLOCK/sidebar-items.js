@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","If any `ERR_*` bits are set, this contains the offset of the first errored block."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["DmaMode0","DMA Mode 0."],["DmaMode1","DMA Mode 1."],["SET",""]],"enum":[["Value","The DMA mode to use."]]});

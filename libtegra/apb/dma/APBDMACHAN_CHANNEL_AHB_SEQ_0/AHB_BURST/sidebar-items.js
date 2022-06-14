@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["DmaBurst1Words",""],["DmaBurst4Words",""],["DmaBurst8Words",""],["SET",""]],"enum":[["Value","AHB Burst Size DMA Burst Length (encoded)."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["HS_THIGH",""],["HS_TLOW",""]],"mod":[["HS_THIGH","High period of the SCL clock."],["HS_TLOW","Low period of the SCL clock."]],"struct":[["Register",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CHANNEL_PAUSE",""],["TRIG_SEL",""]],"mod":[["CHANNEL_PAUSE","When enabled, pauses data transfers on the channel."],["TRIG_SEL","Enable on Non-Zero Value."]],"struct":[["Register",""]]});

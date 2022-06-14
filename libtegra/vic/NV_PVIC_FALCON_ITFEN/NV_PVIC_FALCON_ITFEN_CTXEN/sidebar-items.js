@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["CtxenDisable",""],["CtxenEnable",""],["SET",""]],"enum":[["Value","Context switch interface enable. When set, allows the host context switch state machine to react to incoming context switch requests from the host."]]});

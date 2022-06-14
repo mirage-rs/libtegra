@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Whether C0NC/C1NC/CRAIL domains should be power-gated."]]});

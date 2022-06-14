@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CTXSW",""],["DMA",""],["EXT",""],["EXTERR",""],["GPTMR",""],["HALT",""],["MTHD",""],["SWGEN0",""],["SWGEN1",""],["WDTMR",""]],"mod":[["CTXSW",""],["DMA",""],["EXT",""],["EXTERR",""],["GPTMR",""],["HALT",""],["MTHD",""],["SWGEN0",""],["SWGEN1",""],["WDTMR",""]],"struct":[["Register",""]]});

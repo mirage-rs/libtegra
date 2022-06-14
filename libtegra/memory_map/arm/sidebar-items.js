@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["BASE","Base address of the ARM registers."],["INTERRUPT_DISTRIBUTOR","Start address of the ARM Interrupt Distributor register block."],["PERIPHBASE","Start address of the ARM PERIPHBASE register block."]]});

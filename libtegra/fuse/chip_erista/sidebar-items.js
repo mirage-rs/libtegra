@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Registers","Representation of the FUSE chip registers for Erista."]]});

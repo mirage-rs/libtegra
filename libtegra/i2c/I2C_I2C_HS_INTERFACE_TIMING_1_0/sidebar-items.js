@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["HS_THD_STA",""],["HS_TSU_STA",""],["HS_TSU_STO",""]],"mod":[["HS_THD_STA","Hold time for a (Repeated) START condition."],["HS_TSU_STA","Setup time for a Repeated START condition."],["HS_TSU_STO","Setup time for STOP condition."]],"struct":[["Register",""]]});

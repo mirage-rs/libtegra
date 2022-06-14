@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Freeze","Freeze."],["NoFreeze","No freeze."],["SET",""]],"enum":[["Value","Whether timers should be freezed when CPU0 is in debug state."]]});

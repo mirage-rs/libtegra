@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["EN_RX_FIFO_TRIG",""],["RX_FIFO_TRIG",""]],"mod":[["EN_RX_FIFO_TRIG","Enables the use of `RX_FIFO_TRIG` count, if set to 1."],["RX_FIFO_TRIG","Set RX_FIFO trigger level."]],"struct":[["Register",""]]});

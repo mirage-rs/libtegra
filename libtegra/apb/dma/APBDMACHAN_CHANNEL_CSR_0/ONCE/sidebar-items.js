@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["MultipleBlock",""],["SET",""],["SingleBlock",""]],"enum":[["Value","Run Once or Run Multiple Mode (Allow Retriggering of this Channel)."]]});

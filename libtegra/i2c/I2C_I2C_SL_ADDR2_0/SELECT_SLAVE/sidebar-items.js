@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Addr0","Use slave addr0."],["Addr1","Use slave addr1."],["CLEAR",""],["SET",""]],"enum":[["Value","Selection of the slave address."]]});

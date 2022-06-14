@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_GANGED_START_POINTER",""]],"mod":[["DSI_GANGED_START_POINTER","Start pointer for indicating the start of partial active valid pixel data to be latched from the valid pixels of the display controller in Left-Right/Even-Odd ganged mode."]],"struct":[["Register",""]]});

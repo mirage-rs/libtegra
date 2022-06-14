@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["ENABLE",""],["REQ",""]],"mod":[["ENABLE","Enables hardware L2FLUSH handshake."],["REQ","Issues software L2FLUSH request."]],"struct":[["Register",""]]});

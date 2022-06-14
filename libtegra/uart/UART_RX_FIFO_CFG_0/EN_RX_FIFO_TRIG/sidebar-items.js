@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Enables the use of `RX_FIFO_TRIG` count, if set to 1."]]});

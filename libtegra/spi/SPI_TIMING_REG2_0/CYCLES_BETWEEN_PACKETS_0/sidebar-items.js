@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Specifies the number of cycles between two packets for communication on CS#0."]]});

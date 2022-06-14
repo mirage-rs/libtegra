@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DSI_PAD_CDDNADJ",""],["DSI_PAD_CD_EN",""],["DSI_PAD_CD_EN_CLK",""]],"mod":[["DSI_PAD_CDDNADJ","Level adjust on low limit of detection."],["DSI_PAD_CD_EN","Data bits contention detector enable."],["DSI_PAD_CD_EN_CLK","Clock bit contention detector enable."]],"struct":[["Register",""]]});

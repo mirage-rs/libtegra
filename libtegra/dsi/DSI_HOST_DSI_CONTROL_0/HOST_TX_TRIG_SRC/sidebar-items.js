@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["FifoLevel","How full the FIFO is. Level determined elsewhere."],["Immediate","Determined by a write to the `DSI_HOST_TRIGGER` field of the `DSI_TRIGGER` register."],["SET",""],["Sol","Start of Line signal from Display Controller."]],"enum":[["Value","Controls the source of the trigger to start sending packets."]]});

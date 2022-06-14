@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["NV_PVIC_THI_INT_MASK_FALCON_INT",""]],"mod":[["NV_PVIC_THI_INT_MASK_FALCON_INT","When set, this enables generation of interrupts corresponding to Falcon error conditions."]],"struct":[["Register",""]]});

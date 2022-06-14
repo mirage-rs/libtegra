@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Driver for the Tegra X1 Universal Asynchronous Receiver/Transmitter Controller."><meta name="keywords" content="rust, rustlang, rust-lang, uart"><title>libtegra::uart - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module uart</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#constants">Constants</a></li></ul></div></section><div id="sidebar-vars" data-name="uart" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../libtegra/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">libtegra</a>::<wbr><a class="mod" href="#">uart</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/libtegra/uart/mod.rs.html#1-337">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Driver for the Tegra X1 Universal Asynchronous Receiver/Transmitter Controller.</p>
+<p>See Chapter 36 in the Tegra X1 Technical Reference Manual for details.</p>
+<h2 id="description"><a href="#description">Description</a></h2>
+<p>There are five UARTs available in total. The UARTs A through D, which are
+identical, are built into Tegra X1 devices and the fifth UART is located
+in the Audio Processing Engine.</p>
+<p>These UARTs support both, 16450 and 16550 compatible modes, although this
+implementation specifically targets the 16550 mode.</p>
+<h2 id="transmission-speed"><a href="#transmission-speed">Transmission speed</a></h2>
+<p>UART controllers support <a href="../car/struct.Clock.html" title="Clock"><code>Clock</code></a>s up to 200MHz with a baud rate of 12.5M.</p>
+<p>The default supported and recommended baud rate is <code>115_200</code>. If one wishes to
+use a custom baud rate, they may have to alter the clock divisor configuration of
+the corresponding UART device clock.</p>
+<h2 id="initialization"><a href="#initialization">Initialization</a></h2>
+<p><a href="struct.Uart.html"><code>Uart</code></a>s need to be initialized with a given baud rate before they can be used.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libtegra::uart</span>::{<span class="ident">Uart</span>, <span class="ident">BAUD_115200</span>};
+
+<span class="ident">Uart::A</span>.<span class="ident">init</span>(<span class="ident">BAUD_115200</span>);</code></pre></div>
+<h2 id="communication"><a href="#communication">Communication</a></h2>
+<p>After a <a href="struct.Uart.html"><code>Uart</code></a> was initialized, it can be used like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">core::fmt::Write</span>;
+
+<span class="kw">use</span> <span class="ident">libtegra::uart::Uart</span>;
+
+<span class="macro">writeln!</span>(<span class="kw-2">&amp;mut</span> <span class="ident">Uart::A</span>, <span class="string">&quot;I got {} problems, but UART logging ain&#39;t one!&quot;</span>, <span class="number">99</span>);</code></pre></div>
+<p>Reading data is also supported:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libtegra::uart::Uart</span>;
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">uart</span> <span class="op">=</span> <span class="ident">Uart::A</span>; <span class="comment">// Less typing...</span>
+
+<span class="comment">// Read a single byte.</span>
+<span class="kw">let</span> <span class="ident">byte</span> <span class="op">=</span> <span class="ident">uart</span>.<span class="ident">read_byte</span>();
+
+<span class="comment">// Read 10 bytes into a buffer.</span>
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">10</span>];
+<span class="ident">uart</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>);</code></pre></div>
+<h2 id="flushing"><a href="#flushing">Flushing</a></h2>
+<p>In some cases, you may want to flush the underlying FIFOs:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libtegra::uart::Uart</span>;
+
+<span class="ident">Uart::A</span>.<span class="ident">flush</span>();</code></pre></div>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_ASR_0/index.html" title="libtegra::uart::UART_ASR_0 mod">UART_ASR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_ASR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_IER_DLAB_0_0/index.html" title="libtegra::uart::UART_IER_DLAB_0_0 mod">UART_IER_DLAB_0_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_IER_DLAB_0_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_IIR_FCR_0/index.html" title="libtegra::uart::UART_IIR_FCR_0 mod">UART_IIR_FCR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_IIR_FCR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_IRDA_CSR_0/index.html" title="libtegra::uart::UART_IRDA_CSR_0 mod">UART_IRDA_CSR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_IRDA_CSR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_LCR_0/index.html" title="libtegra::uart::UART_LCR_0 mod">UART_LCR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_LCR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_LSR_0/index.html" title="libtegra::uart::UART_LSR_0 mod">UART_LSR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_LSR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_MCR_0/index.html" title="libtegra::uart::UART_MCR_0 mod">UART_MCR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_MCR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_MIE_0/index.html" title="libtegra::uart::UART_MIE_0 mod">UART_MIE_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_MIE_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_MSR_0/index.html" title="libtegra::uart::UART_MSR_0 mod">UART_MSR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_MSR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_RX_FIFO_CFG_0/index.html" title="libtegra::uart::UART_RX_FIFO_CFG_0 mod">UART_RX_FIFO_CFG_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_RX_FIFO_CFG_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_SPR_0/index.html" title="libtegra::uart::UART_SPR_0 mod">UART_SPR_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_SPR_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_THR_DLAB_0_0/index.html" title="libtegra::uart::UART_THR_DLAB_0_0 mod">UART_THR_DLAB_0_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_THR_DLAB_0_0</code> register.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="UART_VENDOR_STATUS_0_0/index.html" title="libtegra::uart::UART_VENDOR_STATUS_0_0 mod">UART_VENDOR_STATUS_0_0</a></div><div class="item-right docblock-short"><p>Bitfields of the <code>UART_VENDOR_STATUS_0_0</code> register.</p>
+</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Registers.html" title="libtegra::uart::Registers struct">Registers</a></div><div class="item-right docblock-short"><p>Representation of the UART registers.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Uart.html" title="libtegra::uart::Uart struct">Uart</a></div><div class="item-right docblock-short"><p>Representation of a UART.</p>
+</div></div></div><h2 id="constants" class="small-section-header"><a href="#constants">Constants</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.BAUD_115200.html" title="libtegra::uart::BAUD_115200 constant">BAUD_115200</a></div><div class="item-right docblock-short"><p>The default baud rate that can be used to intiialize UARTs.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.UART_A_REGISTERS.html" title="libtegra::uart::UART_A_REGISTERS constant">UART_A_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the UART A register block that can be accessed by dereferencing it.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.UART_B_REGISTERS.html" title="libtegra::uart::UART_B_REGISTERS constant">UART_B_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the UART B register block that can be accessed by dereferencing it.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.UART_C_REGISTERS.html" title="libtegra::uart::UART_C_REGISTERS constant">UART_C_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the UART C register block that can be accessed by dereferencing it.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.UART_D_REGISTERS.html" title="libtegra::uart::UART_D_REGISTERS constant">UART_D_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the UART D register block that can be accessed by dereferencing it.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.UART_E_REGISTERS.html" title="libtegra::uart::UART_E_REGISTERS constant">UART_E_REGISTERS</a></div><div class="item-right docblock-short"><p>A pointer to the UART (AP)E register block that can be accessed by dereferencing it.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libtegra" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

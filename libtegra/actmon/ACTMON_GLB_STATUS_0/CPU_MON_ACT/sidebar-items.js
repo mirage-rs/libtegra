@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["Active",""],["CLEAR",""],["Inactive",""],["SET",""]],"enum":[["Value","CPU monitor active status."]]});

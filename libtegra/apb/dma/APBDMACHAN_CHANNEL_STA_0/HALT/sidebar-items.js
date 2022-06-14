@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["Halt",""],["NoHalt",""],["SET",""]],"enum":[["Value","Holding Status of Processor."]]});

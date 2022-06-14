@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Driver for the Tegra X1 General-Purpose Input/Output controller."><meta name="keywords" content="rust, rustlang, rust-lang, gpio"><title>libtegra::gpio - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../libtegra/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module gpio</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#constants">Constants</a></li></ul></div></section><div id="sidebar-vars" data-name="gpio" data-ty="mod" data-relpath="./"></div><script defer src="./sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../libtegra/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">libtegra</a>::<wbr><a class="mod" href="#">gpio</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/libtegra/gpio/mod.rs.html#1-414">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Driver for the Tegra X1 General-Purpose Input/Output controller.</p>
+<p>See Chapter 9.10 in the Tegra X1 Technical Reference Manual for details.</p>
+<h2 id="description"><a href="#description">Description</a></h2>
+<p>The GPIO controller for Tegra X1 devices provides the tools for configuring each
+MPIO for use as a software-controlled GPIO.</p>
+<h2 id="controller-structure"><a href="#controller-structure">Controller Structure</a></h2>
+<p>The controller is divided into 8 banks. Each bank contains 4 GPIO ports, which in turn
+provide 8 available pins, numbered from 0 through 7. GPIO ports a labeled consecutively
+from A through Z and then AA through FF. Ports A through E are in bank 0, E through H
+in bank 1, and so on.</p>
+<p>In conclusion, 256 GPIOs in total are therefore available, approximately 170 of them being
+physical pins. Each of them can be identified uniquely through a port and a pin.</p>
+<h3 id="configuration"><a href="#configuration">Configuration</a></h3>
+<p>Each GPIO can be configured individually as Input/Output/Interrupt sources with level/edge
+controls.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">libtegra</span>::{<span class="ident">tegra_gpio</span>, <span class="ident">gpio</span>};
+
+<span class="comment">// This...</span>
+<span class="macro">tegra_gpio!</span>(<span class="ident">D</span>, <span class="number">4</span>).<span class="ident">config</span>(<span class="ident">gpio::Config::OutputHigh</span>);
+
+<span class="comment">// ...is equivalent to:</span>
+<span class="kw">let</span> <span class="ident">pin</span> <span class="op">=</span> <span class="ident">gpio::Gpio</span> {
+    <span class="ident">port</span>: <span class="ident">gpio::Port::D</span>,
+    <span class="ident">pin</span>: <span class="ident">gpio::Pin::P4</span>,
+};
+<span class="ident">pin</span>.<span class="ident">set_mode</span>(<span class="ident">gpio::Mode::Gpio</span>);
+<span class="ident">pin</span>.<span class="ident">set_direction</span>(<span class="ident">gpio::Direction::Output</span>);
+<span class="ident">pin</span>.<span class="ident">write</span>(<span class="ident">gpio::Level::High</span>);</code></pre></div>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Gpio.html" title="libtegra::gpio::Gpio struct">Gpio</a></div><div class="item-right docblock-short"><p>Representation of a Tegra X1 GPIO.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.GpioBank.html" title="libtegra::gpio::GpioBank struct">GpioBank</a></div><div class="item-right docblock-short"><p>Representation of a GPIO bank.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.GpioController.html" title="libtegra::gpio::GpioController struct">GpioController</a></div><div class="item-right docblock-short"><p>Representation of the GPIO controller.</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Config.html" title="libtegra::gpio::Config enum">Config</a></div><div class="item-right docblock-short"><p>Supported GPIO configurations.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Direction.html" title="libtegra::gpio::Direction enum">Direction</a></div><div class="item-right docblock-short"><p>Possible GPIO directions.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.InterruptType.html" title="libtegra::gpio::InterruptType enum">InterruptType</a></div><div class="item-right docblock-short"><p>Supported interrupt types.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Level.html" title="libtegra::gpio::Level enum">Level</a></div><div class="item-right docblock-short"><p>Possible GPIO levels.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Mode.html" title="libtegra::gpio::Mode enum">Mode</a></div><div class="item-right docblock-short"><p>Possible GPIO modes.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Pin.html" title="libtegra::gpio::Pin enum">Pin</a></div><div class="item-right docblock-short"><p>The GPIO pins that are provided for each port.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Port.html" title="libtegra::gpio::Port enum">Port</a></div><div class="item-right docblock-short"><p>The GPIO ports that are supported by the platform.</p>
+</div></div></div><h2 id="constants" class="small-section-header"><a href="#constants">Constants</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="constant" href="constant.CONTROLLER.html" title="libtegra::gpio::CONTROLLER constant">CONTROLLER</a></div><div class="item-right docblock-short"><p>A pointer to the GPIO controller that can be accessed by dereferencing it.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="libtegra" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.63.0-nightly (ca122c7eb 2022-06-13)" ></div>
+</body></html>

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["CLEAR",""],["SET",""]],"enum":[["Value","Power down regulator which supplies current to serializer/deserializer logic."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["RESERVED",""],["RX_CLK_TAP_DELAY",""],["TX_CLK_TAP_DELAY",""]],"mod":[["RESERVED","Reserved for future use."],["RX_CLK_TAP_DELAY","Delays the clock coming from the external device with these tap values."],["TX_CLK_TAP_DELAY","Delays the clock going out to the external device with these tap values."]],"struct":[["Register",""]]});

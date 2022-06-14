@@ -1,6 +1,6 @@
 use core::mem::ManuallyDrop;
 
-use register::{mmio::ReadWrite, register_structs};
+use tock_registers::{register_structs, registers::ReadWrite};
 
 use crate::memory_map::FUSE;
 
@@ -76,7 +76,7 @@ register_structs! {
 assert_eq_size!(Registers, [u8; 0x98]);
 
 pub mod chip_common {
-    use register::{mmio::ReadWrite, register_structs};
+    use tock_registers::{register_structs, registers::ReadWrite};
 
     register_structs! {
         /// Representation of the FUSE chip registers shared between Erista and Mariko.
@@ -205,7 +205,7 @@ pub mod chip_common {
 }
 
 pub mod chip_erista {
-    use register::{mmio::ReadWrite, register_structs};
+    use tock_registers::{register_structs, registers::ReadWrite};
 
     register_structs! {
         /// Representation of the FUSE chip registers for Erista.
@@ -347,7 +347,7 @@ pub mod chip_erista {
 
 #[cfg(feature = "mariko")]
 pub mod chip_mariko {
-    use register::{mmio::ReadWrite, register_structs};
+    use tock_registers::{register_structs, registers::ReadWrite};
 
     /// Additional fuse chip registers which are only available on Mariko.
     #[allow(non_snake_case)]

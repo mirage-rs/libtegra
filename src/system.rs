@@ -11,6 +11,8 @@ use crate::apb;
 const JEDEC_NVIDIA_MFID: u32 = 0x6B;
 const JEDEC_NVIDIA_BKID: u32 = 0x03;
 
+use tock_registers::interfaces::*;
+
 unsafe fn get_chip_id() -> (u32, u32, u32, u32, u32) {
     let hidrev = (*apb::misc::REGISTERS).gp.APB_MISC_GP_HIDREV_0.get();
 

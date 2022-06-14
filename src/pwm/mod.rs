@@ -14,6 +14,7 @@ mod registers;
 mod hal;
 
 pub use crate::pwm::registers::*;
+use tock_registers::interfaces::*;
 
 /// Representation of a Pulse Width Modulator channel.
 ///
@@ -76,7 +77,7 @@ impl PwmChannel {
     pub fn set_pulse_width(&self, duty: f32) -> Result<(), ()> {
         let controller = unsafe { &*self.registers };
 
-        if duty < 0.0 || duty > 1.0 {
+        if !(0.0..=1.0).contains(&duty) {
             return Err(());
         }
 

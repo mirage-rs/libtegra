@@ -45,6 +45,7 @@
 //!
 //! ```no_run
 //! use libtegra::{bpmp, pmc};
+//! use tock_registers::interfaces::*;
 //!
 //! /// Forcefully reboots the SoC into Recovery Mode.
 //! unsafe fn reboot_to_rcm() -> ! {
@@ -76,6 +77,8 @@
 
 use core::cmp::min;
 
+use tock_registers::interfaces::*;
+
 use crate::flow;
 
 /// Sleeps for the given amount of microseconds.
@@ -95,7 +98,9 @@ pub fn usleep(mut microseconds: u32) {
         microseconds -= delay;
 
         // Halt the CPU for the given duration.
-        controller.FLOW_CTLR_HALT_COP_EVENTS_0.set(0x4200_0000 | delay);
+        controller
+            .FLOW_CTLR_HALT_COP_EVENTS_0
+            .set(0x4200_0000 | delay);
     }
 }
 
@@ -116,7 +121,9 @@ pub fn msleep(mut milliseconds: u32) {
         milliseconds -= delay;
 
         // Halt the CPU for the given duration.
-        controller.FLOW_CTLR_HALT_COP_EVENTS_0.set(0x4100_0000 | delay);
+        controller
+            .FLOW_CTLR_HALT_COP_EVENTS_0
+            .set(0x4100_0000 | delay);
     }
 }
 
@@ -126,6 +133,6 @@ pub fn halt() {
 
     controller.FLOW_CTLR_HALT_COP_EVENTS_0.modify(
         flow::FLOW_CTLR_HALT_COP_EVENTS_0::MODE::FlowModeWaitevent
-        + flow::FLOW_CTLR_HALT_COP_EVENTS_0::JTAG::SET
+            + flow::FLOW_CTLR_HALT_COP_EVENTS_0::JTAG::SET,
     );
 }

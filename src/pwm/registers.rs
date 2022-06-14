@@ -1,7 +1,7 @@
-use register::{mmio::ReadWrite, register_bitfields, register_structs};
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 use crate::memory_map::PWM;
-
+#[allow(clippy::identity_op)]
 /// A pointer to the PWM_0 register block that can be accessed by dereferencing it.
 pub const PWM_0_REGISTERS: *const Registers = (PWM + 0x00) as *const Registers;
 /// A pointer to the PWM_1 register block that can be accessed by dereferencing it.

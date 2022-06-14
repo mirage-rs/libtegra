@@ -4,6 +4,8 @@ use crate::{car, pmc, timer::msleep};
 
 pub use registers::*;
 
+use tock_registers::interfaces::*;
+
 mod registers;
 
 /// Initializes the FUSE driver.

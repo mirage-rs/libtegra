@@ -1,4 +1,4 @@
-use register::mmio::ReadWrite;
+use tock_registers::{interfaces::*, registers::ReadWrite};
 
 use crate::{memory_map::CAR, timer::usleep};
 

@@ -11,7 +11,7 @@
 //! triggered by the RTC can cause the system to wake up from a low-power
 //! state.
 
-use register::{mmio::*, register_bitfields, register_structs};
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 use crate::memory_map::RTC;
 

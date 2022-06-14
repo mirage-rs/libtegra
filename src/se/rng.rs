@@ -3,6 +3,8 @@ use crate::se::core::*;
 use crate::se::registers::*;
 use crate::se::utils::trigger_single_block_operation;
 
+use tock_registers::interfaces::*;
+
 macro_rules! init_rng {
     ($registers:ident, $dest:ident, $mode:ident) => {
         // Configure the hardware to do RNG encryption.

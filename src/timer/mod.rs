@@ -37,6 +37,8 @@
 pub mod rtc;
 pub mod timerus;
 
+use tock_registers::interfaces::*;
+
 /// Reads the current time in seconds.
 #[inline]
 pub fn get_seconds() -> u32 {

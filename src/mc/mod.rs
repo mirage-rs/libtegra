@@ -9,6 +9,8 @@ pub use registers::*;
 
 mod registers;
 
+use tock_registers::interfaces::*;
+
 /// Configures the Memory Controller TSEC carveout.
 pub fn config_tsec_carveout(bom: u32, size_mb: u32, lock: bool) {
     let controller = unsafe { &*REGISTERS };
@@ -124,9 +126,8 @@ pub fn enable_ahb_redirect() {
     let controller = unsafe { &*REGISTERS };
     let car = unsafe { &*car::REGISTERS };
 
-    car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0.set(
-        (car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0.get() & 0xFFF7_FFFF) | 0x80000
-    );
+    car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0
+        .set((car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0.get() & 0xFFF7_FFFF) | 0x80000);
 
     controller.MC_IRAM_BOM_0.set(0x4000_0000);
     controller.MC_IRAM_TOM_0.set(0x4003_F000);
@@ -140,9 +141,8 @@ pub fn disable_ahb_redirect() {
     controller.MC_IRAM_BOM_0.set(0xFFFF_F000);
     controller.MC_IRAM_TOM_0.set(0);
 
-    car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0.set(
-        car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0.get() & 0xFFF7_FFFF
-    );
+    car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0
+        .set(car.CLK_RST_CONTROLLER_LVL2_CLK_GATE_OVRD_0.get() & 0xFFF7_FFFF);
 }
 
 /// Enables the Memory Controller.
@@ -150,24 +150,20 @@ pub fn enable_mc() {
     let car = unsafe { &*car::REGISTERS };
 
     // Set EMC clock source.
-    car.CLK_RST_CONTROLLER_CLK_SOURCE_EMC_0.set(
-        (car.CLK_RST_CONTROLLER_CLK_SOURCE_EMC_0.get() & 0x1FFF_FFFF) | 0x4000_0000
-    );
+    car.CLK_RST_CONTROLLER_CLK_SOURCE_EMC_0
+        .set((car.CLK_RST_CONTROLLER_CLK_SOURCE_EMC_0.get() & 0x1FFF_FFFF) | 0x4000_0000);
 
     // Enable MIPI CAL clock.
-    car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0.set(
-        (car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0.get() & 0xFDFF_FFFF) | 0x2000000
-    );
+    car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0
+        .set((car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0.get() & 0xFDFF_FFFF) | 0x2000000);
 
     // Enable MC clock.
-    car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0.set(
-        (car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0.get() & 0xFFFF_FFFE) | 1
-    );
+    car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0
+        .set((car.CLK_RST_CONTROLLER_CLK_ENB_H_SET_0.get() & 0xFFFF_FFFE) | 1);
 
     // Enable EMC DLL clock.
-    car.CLK_RST_CONTROLLER_CLK_ENB_X_SET_0.set(
-        (car.CLK_RST_CONTROLLER_CLK_ENB_X_SET_0.get() & 0xFFFF_BFFF) | 0x4000
-    );
+    car.CLK_RST_CONTROLLER_CLK_ENB_X_SET_0
+        .set((car.CLK_RST_CONTROLLER_CLK_ENB_X_SET_0.get() & 0xFFFF_BFFF) | 0x4000);
 
     // Clear EMC and MC reset.
     car.CLK_RST_CONTROLLER_RST_DEV_H_CLR_0.set(0x2000001);

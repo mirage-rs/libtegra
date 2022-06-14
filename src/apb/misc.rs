@@ -1,6 +1,6 @@
 //! Miscellaneous system control registers.
 
-use register::{mmio::ReadWrite, register_structs};
+use tock_registers::{register_structs, registers::ReadWrite};
 
 use crate::memory_map::APB;
 
@@ -8,7 +8,7 @@ use crate::memory_map::APB;
 pub const REGISTERS: *const AmbaPeripheralBus = APB as *const AmbaPeripheralBus;
 
 pub mod misc_pp {
-    use register::{mmio::*, register_bitfields, register_structs};
+    use tock_registers::{register_bitfields, register_structs, registers::*};
 
     register_bitfields! {
         u32,
@@ -68,7 +68,7 @@ pub mod misc_pp {
 }
 
 pub mod misc_gp {
-    use register::{mmio::*, register_structs};
+    use tock_registers::{register_structs, registers::*};
 
     // TODO: Bitfields.
 

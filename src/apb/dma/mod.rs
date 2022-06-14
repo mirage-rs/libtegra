@@ -8,6 +8,8 @@ pub use channel::*;
 mod channel;
 mod core;
 
+use tock_registers::interfaces::*;
+
 /// Representation of the AMBA Peripheral Bus DMA Controller.
 ///
 /// The controller manages 32 DMA [`Channel`]s, which are used to transfer data over DMA.

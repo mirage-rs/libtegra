@@ -12,7 +12,7 @@
 //! - Result Phase: The results of the operation are made available in the result register.
 
 use crate::memory_map::ATOMICS;
-use register::{mmio::*, register_bitfields, register_structs};
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 /// A pointer to the Atomic register block.
 pub const REGISTERS: *const Registers = ATOMICS as *const Registers;

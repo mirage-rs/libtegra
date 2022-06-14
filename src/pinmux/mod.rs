@@ -36,7 +36,7 @@
 mod registers;
 
 use enum_primitive::FromPrimitive;
-use register::mmio::ReadWrite;
+use tock_registers::{interfaces::*, registers::*};
 
 pub use crate::pinmux::registers::*;
 
@@ -44,7 +44,7 @@ pub use crate::pinmux::registers::*;
 ///
 /// Many drivers of the `libtegra` crate depend on proper Pin Multiplexing settings
 /// for the specific board before they can be used.
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd)]
 pub enum PinGrP {
     Sdmmc1ClkPm0,
     Sdmmc1CmdPm1,
@@ -219,7 +219,7 @@ enum_from_primitive! {
     /// Note that most pins are actually predestined for a specific pin functions among
     /// reserved ones. The driver will make sure that no unsupported pin function can be
     /// set on the wrong pin.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     pub enum PinFunction {
         Default,
         Aud,
@@ -305,7 +305,7 @@ enum_from_primitive! {
     /// State control for the Pull bit as a part of Pin configuration.
     ///
     /// The Pull Resistor bit can be configured to Pull-up, Pull-down or nothing per pad.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinPull {
         /// Nothing.
@@ -324,7 +324,7 @@ enum_from_primitive! {
     ///
     /// Enables or disables the pad's output driver and thus overrides whether the pad is
     /// used as an SFIO or GPIO. For normal operations, a pad should be set to Passthrough.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinTristate {
         /// Disables the pad's Tristate.
@@ -341,7 +341,7 @@ enum_from_primitive! {
     /// be put into PARKING state. Until pinmux recovery code on LP0 exit clears this bit,
     /// the pin will remain in LP0 state in the same value as that of LP0 entry. A Default
     /// state is provided to preserve the setting of this bit without touching it.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinPark {
         /// Normal state.
@@ -358,7 +358,7 @@ enum_from_primitive! {
     ///
     /// Depending on whether or not the Input Receiver of a pad is enabled through this setting,
     /// the pad will have either input or output direction for I/O.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinIo {
         /// Output direction configuration.
@@ -374,7 +374,7 @@ enum_from_primitive! {
     /// The Lock bit, as the name may suggest, locks down or grants write access
     /// to the pad that is configured with it, respectively. A Default state is
     /// provided to preserve the setting of the bit without touching it.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinLock {
         /// No lock control.
@@ -392,7 +392,7 @@ enum_from_primitive! {
     /// When interfacing chips require minimal rise and fall times, this can be set to
     /// enable Base Drivers to fine-tune their behavior. A Default state is provided
     /// to preserve the setting of this bit without touching it.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinLpdr {
         /// Disables LPDR.
@@ -410,7 +410,7 @@ enum_from_primitive! {
     /// This is marked as reserved by the Tegra Reference Manual and should never be set
     /// to another value than its default. For that reason, a Default state is provided
     /// to enforce this rule and skip direct modification of the bit's value.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinOd {
         /// Disables OD.
@@ -430,7 +430,7 @@ enum_from_primitive! {
     /// If pins are in need of 3.3V operation, open-drain pull-up capability can be enabled
     /// on them using this setting. A Default state is provided to preserve the setting of
     /// this bit without touching it.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinIoHv {
         /// Enables regular-voltage operation.
@@ -447,7 +447,7 @@ enum_from_primitive! {
     ///
     /// Enables or disables the Schmitt trigger on a given pad. A Default state is provided
     /// to preserve the setting of this bit without touching it.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinSchmt {
         /// Disables Schmitt mode on a pin.
@@ -465,7 +465,7 @@ enum_from_primitive! {
     /// Enables different combinations of impedance code mapping on a given pad. This
     /// can be configured for every supported pad individually and allows for fine-tuning
     /// the impedance of an individual pad.
-    #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd)]
     #[repr(u32)]
     pub enum PinDrive {
         /// 1X drive.
@@ -2018,8 +2018,8 @@ impl PinGrP {
 
         // Set the bits accordingly.
         let mut value = register.get();
-        value &= !(3 << 0);
-        value |= mux << 0;
+        value &= !3;
+        value |= mux;
         register.set(value);
     }
 

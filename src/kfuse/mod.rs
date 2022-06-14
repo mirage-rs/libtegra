@@ -33,6 +33,8 @@ mod registers;
 use crate::car::Clock;
 pub use crate::kfuse::registers::*;
 
+use tock_registers::interfaces::*;
+
 /// The size of the buffer in words required for reading all encrypted HDMI keys from
 /// the KFUSE.
 pub const KFUSE_KEY_BUFFER_SIZE: usize = 576 >> 2;

@@ -2,6 +2,8 @@ use byteorder::{ByteOrder, BE, LE};
 
 use crate::se::registers::*;
 
+use tock_registers::interfaces::*;
+
 macro_rules! init_sha {
     ($registers:ident, $mode:ident) => {
         // Configure the hardware to perform a SHA hashing operation.

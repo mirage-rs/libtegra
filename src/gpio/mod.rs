@@ -45,10 +45,12 @@ mod hal;
 
 pub use crate::gpio::controller::*;
 
+use tock_registers::interfaces::*;
+
 use enum_primitive::FromPrimitive;
 #[doc(hidden)]
 pub use paste::paste;
-use register::mmio::ReadWrite;
+use tock_registers::registers::ReadWrite;
 
 /// The GPIO ports that are supported by the platform.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

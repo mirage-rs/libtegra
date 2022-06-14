@@ -2,6 +2,7 @@ use embedded_hal::blocking::delay;
 
 use crate::timer;
 
+#[derive(Default)]
 pub struct Delay;
 
 impl Delay {

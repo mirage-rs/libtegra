@@ -3,7 +3,7 @@
 //! See Chapter 17.2 in the Tegra X1 Technical Reference Manual for
 //! details.
 
-use register::{mmio::*, register_bitfields, register_structs};
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 use crate::memory_map::FLOW;
 

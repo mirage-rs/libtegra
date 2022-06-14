@@ -14,8 +14,8 @@ byteorder = { version = "1.4", default-features = false }
 embedded-hal = { version = "0.2", optional = true }
 enum_primitive = { git = "https://github.com/mirage-rs/enum_primitive-rs.git" }
 paste = "1.0.4"
-register = "1.0.2"
 static_assertions = "1.1"
+tock-registers = "0.7.0"
 
 [target.'cfg(target_arch = "aarch64")'.dependencies]
 cortex-a = "7.2"

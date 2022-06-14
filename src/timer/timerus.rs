@@ -8,7 +8,7 @@
 //! to be used by the rest of the system regardless of the clk_m frequency
 //! (i.e., 12 MHz or 38.4 MHz).
 
-use register::{mmio::ReadWrite, register_bitfields, register_structs};
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 use crate::memory_map::TMR;
 

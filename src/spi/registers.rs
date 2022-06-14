@@ -1,4 +1,5 @@
-use register::{mmio::*, register_bitfields, register_structs};
+#![allow(clippy::zero_prefixed_literal)]
+use tock_registers::{register_bitfields, register_structs, registers::*};
 
 use crate::memory_map::{spi::*, QSPI};
 

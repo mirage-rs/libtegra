@@ -8,7 +8,7 @@
 //! The Flow Controller provides the sequencing of hardware-controlled
 //! CPU power states for the main CPU complex and the BPMP.
 
-use register::mmio::ReadWrite;
+use tock_registers::{interfaces::*, registers::ReadWrite};
 
 use crate::car;
 use crate::memory_map::EXCEPTION_VECTORS;

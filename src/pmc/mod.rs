@@ -50,6 +50,7 @@
 //! [`powergate_partition`]: fn.powergate_partition.html
 
 use crate::timer::usleep;
+use tock_registers::interfaces::*;
 
 pub use registers::*;
 
